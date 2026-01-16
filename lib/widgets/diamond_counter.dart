@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/game_provider.dart';
 
 class DiamondCounter extends StatelessWidget {
-  final int amount;
-
-  const DiamondCounter({
-    super.key,
-    required this.amount,
-  });
+  const DiamondCounter({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final diamonds = context.watch<GameProvider>().diamonds;
+
     return Positioned(
       top: 12,
       right: 12,
@@ -21,18 +20,11 @@ class DiamondCounter extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.diamond,
-              color: Colors.white,
-              size: 20,
-            ),
+            const Icon(Icons.diamond, color: Colors.white),
             const SizedBox(width: 6),
             Text(
-              amount.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              diamonds.toString(),
+              style: const TextStyle(color: Colors.white),
             ),
           ],
         ),

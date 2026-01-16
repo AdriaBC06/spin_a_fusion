@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../widgets/widgets.dart';
 import 'screens.dart';
+import '../providers/providers.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,26 +14,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
-  int money = 1250;
-int diamonds = 42;
-
 
   final List<Widget> screens = const [
-    HomeContent(),
+    HomeTab(),      // 👈 contenido Home
     ShopScreen(),
     FusionScreen(),
-    PediaScreen(),
+    DebugScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      context.read<PokedexProvider>().initialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home'), centerTitle: true),
       body: Stack(
         children: [
           screens[currentIndex],
-          MoneyCounter(amount: money),
-          DiamondCounter(amount: diamonds),
+          const MoneyCounter(),
+          const DiamondCounter(),
         ],
       ),
       bottomNavigationBar: CustomBottomBar(
@@ -45,13 +53,19 @@ int diamonds = 42;
   }
 }
 
-class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
+/// ------------------------------------------------------
+/// CONTENIDO DE LA PESTAÑA HOME
+/// ------------------------------------------------------
+class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Pantalla Home', style: TextStyle(fontSize: 22)),
+      child: Text(
+        'Pantalla Home',
+        style: TextStyle(fontSize: 22),
+      ),
     );
   }
 }

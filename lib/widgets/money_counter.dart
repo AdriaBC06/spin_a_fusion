@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/game_provider.dart';
 
 class MoneyCounter extends StatelessWidget {
-  final int amount;
-
-  const MoneyCounter({
-    super.key,
-    required this.amount,
-  });
+  const MoneyCounter({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final money = context.watch<GameProvider>().money;
+
     return Positioned(
       top: 12,
       left: 12,
@@ -21,18 +20,11 @@ class MoneyCounter extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.monetization_on,
-              color: Colors.yellow,
-              size: 20,
-            ),
+            const Icon(Icons.monetization_on, color: Colors.yellow),
             const SizedBox(width: 6),
             Text(
-              amount.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              money.toString(),
+              style: const TextStyle(color: Colors.white),
             ),
           ],
         ),
