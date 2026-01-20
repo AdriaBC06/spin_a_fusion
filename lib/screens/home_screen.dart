@@ -13,11 +13,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentIndex = 0;
+  int currentIndex = 1;
 
-  final List<Widget> screens = const [
-    HomeTab(),      // 👈 contenido Home
+  final List<Widget> screens = const [      // 👈 contenido Home
     ShopScreen(),
+    HomeTab(),
     FusionScreen(),
     DebugScreen(),
   ];
