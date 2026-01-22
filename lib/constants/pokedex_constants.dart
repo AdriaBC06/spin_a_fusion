@@ -1,1 +1,1 @@
-const int expectedPokemonCount = 155;
+const int expectedPokemonCount = 153;

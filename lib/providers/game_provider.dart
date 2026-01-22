@@ -10,7 +10,7 @@ class GameProvider extends ChangeNotifier {
   }
 
   bool spendMoney(int amount) {
-    if (money >= amount) {
+    if (canSpendMoney(amount)) {
       money -= amount;
       notifyListeners();
       return true;
@@ -29,7 +29,7 @@ class GameProvider extends ChangeNotifier {
   }
 
   bool spendDiamonds(int amount) {
-    if (diamonds >= amount) {
+    if (canSpendDiamonds(amount)) {
       diamonds -= amount;
       notifyListeners();
       return true;
