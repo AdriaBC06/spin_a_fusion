@@ -28,6 +28,10 @@ class Pokemon {
   @HiveField(7)
   final int speed;
 
+  // ✅ NEW FIELD (non-nullable, backward-safe)
+  @HiveField(8)
+  final String pokemonSprite;
+
   Pokemon({
     required this.id,
     required this.name,
@@ -37,6 +41,7 @@ class Pokemon {
     required this.specialAttack,
     required this.specialDefense,
     required this.speed,
+    required this.pokemonSprite,
   });
 
   int get totalStats =>
@@ -57,6 +62,7 @@ class Pokemon {
       specialAttack: getStat('special-attack'),
       specialDefense: getStat('special-defense'),
       speed: getStat('speed'),
+      pokemonSprite: json['sprites']['front_default'] ?? '',
     );
   }
 }

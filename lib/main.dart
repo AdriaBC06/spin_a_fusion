@@ -11,6 +11,9 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(PokemonAdapter());
 
+  // borrar tot es hive
+  // await Hive.deleteBoxFromDisk('pokedex');
+
   await Hive.openBox<Pokemon>('pokedex');
 
   runApp(

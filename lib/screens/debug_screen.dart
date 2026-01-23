@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/pokedex_provider.dart';
 import '../models/pokemon.dart';
+import '../widgets/widgets.dart';
 
 class DebugScreen extends StatefulWidget {
   const DebugScreen({super.key});
@@ -20,8 +23,8 @@ class _DebugScreenState extends State<DebugScreen> {
 
     return Center(
       child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'Pokémon cargados: ${pokedex.pokemonList.length}',
@@ -33,22 +36,42 @@ class _DebugScreenState extends State<DebugScreen> {
             ElevatedButton(
               onPressed: pokedex.isLoaded
                   ? () {
-                      setState(() {
-                        pokemon1 = pokedex.getRandomPokemon();
-                        pokemon2 = pokedex.getRandomPokemon();
-                      });
+                      final rand = Random();
+                      final count = 15 + rand.nextInt(6);
+
+                      final pool = List<Pokemon>.from(pokedex.pokemonList)
+                        ..shuffle();
+
+                      final p1 = pool.removeAt(0);
+                      final p2 = pool.removeAt(1);
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) {
+                          return FusionLootbox(
+                            pool: pool.take(count).toList(),
+                            result1: p1,
+                            result2: p2,
+                            onFinished: () {
+                              Navigator.pop(context);
+                              setState(() {
+                                pokemon1 = p1;
+                                pokemon2 = p2;
+                              });
+                            },
+                          );
+                        },
+                      );
                     }
                   : null,
-              child: const Text('Generar 2 Pokémon'),
+              child: const Text('Generar Fusión'),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 32),
 
             if (pokemon1 != null && pokemon2 != null)
-              _FusionResult(
-                pokemon1: pokemon1!,
-                pokemon2: pokemon2!,
-              ),
+              _FusionResult(pokemon1: pokemon1!, pokemon2: pokemon2!),
           ],
         ),
       ),
@@ -63,10 +86,7 @@ class _FusionResult extends StatelessWidget {
   final Pokemon pokemon1;
   final Pokemon pokemon2;
 
-  const _FusionResult({
-    required this.pokemon1,
-    required this.pokemon2,
-  });
+  const _FusionResult({required this.pokemon1, required this.pokemon2});
 
   String get _customFusionUrl =>
       'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
@@ -78,13 +98,42 @@ class _FusionResult extends StatelessWidget {
       'pokemon/autogen-fusion-sprites-master/Battlers/'
       '${pokemon1.id}/${pokemon1.id}.${pokemon2.id}.png';
 
-  int get _combinedStats =>
-      pokemon1.totalStats + pokemon2.totalStats;
+  int get _combinedStats => pokemon1.totalStats + pokemon2.totalStats;
+
+  Widget _pokemonCard(Pokemon pokemon) {
+    return Column(
+      children: [
+        Image.network(
+          pokemon.pokemonSprite,
+          width: 96,
+          height: 96,
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          pokemon.name.toUpperCase(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        /// ORIGINAL POKÉMONS
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _pokemonCard(pokemon1),
+            const Icon(Icons.add, size: 32),
+            _pokemonCard(pokemon2),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
         /// FUSION IMAGE (WITH FALLBACK)
         Image.network(
           _customFusionUrl,
@@ -103,13 +152,10 @@ class _FusionResult extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        /// NAMES
+        /// FUSION NAME
         Text(
           '${pokemon1.name.toUpperCase()} - ${pokemon2.name.toUpperCase()}',
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
 

@@ -25,13 +25,14 @@ class PokemonAdapter extends TypeAdapter<Pokemon> {
       specialAttack: fields[5] as int,
       specialDefense: fields[6] as int,
       speed: fields[7] as int,
+      pokemonSprite: fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Pokemon obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class PokemonAdapter extends TypeAdapter<Pokemon> {
       ..writeByte(6)
       ..write(obj.specialDefense)
       ..writeByte(7)
-      ..write(obj.speed);
+      ..write(obj.speed)
+      ..writeByte(8)
+      ..write(obj.pokemonSprite);
   }
 
   @override
