@@ -34,6 +34,9 @@ class Pokemon {
   @HiveField(9)
   final String pokemonSprite;
 
+  @HiveField(10)
+  final int catchRate;
+
   const Pokemon({
     required this.fusionId,
     required this.pokeApiId,
@@ -45,6 +48,7 @@ class Pokemon {
     required this.specialDefense,
     required this.speed,
     required this.pokemonSprite,
+    required this.catchRate,
   });
 
   /// ✅ DERIVED VALUE (KEEP THIS)
@@ -54,9 +58,10 @@ class Pokemon {
   factory Pokemon.fromJson(
     Map<String, dynamic> json, {
     required int fusionId,
+    required int catchRate,
   }) {
-    int stat(String name) => json['stats']
-        .firstWhere((s) => s['stat']['name'] == name)['base_stat'];
+    int stat(String name) =>
+        json['stats'].firstWhere((s) => s['stat']['name'] == name)['base_stat'];
 
     final pokeApiId = json['id'] as int;
 
@@ -70,6 +75,7 @@ class Pokemon {
       specialAttack: stat('special-attack'),
       specialDefense: stat('special-defense'),
       speed: stat('speed'),
+      catchRate: catchRate,
       pokemonSprite:
           'https://raw.githubusercontent.com/PokeAPI/sprites/master/'
           'sprites/pokemon/$pokeApiId.png',
