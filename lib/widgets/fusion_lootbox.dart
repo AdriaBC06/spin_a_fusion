@@ -41,22 +41,20 @@ class _FusionLootboxState extends State<FusionLootbox>
     _spin1 = _buildSpin(widget.result1, rng);
     _spin2 = _buildSpin(widget.result2, rng, reverse: true);
 
-    _controller1 = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 5 + rng.nextInt(3)),
-    );
+    final spinDuration1 = Duration(seconds: 5 + rng.nextInt(3));
+    final spinDuration2 = Duration(seconds: 5 + rng.nextInt(3));
 
-    _controller2 = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 5 + rng.nextInt(3)),
-    );
+    _controller1 = AnimationController(vsync: this, duration: spinDuration1);
+
+    _controller2 = AnimationController(vsync: this, duration: spinDuration2);
 
     _controller1.forward();
     _controller2.forward();
 
     Future.delayed(
       Duration(
-        milliseconds: max(
+        milliseconds:
+            max(
               _controller1.duration!.inMilliseconds,
               _controller2.duration!.inMilliseconds,
             ) +
@@ -66,11 +64,7 @@ class _FusionLootboxState extends State<FusionLootbox>
     );
   }
 
-  _SpinData _buildSpin(
-    Pokemon result,
-    Random rng, {
-    bool reverse = false,
-  }) {
+  _SpinData _buildSpin(Pokemon result, Random rng, {bool reverse = false}) {
     final coreCount = 15 + rng.nextInt(6);
 
     final pool = List<Pokemon>.from(widget.allPokemon)
@@ -79,8 +73,7 @@ class _FusionLootboxState extends State<FusionLootbox>
 
     final before = pool.take(bufferSize).toList();
     final core = pool.skip(bufferSize).take(coreCount).toList();
-    final after =
-        pool.skip(bufferSize + coreCount).take(bufferSize).toList();
+    final after = pool.skip(bufferSize + coreCount).take(bufferSize).toList();
 
     var items = [...before, ...core, result, ...after];
 
@@ -110,10 +103,7 @@ class _FusionLootboxState extends State<FusionLootbox>
     super.dispose();
   }
 
-  Widget _roulette(
-    AnimationController controller,
-    _SpinData data,
-  ) {
+  Widget _roulette(AnimationController controller, _SpinData data) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
@@ -127,11 +117,9 @@ class _FusionLootboxState extends State<FusionLootbox>
         return AnimatedBuilder(
           animation: controller,
           builder: (_, __) {
-            final eased =
-                Curves.easeOutQuart.transform(controller.value);
+            final eased = Curves.easeOutQuart.transform(controller.value);
 
-            final currentOffset =
-                lerpDouble(startOffset, endOffset, eased)!;
+            final currentOffset = lerpDouble(startOffset, endOffset, eased)!;
 
             final dx = centerOffset - currentOffset;
 
@@ -162,10 +150,7 @@ class _FusionLootboxState extends State<FusionLootbox>
                       height: 150,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: Colors.amber,
-                          width: 3,
-                        ),
+                        border: Border.all(color: Colors.amber, width: 3),
                       ),
                     ),
                   ],
@@ -184,25 +169,15 @@ class _FusionLootboxState extends State<FusionLootbox>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.network(
-            p.pokemonSprite,
-            width: 64,
-            height: 64,
-          ),
+          Image.network(p.pokemonSprite, width: 64, height: 64),
           const SizedBox(height: 6),
           Text(
             p.name.toUpperCase(),
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           ),
           const SizedBox(height: 4),
-          Text(
-            'Total ${p.totalStats}',
-            style: const TextStyle(fontSize: 11),
-          ),
+          Text('Total ${p.totalStats}', style: const TextStyle(fontSize: 11)),
         ],
       ),
     );
