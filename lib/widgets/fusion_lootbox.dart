@@ -39,7 +39,7 @@ class _FusionLootboxState extends State<FusionLootbox>
     final rng = Random();
 
     _spin1 = _buildSpin(widget.result1, rng);
-    _spin2 = _buildSpin(widget.result2, rng);
+    _spin2 = _buildSpin(widget.result2, rng, reverse: true);
 
     _controller1 = AnimationController(
       vsync: this,
@@ -66,7 +66,11 @@ class _FusionLootboxState extends State<FusionLootbox>
     );
   }
 
-  _SpinData _buildSpin(Pokemon result, Random rng) {
+  _SpinData _buildSpin(
+    Pokemon result,
+    Random rng, {
+    bool reverse = false,
+  }) {
     final coreCount = 15 + rng.nextInt(6);
 
     final pool = List<Pokemon>.from(widget.allPokemon)
@@ -78,11 +82,19 @@ class _FusionLootboxState extends State<FusionLootbox>
     final after =
         pool.skip(bufferSize + coreCount).take(bufferSize).toList();
 
-    final items = [...before, ...core, result, ...after];
+    var items = [...before, ...core, result, ...after];
 
-    final resultIndex = before.length + core.length;
+    var resultIndex = before.length + core.length;
+    var startIndex = rng.nextInt(bufferSize ~/ 2) + 2;
 
-    final startIndex = rng.nextInt(bufferSize ~/ 2) + 2;
+    // 🔥 THIS IS THE KEY PART 🔥
+    if (reverse) {
+      items = items.reversed.toList();
+
+      final lastIndex = items.length - 1;
+      resultIndex = lastIndex - resultIndex;
+      startIndex = lastIndex - startIndex;
+    }
 
     return _SpinData(
       items: items,
@@ -98,7 +110,10 @@ class _FusionLootboxState extends State<FusionLootbox>
     super.dispose();
   }
 
-  Widget _roulette(AnimationController controller, _SpinData data) {
+  Widget _roulette(
+    AnimationController controller,
+    _SpinData data,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewportWidth = constraints.maxWidth;
@@ -118,6 +133,8 @@ class _FusionLootboxState extends State<FusionLootbox>
             final currentOffset =
                 lerpDouble(startOffset, endOffset, eased)!;
 
+            final dx = centerOffset - currentOffset;
+
             return ClipRect(
               child: SizedBox(
                 height: 160,
@@ -128,10 +145,7 @@ class _FusionLootboxState extends State<FusionLootbox>
                       maxWidth: totalWidth,
                       alignment: Alignment.centerLeft,
                       child: Transform.translate(
-                        offset: Offset(
-                          centerOffset - currentOffset,
-                          0,
-                        ),
+                        offset: Offset(dx, 0),
                         child: SizedBox(
                           width: totalWidth,
                           child: Row(
@@ -205,8 +219,10 @@ class _FusionLootboxState extends State<FusionLootbox>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // TOP → normal (left spin)
               _roulette(_controller1, _spin1),
               const SizedBox(height: 24),
+              // BOTTOM → mirrored (right spin)
               _roulette(_controller2, _spin2),
             ],
           ),
