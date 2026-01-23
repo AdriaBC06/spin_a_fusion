@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 
 class FusionLootbox extends StatefulWidget {
-  final List<Pokemon> pool;
+  final List<Pokemon> allPokemon;
   final Pokemon result1;
   final Pokemon result2;
   final VoidCallback onFinished;
 
   const FusionLootbox({
     super.key,
-    required this.pool,
+    required this.allPokemon,
     required this.result1,
     required this.result2,
     required this.onFinished,
@@ -25,39 +25,70 @@ class _FusionLootboxState extends State<FusionLootbox>
   late final AnimationController _controller1;
   late final AnimationController _controller2;
 
-  late final Animation<double> _animation1;
-  late final Animation<double> _animation2;
+  late final _SpinData _spin1;
+  late final _SpinData _spin2;
 
-  static const double itemWidth = 140;
+  static const double itemWidth = 120;
+  static const int bufferSize = 10;
 
   @override
   void initState() {
     super.initState();
 
+    final rng = Random();
+
+    _spin1 = _buildSpin(widget.result1, rng);
+    _spin2 = _buildSpin(widget.result2, rng);
+
     _controller1 = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2800),
+      duration: Duration(seconds: 5 + rng.nextInt(3)),
     );
 
     _controller2 = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
-    );
-
-    _animation1 = CurvedAnimation(
-      parent: _controller1,
-      curve: Curves.easeOutCubic,
-    );
-
-    _animation2 = CurvedAnimation(
-      parent: _controller2,
-      curve: Curves.easeOutQuart,
+      duration: Duration(seconds: 5 + rng.nextInt(3)),
     );
 
     _controller1.forward();
     _controller2.forward();
 
-    Future.delayed(const Duration(milliseconds: 3600), widget.onFinished);
+    Future.delayed(
+      Duration(
+        milliseconds: max(
+          _controller1.duration!.inMilliseconds,
+          _controller2.duration!.inMilliseconds,
+        ) +
+            500,
+      ),
+      widget.onFinished,
+    );
+  }
+
+  _SpinData _buildSpin(Pokemon result, Random rng) {
+    final baseCount = 15 + rng.nextInt(6);
+
+    final pool = List<Pokemon>.from(widget.allPokemon)
+      ..remove(result)
+      ..shuffle();
+
+    final before = pool.take(bufferSize).toList();
+    final core = pool.skip(bufferSize).take(baseCount).toList();
+    final after = pool.skip(bufferSize + baseCount).take(bufferSize).toList();
+
+    final items = [
+      ...before,
+      ...core,
+      result,
+      ...after,
+    ];
+
+    final resultIndex = before.length + core.length;
+
+    return _SpinData(
+      items: items,
+      resultIndex: resultIndex,
+    );
   }
 
   @override
@@ -67,50 +98,61 @@ class _FusionLootboxState extends State<FusionLootbox>
     super.dispose();
   }
 
-  Widget _buildRoulette(
-    Animation<double> animation,
-    Pokemon result,
-  ) {
-    final items = [...widget.pool, result, result];
+  Widget _roulette(AnimationController controller, _SpinData data) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final viewportWidth = constraints.maxWidth;
+        final centerOffset = (viewportWidth - itemWidth) / 2;
 
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (_, __) {
-        final maxScroll =
-            (items.length - 3) * itemWidth;
+        final targetOffset =
+            data.resultIndex * itemWidth;
 
-        final offset = animation.value * maxScroll;
+        return AnimatedBuilder(
+          animation: controller,
+          builder: (_, __) {
+            final eased =
+                Curves.easeOutQuart.transform(controller.value);
 
-        return ClipRect(
-          child: SizedBox(
-            height: 180,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Transform.translate(
-                  offset: Offset(-offset, 0),
-                  child: Row(
-                    children: items.map(_pokemonTile).toList(),
-                  ),
-                ),
-                Container(
-                  width: itemWidth,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.amber,
-                      width: 3,
+            final offset = eased * targetOffset;
+
+            return ClipRect(
+              child: SizedBox(
+                height: 160,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Transform.translate(
+                      offset: Offset(
+                        centerOffset - offset,
+                        0,
+                      ),
+                      child: Row(
+                        children:
+                            data.items.map(_tile).toList(),
+                      ),
                     ),
-                  ),
+                    Container(
+                      width: itemWidth,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.amber,
+                          width: 3,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
 
-  Widget _pokemonTile(Pokemon p) {
+  Widget _tile(Pokemon p) {
     return SizedBox(
       width: itemWidth,
       child: Column(
@@ -118,22 +160,22 @@ class _FusionLootboxState extends State<FusionLootbox>
         children: [
           Image.network(
             p.pokemonSprite,
-            width: 72,
-            height: 72,
-            fit: BoxFit.contain,
+            width: 64,
+            height: 64,
           ),
           const SizedBox(height: 6),
           Text(
             p.name.toUpperCase(),
+            textAlign: TextAlign.center,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
+              fontSize: 12,
             ),
-            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           Text(
-            'Total: ${p.totalStats}',
-            style: const TextStyle(fontSize: 12),
+            'Total ${p.totalStats}',
+            style: const TextStyle(fontSize: 11),
           ),
         ],
       ),
@@ -142,18 +184,35 @@ class _FusionLootboxState extends State<FusionLootbox>
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withOpacity(0.85),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildRoulette(_animation1, widget.result1),
-            const SizedBox(height: 24),
-            _buildRoulette(_animation2, widget.result2),
-          ],
+    return Center(
+      child: Material(
+        elevation: 24,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _roulette(_controller1, _spin1),
+              const SizedBox(height: 24),
+              _roulette(_controller2, _spin2),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// -------------------------------
+/// INTERNAL DATA STRUCTURE
+/// -------------------------------
+class _SpinData {
+  final List<Pokemon> items;
+  final int resultIndex;
+
+  _SpinData({
+    required this.items,
+    required this.resultIndex,
+  });
 }

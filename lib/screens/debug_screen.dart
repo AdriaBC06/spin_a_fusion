@@ -16,6 +16,7 @@ class DebugScreen extends StatefulWidget {
 class _DebugScreenState extends State<DebugScreen> {
   Pokemon? pokemon1;
   Pokemon? pokemon2;
+  bool _isSpinning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +35,23 @@ class _DebugScreenState extends State<DebugScreen> {
             const SizedBox(height: 20),
 
             ElevatedButton(
-              onPressed: pokedex.isLoaded
+              onPressed: (!_isSpinning && pokedex.isLoaded)
                   ? () {
-                      final rand = Random();
-                      final count = 15 + rand.nextInt(6);
-
                       final pool = List<Pokemon>.from(pokedex.pokemonList)
                         ..shuffle();
 
                       final p1 = pool.removeAt(0);
                       final p2 = pool.removeAt(1);
 
+                      setState(() => _isSpinning = true);
+
                       showDialog(
                         context: context,
                         barrierDismissible: false,
+                        barrierColor: Colors.black26,
                         builder: (_) {
                           return FusionLootbox(
-                            pool: pool.take(count).toList(),
+                            allPokemon: pool,
                             result1: p1,
                             result2: p2,
                             onFinished: () {
@@ -58,6 +59,7 @@ class _DebugScreenState extends State<DebugScreen> {
                               setState(() {
                                 pokemon1 = p1;
                                 pokemon2 = p2;
+                                _isSpinning = false;
                               });
                             },
                           );
