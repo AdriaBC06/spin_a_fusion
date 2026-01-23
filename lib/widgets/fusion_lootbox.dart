@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 
@@ -29,7 +30,7 @@ class _FusionLootboxState extends State<FusionLootbox>
   late final _SpinData _spin2;
 
   static const double itemWidth = 120;
-  static const int bufferSize = 10;
+  static const int bufferSize = 20;
 
   @override
   void initState() {
@@ -56,37 +57,36 @@ class _FusionLootboxState extends State<FusionLootbox>
     Future.delayed(
       Duration(
         milliseconds: max(
-          _controller1.duration!.inMilliseconds,
-          _controller2.duration!.inMilliseconds,
-        ) +
-            500,
+              _controller1.duration!.inMilliseconds,
+              _controller2.duration!.inMilliseconds,
+            ) +
+            600,
       ),
       widget.onFinished,
     );
   }
 
   _SpinData _buildSpin(Pokemon result, Random rng) {
-    final baseCount = 15 + rng.nextInt(6);
+    final coreCount = 15 + rng.nextInt(6);
 
     final pool = List<Pokemon>.from(widget.allPokemon)
       ..remove(result)
       ..shuffle();
 
     final before = pool.take(bufferSize).toList();
-    final core = pool.skip(bufferSize).take(baseCount).toList();
-    final after = pool.skip(bufferSize + baseCount).take(bufferSize).toList();
+    final core = pool.skip(bufferSize).take(coreCount).toList();
+    final after =
+        pool.skip(bufferSize + coreCount).take(bufferSize).toList();
 
-    final items = [
-      ...before,
-      ...core,
-      result,
-      ...after,
-    ];
+    final items = [...before, ...core, result, ...after];
 
     final resultIndex = before.length + core.length;
 
+    final startIndex = rng.nextInt(bufferSize ~/ 2) + 2;
+
     return _SpinData(
       items: items,
+      startIndex: startIndex,
       resultIndex: resultIndex,
     );
   }
@@ -104,8 +104,10 @@ class _FusionLootboxState extends State<FusionLootbox>
         final viewportWidth = constraints.maxWidth;
         final centerOffset = (viewportWidth - itemWidth) / 2;
 
-        final targetOffset =
-            data.resultIndex * itemWidth;
+        final startOffset = data.startIndex * itemWidth;
+        final endOffset = data.resultIndex * itemWidth;
+
+        final totalWidth = data.items.length * itemWidth;
 
         return AnimatedBuilder(
           animation: controller,
@@ -113,7 +115,8 @@ class _FusionLootboxState extends State<FusionLootbox>
             final eased =
                 Curves.easeOutQuart.transform(controller.value);
 
-            final offset = eased * targetOffset;
+            final currentOffset =
+                lerpDouble(startOffset, endOffset, eased)!;
 
             return ClipRect(
               child: SizedBox(
@@ -121,14 +124,23 @@ class _FusionLootboxState extends State<FusionLootbox>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Transform.translate(
-                      offset: Offset(
-                        centerOffset - offset,
-                        0,
-                      ),
-                      child: Row(
-                        children:
-                            data.items.map(_tile).toList(),
+                    OverflowBox(
+                      maxWidth: totalWidth,
+                      alignment: Alignment.centerLeft,
+                      child: Transform.translate(
+                        offset: Offset(
+                          centerOffset - currentOffset,
+                          0,
+                        ),
+                        child: SizedBox(
+                          width: totalWidth,
+                          child: Row(
+                            children: List.generate(
+                              data.items.length,
+                              (i) => _tile(data.items[i]),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     Container(
@@ -186,7 +198,7 @@ class _FusionLootboxState extends State<FusionLootbox>
   Widget build(BuildContext context) {
     return Center(
       child: Material(
-        elevation: 24,
+        elevation: 26,
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -209,10 +221,12 @@ class _FusionLootboxState extends State<FusionLootbox>
 /// -------------------------------
 class _SpinData {
   final List<Pokemon> items;
+  final int startIndex;
   final int resultIndex;
 
   _SpinData({
     required this.items,
+    required this.startIndex,
     required this.resultIndex,
   });
 }
