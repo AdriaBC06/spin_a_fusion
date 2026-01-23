@@ -25,10 +25,14 @@ class PokedexProvider extends ChangeNotifier {
     await _box.clear();
     _pokemonList.clear();
 
-    for (int id = 1; id <= expectedPokemonCount; id++) {
-      final pokemon = await PokemonService.fetchPokemon(id);
+    for (final entry in fusionPokemonList.take(expectedPokemonCount)) {
+      final pokemon = await PokemonService.fetchPokemon(
+        name: entry['name'],
+        fusionId: entry['fusionId'],
+      );
+
       _pokemonList.add(pokemon);
-      await _box.put(id, pokemon);
+      await _box.put(entry['fusionId'], pokemon);
     }
   }
 

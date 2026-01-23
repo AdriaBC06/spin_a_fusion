@@ -5,35 +5,38 @@ part 'pokemon.g.dart';
 @HiveType(typeId: 0)
 class Pokemon {
   @HiveField(0)
-  final int id;
+  final int fusionId;
 
   @HiveField(1)
-  final String name;
+  final int pokeApiId;
 
   @HiveField(2)
-  final int hp;
+  final String name;
 
   @HiveField(3)
-  final int attack;
+  final int hp;
 
   @HiveField(4)
-  final int defense;
+  final int attack;
 
   @HiveField(5)
-  final int specialAttack;
+  final int defense;
 
   @HiveField(6)
-  final int specialDefense;
+  final int specialAttack;
 
   @HiveField(7)
+  final int specialDefense;
+
+  @HiveField(8)
   final int speed;
 
-  // ✅ NEW FIELD (non-nullable, backward-safe)
-  @HiveField(8)
+  @HiveField(9)
   final String pokemonSprite;
 
-  Pokemon({
-    required this.id,
+  const Pokemon({
+    required this.fusionId,
+    required this.pokeApiId,
     required this.name,
     required this.hp,
     required this.attack,
@@ -44,25 +47,32 @@ class Pokemon {
     required this.pokemonSprite,
   });
 
+  /// ✅ DERIVED VALUE (KEEP THIS)
   int get totalStats =>
       hp + attack + defense + specialAttack + specialDefense + speed;
 
-  factory Pokemon.fromJson(Map<String, dynamic> json) {
-    int getStat(String name) {
-      return json['stats']
-          .firstWhere((s) => s['stat']['name'] == name)['base_stat'];
-    }
+  factory Pokemon.fromJson(
+    Map<String, dynamic> json, {
+    required int fusionId,
+  }) {
+    int stat(String name) => json['stats']
+        .firstWhere((s) => s['stat']['name'] == name)['base_stat'];
+
+    final pokeApiId = json['id'] as int;
 
     return Pokemon(
-      id: json['id'],
+      fusionId: fusionId,
+      pokeApiId: pokeApiId,
       name: json['name'],
-      hp: getStat('hp'),
-      attack: getStat('attack'),
-      defense: getStat('defense'),
-      specialAttack: getStat('special-attack'),
-      specialDefense: getStat('special-defense'),
-      speed: getStat('speed'),
-      pokemonSprite: json['sprites']['front_default'] ?? '',
+      hp: stat('hp'),
+      attack: stat('attack'),
+      defense: stat('defense'),
+      specialAttack: stat('special-attack'),
+      specialDefense: stat('special-defense'),
+      speed: stat('speed'),
+      pokemonSprite:
+          'https://raw.githubusercontent.com/PokeAPI/sprites/master/'
+          'sprites/pokemon/$pokeApiId.png',
     );
   }
 }

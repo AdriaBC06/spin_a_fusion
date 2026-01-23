@@ -93,12 +93,12 @@ class _FusionResult extends StatelessWidget {
   String get _customFusionUrl =>
       'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
       'pokemon/custom-fusion-sprites-main/CustomBattlers/'
-      '${pokemon1.id}.${pokemon2.id}.png';
+      '${pokemon1.fusionId}.${pokemon2.fusionId}.png';
 
   String get _autoGenFusionUrl =>
       'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
       'pokemon/autogen-fusion-sprites-master/Battlers/'
-      '${pokemon1.id}/${pokemon1.id}.${pokemon2.id}.png';
+      '${pokemon1.fusionId}/${pokemon1.fusionId}.${pokemon2.fusionId}.png';
 
   int get _combinedStats => pokemon1.totalStats + pokemon2.totalStats;
 

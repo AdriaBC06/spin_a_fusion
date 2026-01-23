@@ -17,39 +17,42 @@ class PokemonAdapter extends TypeAdapter<Pokemon> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Pokemon(
-      id: fields[0] as int,
-      name: fields[1] as String,
-      hp: fields[2] as int,
-      attack: fields[3] as int,
-      defense: fields[4] as int,
-      specialAttack: fields[5] as int,
-      specialDefense: fields[6] as int,
-      speed: fields[7] as int,
-      pokemonSprite: fields[8] as String,
+      fusionId: fields[0] as int,
+      pokeApiId: fields[1] as int,
+      name: fields[2] as String,
+      hp: fields[3] as int,
+      attack: fields[4] as int,
+      defense: fields[5] as int,
+      specialAttack: fields[6] as int,
+      specialDefense: fields[7] as int,
+      speed: fields[8] as int,
+      pokemonSprite: fields[9] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Pokemon obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
-      ..write(obj.id)
+      ..write(obj.fusionId)
       ..writeByte(1)
-      ..write(obj.name)
+      ..write(obj.pokeApiId)
       ..writeByte(2)
-      ..write(obj.hp)
+      ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.attack)
+      ..write(obj.hp)
       ..writeByte(4)
-      ..write(obj.defense)
+      ..write(obj.attack)
       ..writeByte(5)
-      ..write(obj.specialAttack)
+      ..write(obj.defense)
       ..writeByte(6)
-      ..write(obj.specialDefense)
+      ..write(obj.specialAttack)
       ..writeByte(7)
-      ..write(obj.speed)
+      ..write(obj.specialDefense)
       ..writeByte(8)
+      ..write(obj.speed)
+      ..writeByte(9)
       ..write(obj.pokemonSprite);
   }
 

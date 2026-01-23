@@ -141,12 +141,12 @@ class _FusionLootboxState extends State<FusionLootbox>
   String get _fusionUrl =>
       'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
       'pokemon/custom-fusion-sprites-main/CustomBattlers/'
-      '${widget.result1.id}.${widget.result2.id}.png';
+      '${widget.result1.fusionId}.${widget.result2.fusionId}.png';
 
   String get _autoGenFusionUrl =>
       'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
       'pokemon/autogen-fusion-sprites-master/Battlers/'
-      '${widget.result1.id}/${widget.result1.id}.${widget.result2.id}.png';
+      '${widget.result1.fusionId}/${widget.result1.fusionId}.${widget.result2.fusionId}.png';
 
   ColorFilter _brightness(double value) {
     final v = value * 255;
@@ -285,6 +285,7 @@ class _FusionLootboxState extends State<FusionLootbox>
                 ),
               ),
             ),
+
           _fusionOverlay(),
         ],
       ),
@@ -481,7 +482,7 @@ class _FusionCard extends StatelessWidget {
     final customUrl =
         'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
         'pokemon/custom-fusion-sprites-main/CustomBattlers/'
-        '${p1.id}.${p2.id}.png';
+        '${p1.fusionId}.${p2.fusionId}.png';
 
     return Card(
       elevation: 20,
