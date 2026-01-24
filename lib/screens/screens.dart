@@ -3,3 +3,4 @@ export 'fusion_screen.dart';
 export 'pedia_screen.dart';
 export 'shop_screen.dart';
 export 'debug_screen.dart';
+export 'loading_screen.dart';

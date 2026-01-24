@@ -10,22 +10,36 @@ class PokedexProvider extends ChangeNotifier {
   final Box<Pokemon> _box = Hive.box<Pokemon>('pokedex');
   final List<Pokemon> _pokemonList = [];
 
+  int _loadedCount = 0;
+
+  int get loadedCount => _loadedCount;
+  int get totalCount => expectedPokemonCount;
+
+  double get progress =>
+      totalCount == 0 ? 0 : _loadedCount / totalCount;
+
   List<Pokemon> get pokemonList => List.unmodifiable(_pokemonList);
 
-  bool get isLoaded => _pokemonList.length == expectedPokemonCount;
+  bool get isLoaded => _loadedCount == totalCount;
 
   Future<void> initialize() async {
+    _pokemonList.clear();
+    _loadedCount = 0;
+    notifyListeners();
+
     if (_box.length == expectedPokemonCount) {
-      _pokemonList.addAll(_box.values);
+      for (final pokemon in _box.values) {
+        _pokemonList.add(pokemon);
+        _loadedCount++;
+        notifyListeners();
+      }
     } else {
       await _reloadFromApi();
     }
-    notifyListeners();
   }
 
   Future<void> _reloadFromApi() async {
     await _box.clear();
-    _pokemonList.clear();
 
     for (final entry in fusionPokemonList.take(expectedPokemonCount)) {
       final pokemon = await PokemonService.fetchPokemon(
@@ -35,12 +49,13 @@ class PokedexProvider extends ChangeNotifier {
 
       _pokemonList.add(pokemon);
       await _box.put(entry['fusionId'], pokemon);
+
+      _loadedCount++;
+      notifyListeners(); // 🔥 THIS MAKES THE BAR MOVE
     }
   }
 
-  // --------------------------------------------------
-  // BALL PARAMETERS
-  // --------------------------------------------------
+  // ------------------ GAME LOGIC (UNCHANGED) ------------------
 
   double _ballExponent(BallType ball) {
     switch (ball) {
@@ -68,28 +83,20 @@ class PokedexProvider extends ChangeNotifier {
     }
   }
 
-  // --------------------------------------------------
-  // LOW CATCH RATE PENALTY (KEY BALANCE FIX)
-  // --------------------------------------------------
-
   double _lowCatchRatePenalty(int catchRate, BallType ball) {
     if (catchRate >= 10) return 1.0;
 
     switch (ball) {
       case BallType.poke:
-        return 0.0;   // imposible
+        return 0.0;
       case BallType.superBall:
-        return 0.05;  // casi imposible
+        return 0.05;
       case BallType.ultra:
-        return 0.01;  // ~0.1%
+        return 0.01;
       case BallType.master:
-        return 0.1;   // ~1%
+        return 0.1;
     }
   }
-
-  // --------------------------------------------------
-  // EFFECTIVE WEIGHT
-  // --------------------------------------------------
 
   double _weightFor(Pokemon p, BallType ball) {
     final minCR = _ballMinCatchRate(ball);
@@ -100,18 +107,13 @@ class PokedexProvider extends ChangeNotifier {
         pow(effectiveCR / 255, exp).toDouble();
 
     final penalty = _lowCatchRatePenalty(p.catchRate, ball);
-
     return baseWeight * penalty;
   }
 
-  // --------------------------------------------------
-  // RANDOM POKÉMON
-  // --------------------------------------------------
-
   Pokemon getRandomPokemon({BallType ball = BallType.poke}) {
     final rng = Random();
-
     double totalWeight = 0;
+
     for (final p in _pokemonList) {
       totalWeight += _weightFor(p, ball);
     }
@@ -126,10 +128,6 @@ class PokedexProvider extends ChangeNotifier {
     return _pokemonList.last;
   }
 
-  // --------------------------------------------------
-  // PROBABILITY OF A SPECIFIC POKÉMON
-  // --------------------------------------------------
-
   double probabilityOfPokemon(
     Pokemon target, {
     BallType ball = BallType.poke,
@@ -142,18 +140,10 @@ class PokedexProvider extends ChangeNotifier {
     return _weightFor(target, ball) / totalWeight;
   }
 
-  // --------------------------------------------------
-  // FUSION CATCH RATE
-  // --------------------------------------------------
-
   double fusionCatchRate(Pokemon p1, Pokemon p2) {
     final raw = sqrt(p1.catchRate * p2.catchRate);
     return (raw * 0.75).clamp(1, 255);
   }
-
-  // --------------------------------------------------
-  // PROBABILITY OF A FUSION
-  // --------------------------------------------------
 
   double probabilityOfFusion({
     required Pokemon p1,

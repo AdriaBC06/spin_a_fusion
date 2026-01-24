@@ -25,10 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    Future.microtask(() {
-      context.read<PokedexProvider>().initialize();
-    });
   }
 
   @override

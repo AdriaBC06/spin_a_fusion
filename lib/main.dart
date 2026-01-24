@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models/pokemon.dart';
 import 'providers/providers.dart';
-import 'screens/home_screen.dart';
+import 'screens/screens.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -33,9 +33,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      routes: {
+        '/': (_) => const LoadingScreen(),
+        '/home': (_) => const HomeScreen(),
+      },
     );
   }
 }
+
