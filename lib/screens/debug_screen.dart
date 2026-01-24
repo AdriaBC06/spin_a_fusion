@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../constants/constants.dart';
 import '../providers/pokedex_provider.dart';
 import '../models/pokemon.dart';
@@ -35,8 +36,9 @@ class _DebugScreenState extends State<DebugScreen> {
             ElevatedButton(
               onPressed: (!_isSpinning && pokedex.isLoaded)
                   ? () {
-                      final pool = List<Pokemon>.from(pokedex.pokemonList)
-                        ..shuffle();
+                      final pool = List<Pokemon>.from(
+                        pokedex.pokemonList,
+                      )..shuffle();
 
                       final p1 = pokedex.getRandomPokemon(
                         ball: BallType.master,
@@ -113,11 +115,8 @@ class _FusionResult extends StatelessWidget {
     if (probability <= 0) return '∞';
 
     final raw = 1 / probability;
-
-    // number of digits
     final magnitude = pow(10, (log(raw) / ln10).floor());
-    final rounded =
-        (raw / magnitude).round() * magnitude;
+    final rounded = (raw / magnitude).round() * magnitude;
 
     return '1 in ${rounded.toInt()}';
   }
@@ -179,24 +178,15 @@ class _FusionResult extends StatelessWidget {
 
     return Column(
       children: [
-        /// ORIGINAL POKÉMONS
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _pokemonCard(
-              pokemon1,
-              _formatOneIn(p1Prob),
-            ),
+            _pokemonCard(pokemon1, _formatOneIn(p1Prob)),
             const Icon(Icons.add, size: 32),
-            _pokemonCard(
-              pokemon2,
-              _formatOneIn(p2Prob),
-            ),
+            _pokemonCard(pokemon2, _formatOneIn(p2Prob)),
           ],
         ),
         const SizedBox(height: 24),
-
-        /// FUSION IMAGE
         Image.network(
           _customFusionUrl,
           width: 200,
@@ -211,10 +201,7 @@ class _FusionResult extends StatelessWidget {
             );
           },
         ),
-
         const SizedBox(height: 16),
-
-        /// FUSION NAME
         Text(
           '${pokemon1.name.toUpperCase()} - ${pokemon2.name.toUpperCase()}',
           style: const TextStyle(
@@ -223,21 +210,14 @@ class _FusionResult extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
         ),
-
         const SizedBox(height: 8),
-
-        /// STATS
         Text(
           'Stats totales: $combinedStats',
           style: const TextStyle(fontSize: 16),
         ),
-
         const SizedBox(height: 8),
-
-        /// FUSION RARITY
         Text(
-          'Rareza de fusión (Poké Ball): '
-          '${_formatOneIn(fusionProb)}',
+          'Rareza de fusión (Poké Ball): ${_formatOneIn(fusionProb)}',
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
