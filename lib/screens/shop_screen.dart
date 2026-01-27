@@ -14,7 +14,7 @@ class ShopScreen extends StatelessWidget {
     final money = game.money;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

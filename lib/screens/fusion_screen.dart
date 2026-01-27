@@ -9,9 +9,6 @@ class FusionScreen extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Space for MoneyCounter and DiamondCounter
-          const SizedBox(height: 72),
-
           // Title
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),

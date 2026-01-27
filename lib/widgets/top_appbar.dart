@@ -16,12 +16,10 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: const [
-            // Left side counters
             MoneyCounter(),
             SizedBox(width: 8),
             DiamondCounter(),
             Spacer(),
-            // Right side profile menu
             ProfileMenu(),
           ],
         ),

@@ -10,7 +10,6 @@ class HomeTab extends StatelessWidget {
     return const SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(height: 72),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: HomeSlotsGrid(),
