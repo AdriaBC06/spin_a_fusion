@@ -41,10 +41,10 @@ class _DebugScreenState extends State<DebugScreen> {
                       )..shuffle();
 
                       final p1 = pokedex.getRandomPokemon(
-                        ball: BallType.master,
+                        ball: BallType.poke,
                       );
                       final p2 = pokedex.getRandomPokemon(
-                        ball: BallType.master,
+                        ball: BallType.poke,
                       );
 
                       setState(() => _isSpinning = true);

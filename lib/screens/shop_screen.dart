@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/game_provider.dart';
 import '../widgets/shop_ball_card.dart';
 
@@ -8,118 +9,89 @@ class ShopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gameProvider = context.watch<GameProvider>();
-    final money = gameProvider.money;
+    final game = context.watch<GameProvider>();
+    final money = game.money;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Título principal
           const Text(
             'Tienda',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 20),
-
-          // Sección Balls
           const Text(
             'Balls',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 12),
 
-          // Poké Ball
-          ShopBallCard(
+          _buildBall(
+            context,
             name: 'Poké Ball',
             color: Colors.red,
             price: 100,
+            type: BallType.poke,
             enabled: money >= 100,
-            onBuy: () {
-              final success =
-                  context.read<GameProvider>().spendMoney(100);
-
-              if (!success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('No tienes suficiente dinero'),
-                  ),
-                );
-              }
-            },
           ),
-
-          // Super Ball
-          ShopBallCard(
+          _buildBall(
+            context,
             name: 'Super Ball',
             color: Colors.blue,
             price: 250,
+            type: BallType.superBall,
             enabled: money >= 250,
-            onBuy: () {
-              final success =
-                  context.read<GameProvider>().spendMoney(250);
-
-              if (!success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('No tienes suficiente dinero'),
-                  ),
-                );
-              }
-            },
           ),
-
-          // Ultra Ball
-          ShopBallCard(
+          _buildBall(
+            context,
             name: 'Ultra Ball',
             color: Colors.amber,
             price: 500,
+            type: BallType.ultra,
             enabled: money >= 500,
-            onBuy: () {
-              final success =
-                  context.read<GameProvider>().spendMoney(500);
-
-              if (!success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('No tienes suficiente dinero'),
-                  ),
-                );
-              }
-            },
           ),
-
-          // Master Ball
-          ShopBallCard(
+          _buildBall(
+            context,
             name: 'Master Ball',
             color: Colors.purple,
             price: 1000,
+            type: BallType.master,
             enabled: money >= 1000,
-            onBuy: () {
-              final success =
-                  context.read<GameProvider>().spendMoney(1000);
-
-              if (!success) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('No tienes suficiente dinero'),
-                  ),
-                );
-              }
-            },
           ),
-          
         ],
       ),
+    );
+  }
+
+  Widget _buildBall(
+    BuildContext context, {
+    required String name,
+    required Color color,
+    required int price,
+    required BallType type,
+    required bool enabled,
+  }) {
+    return ShopBallCard(
+      name: name,
+      color: color,
+      price: price,
+      enabled: enabled,
+      onBuy: () {
+        final success = context.read<GameProvider>().buyBall(
+              type: type,
+              price: price,
+            );
+
+        if (!success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No tienes suficiente dinero'),
+            ),
+          );
+        }
+      },
     );
   }
 }
