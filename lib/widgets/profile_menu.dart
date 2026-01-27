@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/login_dialog.dart';
 
 class ProfileMenu extends StatefulWidget {
@@ -22,7 +23,7 @@ class _ProfileMenuState extends State<ProfileMenu>
   late final Animation<double> _fadeAnimation =
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
-  void _toggleMenu() {
+  void _toggleMenu(User? user) {
     if (_isOpen) {
       _controller.reverse();
       Future.delayed(const Duration(milliseconds: 200), () {
@@ -30,17 +31,33 @@ class _ProfileMenuState extends State<ProfileMenu>
         _overlayEntry = null;
       });
     } else {
-      _overlayEntry = _createOverlay();
+      _overlayEntry = _createOverlay(user);
       Overlay.of(context).insert(_overlayEntry!);
       _controller.forward();
     }
     setState(() => _isOpen = !_isOpen);
   }
 
-  OverlayEntry _createOverlay() {
+  OverlayEntry _createOverlay(User? user) {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
+
+    List<_ProfileMenuItem> items = [];
+
+    if (user == null) {
+      // Not logged in → show login button
+      items.add(const _ProfileMenuItem(icon: Icons.login, title: 'Login'));
+    } else {
+      // Logged in → show logout
+      items.add(const _ProfileMenuItem(icon: Icons.logout, title: 'Logout'));
+    }
+
+    // Common items
+    items.addAll(const [
+      _ProfileMenuItem(icon: Icons.settings, title: 'Settings'),
+      _ProfileMenuItem(icon: Icons.info_outline, title: 'About'),
+    ]);
 
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -59,11 +76,7 @@ class _ProfileMenuState extends State<ProfileMenu>
                 color: Colors.grey.shade900,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    _ProfileMenuItem(icon: Icons.login, title: 'Login'),
-                    _ProfileMenuItem(icon: Icons.settings, title: 'Settings'),
-                    _ProfileMenuItem(icon: Icons.info_outline, title: 'About'),
-                  ],
+                  children: items,
                 ),
               ),
             ),
@@ -82,16 +95,26 @@ class _ProfileMenuState extends State<ProfileMenu>
 
   @override
   Widget build(BuildContext context) {
-    return CompositedTransformTarget(
-      link: _layerLink,
-      child: GestureDetector(
-        onTap: _toggleMenu,
-        child: CircleAvatar(
-          radius: 22,
-          backgroundColor: Colors.grey.shade800,
-          child: const Icon(Icons.person, color: Colors.white),
-        ),
-      ),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        return CompositedTransformTarget(
+          link: _layerLink,
+          child: GestureDetector(
+            onTap: () => _toggleMenu(user),
+            child: CircleAvatar(
+              radius: 22,
+              backgroundColor: Colors.grey.shade800,
+              child: user != null && user.photoURL != null
+                  ? ClipOval(
+                      child: Image.network(user.photoURL!, fit: BoxFit.cover),
+                    )
+                  : const Icon(Icons.person, color: Colors.white),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -105,7 +128,7 @@ class _ProfileMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
+      onTap: () async {
         if (title == 'Login') {
           Navigator.of(context).push(
             PageRouteBuilder(
@@ -113,6 +136,10 @@ class _ProfileMenuItem extends StatelessWidget {
               pageBuilder: (_, __, ___) => const LoginDialog(),
             ),
           );
+        } else if (title == 'Logout') {
+          await FirebaseAuth.instance.signOut();
+          // Close menu automatically
+          Navigator.of(context).pop();
         }
       },
       child: Padding(
