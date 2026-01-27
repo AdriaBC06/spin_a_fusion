@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-
-enum BallType {
-  poke,
-  superBall,
-  ultra,
-  master,
-}
+import '../constants/pokedex_constants.dart';
 
 class GameProvider extends ChangeNotifier {
   int money = 100000;
@@ -41,12 +35,20 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool buyBall({
-    required BallType type,
-    required int price,
-  }) {
+  bool buyBall({required BallType type, required int price}) {
     if (!spendMoney(price)) return false;
     addBall(type);
+    return true;
+  }
+
+  bool canUseBall(BallType type) {
+    return ballCount(type) > 0;
+  }
+
+  bool useBall(BallType type) {
+    if (!canUseBall(type)) return false;
+    _balls[type] = ballCount(type) - 1;
+    notifyListeners();
     return true;
   }
 }
