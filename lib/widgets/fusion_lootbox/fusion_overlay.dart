@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+
 import '../../models/pokemon.dart';
+import '../../constants/pokedex_constants.dart';
 import 'fusion_particles.dart';
 import 'fusion_card.dart';
 
@@ -9,6 +11,7 @@ class FusionOverlay extends StatelessWidget {
   final bool showCard;
   final Pokemon p1;
   final Pokemon p2;
+  final BallType ball;
 
   final Animation<double> mergeRotate;
   final Animation<double> mergeScale;
@@ -29,6 +32,7 @@ class FusionOverlay extends StatelessWidget {
     required this.showCard,
     required this.p1,
     required this.p2,
+    required this.ball,
     required this.mergeRotate,
     required this.mergeScale,
     required this.mergeBrightness,
@@ -71,6 +75,9 @@ class FusionOverlay extends StatelessWidget {
         return Stack(
           alignment: Alignment.center,
           children: [
+            // ----------------------------
+            // MERGING POKÉMON
+            // ----------------------------
             if (fusionController.value == 0)
               FractionalTranslation(
                 translation: moveUp.value,
@@ -80,7 +87,10 @@ class FusionOverlay extends StatelessWidget {
                     scale: mergeScale.value,
                     child: ColorFiltered(
                       colorFilter: _brightness(mergeBrightness.value),
-                      child: Image.network(p1.pokemonSprite, width: 110),
+                      child: Image.network(
+                        p1.pokemonSprite,
+                        width: 110,
+                      ),
                     ),
                   ),
                 ),
@@ -94,31 +104,57 @@ class FusionOverlay extends StatelessWidget {
                     scale: mergeScale.value,
                     child: ColorFiltered(
                       colorFilter: _brightness(mergeBrightness.value),
-                      child: Image.network(p2.pokemonSprite, width: 110),
+                      child: Image.network(
+                        p2.pokemonSprite,
+                        width: 110,
+                      ),
                     ),
                   ),
                 ),
               ),
-            if (fusionController.value > 0 && fusionController.value < 0.4)
+
+            // ----------------------------
+            // PARTICLES
+            // ----------------------------
+            if (fusionController.value > 0 &&
+                fusionController.value < 0.4)
               FusionParticles(progress: fusionController.value),
+
+            // ----------------------------
+            // FUSED SPRITE (PRE-CARD)
+            // ----------------------------
             if (!showCard && fusionController.value > 0)
               Transform.rotate(
                 angle: fusionRotate.value,
                 child: Transform.scale(
                   scale: fusionScale.value,
                   child: ColorFiltered(
-                    colorFilter: _brightness(fusionBrightness.value),
+                    colorFilter:
+                        _brightness(fusionBrightness.value),
                     child: Image.network(
                       fusionUrl,
                       width: 160,
-                      errorBuilder: (_, __, ___) =>
-                          Image.network(autoGenUrl, width: 160),
+                      errorBuilder: (_, __, ___) {
+                        return Image.network(
+                          autoGenUrl,
+                          width: 160,
+                        );
+                      },
                     ),
                   ),
                 ),
               ),
+
+            // ----------------------------
+            // FINAL CARD
+            // ----------------------------
             if (showCard)
-              FusionCard(p1: p1, p2: p2, autoGenUrl: autoGenUrl),
+              FusionCard(
+                p1: p1,
+                p2: p2,
+                autoGenUrl: autoGenUrl,
+                ball: ball,
+              ),
           ],
         );
       },

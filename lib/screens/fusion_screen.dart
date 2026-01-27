@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import '../widgets/widgets.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/fusion_collection_provider.dart';
+import '../widgets/fusion_inventory_card.dart';
 
 class FusionScreen extends StatelessWidget {
   const FusionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final fusions = context.watch<FusionCollectionProvider>().fusions;
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -16,34 +21,19 @@ class FusionScreen extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Fusiones',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // Fusion list
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
-              children: const [
-                FusionInventoryCard(
-                  name: 'Fusion #1',
-                  imageUrl: '',
-                ),
-                FusionInventoryCard(
-                  name: 'Fusion #2',
-                  imageUrl: '',
-                ),
-                FusionInventoryCard(
-                  name: 'Fusion #3',
-                  imageUrl: '',
-                ),
-              ],
+              children: fusions
+                  .map((fusion) => FusionInventoryCard(fusion: fusion))
+                  .toList(),
             ),
           ),
 

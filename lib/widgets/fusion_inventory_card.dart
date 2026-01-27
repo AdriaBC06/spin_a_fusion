@@ -1,81 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../models/fusion_entry.dart';
+import '../providers/fusion_collection_provider.dart';
+import '../providers/home_slots_provider.dart';
+import '../providers/game_provider.dart';
+import 'fusion_summary_modal.dart';
+import '../economy/fusion_economy.dart';
 
 class FusionInventoryCard extends StatelessWidget {
-  final String name;
-  final String imageUrl; // placeholder for now
+  final FusionEntry fusion;
 
   const FusionInventoryCard({
     super.key,
-    required this.name,
-    required this.imageUrl,
+    required this.fusion,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final slots = context.watch<HomeSlotsProvider>();
+    final collection = context.read<FusionCollectionProvider>();
+    final game = context.read<GameProvider>();
+
+    final bool isAdded = slots.contains(fusion);
+    final bool canAdd = slots.hasEmptyUnlockedSlot;
+
+    return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade400, width: 2),
-      ),
-      child: Row(
-        children: [
-          // Pokémon image placeholder
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: imageUrl.isEmpty
-                ? const Icon(
-                    Icons.catching_pokemon,
-                    size: 40,
-                    color: Colors.grey,
-                  )
-                : Image.network(imageUrl, fit: BoxFit.contain),
-          ),
-
-          const SizedBox(width: 12),
-
-          // Name / info
-          Expanded(
-            child: Text(
-              name,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          // Buttons column
-          Column(
-            children: [
-              ElevatedButton(
-                onPressed: () {}, // add to farm (later)
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(80, 32),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // IMAGE + NAME
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) =>
+                        FusionSummaryModal(fusion: fusion),
+                  );
+                },
+                child: Row(
+                  children: [
+                    Image.network(
+                      fusion.customFusionUrl,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          Image.network(
+                        fusion.autoGenFusionUrl,
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        fusion.fusionName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                child: const Text('Añadir'),
               ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () {}, // sell (later)
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  minimumSize: const Size(80, 32),
+            ),
+
+            const SizedBox(width: 12),
+
+            // BUTTONS (VERTICAL)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: isAdded
+                      ? () => slots.removeFusion(fusion)
+                      : canAdd
+                          ? () => slots.addFusion(fusion)
+                          : null,
+                  child: Text(isAdded ? 'Quitar' : 'Añadir'),
                 ),
-                child: const Text('Vender'),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  onPressed: () {
+                    if (isAdded) {
+                      slots.removeFusion(fusion);
+                    }
+                    collection.removeFusion(fusion);
+
+                    final value = FusionEconomy.sellPrice(fusion);
+game.addMoney(value);
+                  },
+                  child: const Text('Vender'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

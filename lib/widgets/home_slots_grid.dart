@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'home_slot_item.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/home_slots_provider.dart';
+import 'home_slot_tile.dart';
 
 class HomeSlotsGrid extends StatelessWidget {
   const HomeSlotsGrid({super.key});
 
-  static const int totalSlots = 12;
-  static const int unlockedSlots = 3;
-
   @override
   Widget build(BuildContext context) {
+    final slots = context.watch<HomeSlotsProvider>().slots;
+
     return GridView.builder(
-      itemCount: totalSlots,
+      itemCount: slots.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -18,9 +20,10 @@ class HomeSlotsGrid extends StatelessWidget {
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
       ),
-      itemBuilder: (context, index) {
-        return HomeSlotItem(
-          unlocked: index < unlockedSlots,
+      itemBuilder: (_, index) {
+        return HomeSlotTile(
+          index: index,
+          fusion: slots[index],
         );
       },
     );
