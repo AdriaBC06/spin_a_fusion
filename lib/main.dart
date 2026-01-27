@@ -21,12 +21,19 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => PokedexProvider()),
+        ChangeNotifierProvider(create: (_) => FusionCollectionProvider()),
+        ChangeNotifierProxyProvider<GameProvider, HomeSlotsProvider>(
+          create: (_) => HomeSlotsProvider(),
+          update: (_, game, slots) {
+            slots!.bindGameProvider(game);
+            return slots;
+          },
+        ),
       ],
       child: const MyApp(),
     ),
   );
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -42,4 +49,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

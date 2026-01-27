@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ShopScreen(),
     HomeTab(),
     FusionScreen(),
-    DebugScreen(),
+    PediaScreen(),
   ];
 
   @override

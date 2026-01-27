@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../models/pokemon.dart';
+import '../../constants/pokedex_constants.dart';
 import 'fusion_overlay.dart';
 import 'roulette/fusion_roulette_widget.dart';
 import 'roulette/spin_data.dart';
@@ -43,41 +44,79 @@ class FusionLootboxState extends State<FusionLootbox>
     _spin1 = _buildSpin(widget.result1, rng);
     _spin2 = _buildSpin(widget.result2, rng, reverse: true);
 
-    _spin1Controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6));
-    _spin2Controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6));
+    _spin1Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
+    _spin2Controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
 
-    _mergeController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _fusionController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+    _mergeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fusionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
 
     mergeRotate = Tween(begin: 0.0, end: pi / 2).animate(
-      CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
+      CurvedAnimation(
+        parent: _mergeController,
+        curve: Curves.easeInOut,
+      ),
     );
     mergeScale = Tween(begin: 1.0, end: 0.7).animate(
-      CurvedAnimation(parent: _mergeController, curve: Curves.easeIn),
+      CurvedAnimation(
+        parent: _mergeController,
+        curve: Curves.easeIn,
+      ),
     );
     mergeBrightness = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _mergeController, curve: Curves.easeIn),
+      CurvedAnimation(
+        parent: _mergeController,
+        curve: Curves.easeIn,
+      ),
     );
 
-    moveUp = Tween(begin: const Offset(0, -1.2), end: Offset.zero).animate(
-      CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
+    moveUp = Tween(
+      begin: const Offset(0, -1.2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _mergeController,
+        curve: Curves.easeInOut,
+      ),
     );
-    moveDown = Tween(begin: const Offset(0, 1.2), end: Offset.zero).animate(
-      CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
+    moveDown = Tween(
+      begin: const Offset(0, 1.2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _mergeController,
+        curve: Curves.easeInOut,
+      ),
     );
 
     fusionRotate = Tween(begin: 0.0, end: pi * 6).animate(
-      CurvedAnimation(parent: _fusionController, curve: Curves.easeOut),
+      CurvedAnimation(
+        parent: _fusionController,
+        curve: Curves.easeOut,
+      ),
     );
     fusionScale = Tween(begin: 0.6, end: 1.2).animate(
-      CurvedAnimation(parent: _fusionController, curve: Curves.easeOutBack),
+      CurvedAnimation(
+        parent: _fusionController,
+        curve: Curves.easeOutBack,
+      ),
     );
     fusionBrightness = Tween(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _fusionController, curve: Curves.easeOut),
+      CurvedAnimation(
+        parent: _fusionController,
+        curve: Curves.easeOut,
+      ),
     );
 
     _startSequence();
@@ -120,7 +159,11 @@ class FusionLootboxState extends State<FusionLootbox>
     return completer.future;
   }
 
-  SpinData _buildSpin(Pokemon result, Random rng, {bool reverse = false}) {
+  SpinData _buildSpin(
+    Pokemon result,
+    Random rng, {
+    bool reverse = false,
+  }) {
     final coreCount = 15 + rng.nextInt(6);
     final pool = List<Pokemon>.from(widget.allPokemon)
       ..remove(result)
@@ -167,16 +210,24 @@ class FusionLootboxState extends State<FusionLootbox>
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FusionRoulette(controller: _spin1Controller, data: _spin1),
+                FusionRoulette(
+                  controller: _spin1Controller,
+                  data: _spin1,
+                ),
                 const SizedBox(height: 24),
-                FusionRoulette(controller: _spin2Controller, data: _spin2),
+                FusionRoulette(
+                  controller: _spin2Controller,
+                  data: _spin2,
+                ),
               ],
             ),
+
           FusionOverlay(
             showFusion: showFusion,
             showCard: showCard,
             p1: widget.result1,
             p2: widget.result2,
+            ball: widget.ball,
             mergeRotate: mergeRotate,
             mergeScale: mergeScale,
             mergeBrightness: mergeBrightness,
