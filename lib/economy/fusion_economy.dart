@@ -2,7 +2,7 @@ import 'dart:math';
 import '../models/fusion_entry.dart';
 
 class FusionEconomy {
-  static const int baseValue = 1000;
+  static const int baseValue = 500;
 
   static double fusionCatchRate(FusionEntry fusion) {
     return (fusion.p1.catchRate + fusion.p2.catchRate) / 2;

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../constants/pokedex_constants.dart';
 
 class GameProvider extends ChangeNotifier {
-  int money = 100000;
-  int diamonds = 50;
+  int money = 300;
+  int diamonds = 0;
 
   final Map<BallType, int> _balls = {
     BallType.poke: 0,
