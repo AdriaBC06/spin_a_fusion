@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../auth/login_dialog.dart';
 
 class ProfileMenu extends StatefulWidget {
   const ProfileMenu({super.key});
@@ -7,18 +8,31 @@ class ProfileMenu extends StatefulWidget {
   State<ProfileMenu> createState() => _ProfileMenuState();
 }
 
-class _ProfileMenuState extends State<ProfileMenu> {
+class _ProfileMenuState extends State<ProfileMenu>
+    with SingleTickerProviderStateMixin {
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   bool _isOpen = false;
 
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+  late final Animation<Offset> _slideAnimation =
+      Tween<Offset>(begin: const Offset(0, -0.1), end: Offset.zero).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  late final Animation<double> _fadeAnimation =
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+
   void _toggleMenu() {
     if (_isOpen) {
-      _overlayEntry?.remove();
-      _overlayEntry = null;
+      _controller.reverse();
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+      });
     } else {
       _overlayEntry = _createOverlay();
       Overlay.of(context).insert(_overlayEntry!);
+      _controller.forward();
     }
     setState(() => _isOpen = !_isOpen);
   }
@@ -31,19 +45,28 @@ class _ProfileMenuState extends State<ProfileMenu> {
     return OverlayEntry(
       builder: (context) => Positioned(
         top: offset.dy + size.height + 4,
-        right: 12, // same as AppBar padding
+        right: 12,
         width: 180,
         child: Material(
-          elevation: 8,
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.grey.shade900,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              _ProfileMenuItem(icon: Icons.login, title: 'Login'),
-              _ProfileMenuItem(icon: Icons.settings, title: 'Settings'),
-              _ProfileMenuItem(icon: Icons.info_outline, title: 'About'),
-            ],
+          color: Colors.transparent,
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Material(
+                elevation: 8,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.grey.shade900,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    _ProfileMenuItem(icon: Icons.login, title: 'Login'),
+                    _ProfileMenuItem(icon: Icons.settings, title: 'Settings'),
+                    _ProfileMenuItem(icon: Icons.info_outline, title: 'About'),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -52,6 +75,7 @@ class _ProfileMenuState extends State<ProfileMenu> {
 
   @override
   void dispose() {
+    _controller.dispose();
     _overlayEntry?.remove();
     super.dispose();
   }
@@ -81,7 +105,16 @@ class _ProfileMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        if (title == 'Login') {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (_, __, ___) => const LoginDialog(),
+            ),
+          );
+        }
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         child: Row(
