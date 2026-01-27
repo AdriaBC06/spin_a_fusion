@@ -8,3 +8,5 @@ export 'fusion_lootbox/fusion_lootbox.dart';
 export 'inventory_section.dart';
 export 'home_slot_item.dart';
 export 'home_slots_grid.dart';
+export 'profile_menu.dart';
+export 'top_appbar.dart';
