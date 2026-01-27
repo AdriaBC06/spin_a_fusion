@@ -4,12 +4,14 @@ class InventoryBallCard extends StatelessWidget {
   final String name;
   final Color color;
   final int amount;
+  final VoidCallback onOpen;
 
   const InventoryBallCard({
     super.key,
     required this.name,
     required this.color,
     required this.amount,
+    required this.onOpen,
   });
 
   @override
@@ -59,7 +61,7 @@ class InventoryBallCard extends StatelessWidget {
 
           // Open button
           ElevatedButton(
-            onPressed: enabled ? () {} : null,
+            onPressed: enabled ? onOpen : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
               disabledBackgroundColor: Colors.grey.shade400,
