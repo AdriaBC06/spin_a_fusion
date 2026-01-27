@@ -25,17 +25,22 @@ class _ProfileMenuState extends State<ProfileMenu>
 
   void _toggleMenu(User? user) {
     if (_isOpen) {
-      _controller.reverse();
-      Future.delayed(const Duration(milliseconds: 200), () {
-        _overlayEntry?.remove();
-        _overlayEntry = null;
-      });
+      _closeMenu();
     } else {
       _overlayEntry = _createOverlay(user);
       Overlay.of(context).insert(_overlayEntry!);
       _controller.forward();
+      setState(() => _isOpen = true);
     }
-    setState(() => _isOpen = !_isOpen);
+  }
+
+  void _closeMenu() {
+    _controller.reverse();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    });
+    setState(() => _isOpen = false);
   }
 
   OverlayEntry _createOverlay(User? user) {
@@ -46,42 +51,68 @@ class _ProfileMenuState extends State<ProfileMenu>
     List<_ProfileMenuItem> items = [];
 
     if (user == null) {
-      // Not logged in → show login button
-      items.add(const _ProfileMenuItem(icon: Icons.login, title: 'Login'));
+      items.add(_ProfileMenuItem(
+        icon: Icons.login,
+        title: 'Login',
+        onTap: () {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (_, __, ___) => const LoginDialog(),
+            ),
+          );
+          _closeMenu();
+        },
+      ));
     } else {
-      // Logged in → show logout
-      items.add(const _ProfileMenuItem(icon: Icons.logout, title: 'Logout'));
+      items.add(_ProfileMenuItem(
+        icon: Icons.logout,
+        title: 'Logout',
+        onTap: () async {
+          await FirebaseAuth.instance.signOut();
+          _closeMenu();
+        },
+      ));
     }
 
     // Common items
-    items.addAll(const [
-      _ProfileMenuItem(icon: Icons.settings, title: 'Settings'),
-      _ProfileMenuItem(icon: Icons.info_outline, title: 'About'),
+    items.addAll([
+      _ProfileMenuItem(icon: Icons.settings, title: 'Settings', onTap: _closeMenu),
+      _ProfileMenuItem(icon: Icons.info_outline, title: 'About', onTap: _closeMenu),
     ]);
 
     return OverlayEntry(
-      builder: (context) => Positioned(
-        top: offset.dy + size.height + 4,
-        right: 12,
-        width: 180,
-        child: Material(
-          color: Colors.transparent,
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(12),
-                color: Colors.grey.shade900,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: items,
+      builder: (context) => Stack(
+        children: [
+          // Transparent barrier to detect outside taps
+          GestureDetector(
+            onTap: _closeMenu,
+            behavior: HitTestBehavior.translucent,
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+          Positioned(
+            top: offset.dy + size.height + 4,
+            right: 12,
+            width: 180,
+            child: Material(
+              elevation: 8,
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.grey.shade900,
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: items,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -122,26 +153,18 @@ class _ProfileMenuState extends State<ProfileMenu>
 class _ProfileMenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
+  final VoidCallback onTap;
 
-  const _ProfileMenuItem({required this.icon, required this.title});
+  const _ProfileMenuItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () async {
-        if (title == 'Login') {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (_, __, ___) => const LoginDialog(),
-            ),
-          );
-        } else if (title == 'Logout') {
-          await FirebaseAuth.instance.signOut();
-          // Close menu automatically
-          Navigator.of(context).pop();
-        }
-      },
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         child: Row(
