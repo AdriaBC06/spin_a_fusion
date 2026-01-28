@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/fusion_entry.dart';
 import '../providers/fusion_collection_provider.dart';
 import '../providers/home_slots_provider.dart';
 import '../economy/fusion_economy.dart';
@@ -11,19 +12,19 @@ class FusionScreen extends StatelessWidget {
 
   void _addBestFusions(
     BuildContext context,
-    List fusions,
+    List<FusionEntry> fusions,
   ) {
     final slots = context.read<HomeSlotsProvider>();
 
     // 1️⃣ Remove everything from Home
-    for (final fusion in List.from(slots.slots)) {
+    for (final fusion in List<FusionEntry?>.from(slots.slots)) {
       if (fusion != null) {
         slots.removeFusion(fusion);
       }
     }
 
     // 2️⃣ Sort by income/sec DESC
-    final sorted = List.from(fusions)
+    final sorted = List<FusionEntry>.from(fusions)
       ..sort(
         (a, b) =>
             FusionEconomy.incomePerSecond(b)
@@ -43,7 +44,8 @@ class FusionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final fusionProvider =
         context.watch<FusionCollectionProvider>();
-    final fusions = fusionProvider.fusions;
+    final List<FusionEntry> fusions =
+        fusionProvider.fusions;
 
     return Stack(
       children: [

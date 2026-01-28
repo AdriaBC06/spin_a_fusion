@@ -1,11 +1,22 @@
+import 'package:hive/hive.dart';
 import '../models/pokemon.dart';
 import '../constants/pokedex_constants.dart';
 
+part 'fusion_entry.g.dart';
+
+@HiveType(typeId: 1)
 class FusionEntry {
+  @HiveField(0)
   final Pokemon p1;
+
+  @HiveField(1)
   final Pokemon p2;
+
+  @HiveField(2)
   final BallType ball;
-  final double rarity; // raw probability (0–1)
+
+  @HiveField(3)
+  final double rarity;
 
   const FusionEntry({
     required this.p1,

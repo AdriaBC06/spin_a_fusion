@@ -1,37 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import '../constants/pokedex_constants.dart';
+import '../models/game_state.dart';
 
 class GameProvider extends ChangeNotifier {
-  int money = 300;
-  int diamonds = 0;
+  static const String _boxName = 'game';
 
-  final Map<BallType, int> _balls = {
-    BallType.poke: 0,
-    BallType.superBall: 0,
-    BallType.ultra: 0,
-    BallType.master: 0,
-  };
+  late Box<GameState> _box;
+  late GameState _state;
 
-  // ---------- MONEY ----------
-  bool canSpendMoney(int amount) => money >= amount;
+  // ----------------------------
+  // INIT
+  // ----------------------------
+  Future<void> init() async {
+    _box = await Hive.openBox<GameState>(_boxName);
+    _state = _box.get('state') ?? GameState.initial();
+    await _box.put('state', _state);
+  }
+
+  // ----------------------------
+  // GETTERS
+  // ----------------------------
+  int get money => _state.money;
+  int get diamonds => _state.diamonds;
+
+  int ballCount(BallType type) => _state.balls[type] ?? 0;
+
+  // ----------------------------
+  // INTERNAL SAVE
+  // ----------------------------
+  void _save() {
+    _box.put('state', _state);
+  }
+
+  // ----------------------------
+  // MONEY
+  // ----------------------------
+  bool canSpendMoney(int amount) => _state.money >= amount;
 
   bool spendMoney(int amount) {
     if (!canSpendMoney(amount)) return false;
-    money -= amount;
+    _state.money -= amount;
+    _save();
     notifyListeners();
     return true;
   }
 
   void addMoney(int amount) {
-    money += amount;
+    _state.money += amount;
+    _save();
     notifyListeners();
   }
 
-  // ---------- BALLS ----------
-  int ballCount(BallType type) => _balls[type] ?? 0;
-
+  // ----------------------------
+  // BALLS
+  // ----------------------------
   void addBall(BallType type, {int amount = 1}) {
-    _balls[type] = ballCount(type) + amount;
+    _state.balls[type] = ballCount(type) + amount;
+    _save();
     notifyListeners();
   }
 
@@ -41,13 +67,12 @@ class GameProvider extends ChangeNotifier {
     return true;
   }
 
-  bool canUseBall(BallType type) {
-    return ballCount(type) > 0;
-  }
+  bool canUseBall(BallType type) => ballCount(type) > 0;
 
   bool useBall(BallType type) {
     if (!canUseBall(type)) return false;
-    _balls[type] = ballCount(type) - 1;
+    _state.balls[type] = ballCount(type) - 1;
+    _save();
     notifyListeners();
     return true;
   }

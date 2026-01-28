@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 import '../models/fusion_entry.dart';
+import '../models/home_slots_state.dart';
 import 'game_provider.dart';
 import '../economy/fusion_economy.dart';
 
@@ -11,12 +13,13 @@ class HomeSlotsProvider extends ChangeNotifier {
   // ----------------------------
   static const int totalSlots = 12;
   static const int unlockedSlots = 3;
+  static const String _boxName = 'home_slots';
 
   // ----------------------------
   // STATE
   // ----------------------------
-  final List<FusionEntry?> _slots =
-      List<FusionEntry?>.filled(totalSlots, null);
+  late Box<HomeSlotsState> _box;
+  late HomeSlotsState _state;
 
   Timer? _timer;
   GameProvider? _game;
@@ -31,9 +34,14 @@ class HomeSlotsProvider extends ChangeNotifier {
       _incomeController.stream;
 
   // ----------------------------
-  // LIFECYCLE
+  // INIT
   // ----------------------------
-  HomeSlotsProvider() {
+  Future<void> init() async {
+    _box = await Hive.openBox<HomeSlotsState>(_boxName);
+    _state = _box.get('state') ??
+        HomeSlotsState.empty(totalSlots);
+    await _box.put('state', _state);
+
     _timer = Timer.periodic(
       const Duration(seconds: 1),
       (_) => _tickIncome(),
@@ -44,25 +52,31 @@ class HomeSlotsProvider extends ChangeNotifier {
     _game = game;
   }
 
+  void _save() {
+    _box.put('state', _state);
+  }
+
   // ----------------------------
   // PUBLIC API
   // ----------------------------
-  List<FusionEntry?> get slots => List.unmodifiable(_slots);
+  List<FusionEntry?> get slots =>
+      List.unmodifiable(_state.slots);
 
   bool get hasEmptyUnlockedSlot {
     for (int i = 0; i < unlockedSlots; i++) {
-      if (_slots[i] == null) return true;
+      if (_state.slots[i] == null) return true;
     }
     return false;
   }
 
   bool contains(FusionEntry fusion) =>
-      _slots.contains(fusion);
+      _state.slots.contains(fusion);
 
   bool addFusion(FusionEntry fusion) {
     for (int i = 0; i < unlockedSlots; i++) {
-      if (_slots[i] == null) {
-        _slots[i] = fusion;
+      if (_state.slots[i] == null) {
+        _state.slots[i] = fusion;
+        _save();
         notifyListeners();
         return true;
       }
@@ -72,8 +86,9 @@ class HomeSlotsProvider extends ChangeNotifier {
 
   void removeFusion(FusionEntry fusion) {
     for (int i = 0; i < totalSlots; i++) {
-      if (_slots[i] == fusion) {
-        _slots[i] = null;
+      if (_state.slots[i] == fusion) {
+        _state.slots[i] = null;
+        _save();
         notifyListeners();
         return;
       }
@@ -81,23 +96,21 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 
   // ----------------------------
-  // PASSIVE INCOME (CORE LOGIC)
+  // PASSIVE INCOME
   // ----------------------------
   void _tickIncome() {
     if (_game == null) return;
 
     for (int i = 0; i < unlockedSlots; i++) {
-      final fusion = _slots[i];
+      final fusion = _state.slots[i];
       if (fusion == null) continue;
 
       final income =
           FusionEconomy.incomePerSecond(fusion);
 
       if (income > 0) {
-        // Add money
         _game!.addMoney(income);
 
-        // Emit UI event (floating number)
         _incomeController.add(
           HomeIncomeEvent(
             slotIndex: i,
@@ -120,7 +133,7 @@ class HomeSlotsProvider extends ChangeNotifier {
 }
 
 // ------------------------------------------------------
-// INCOME EVENT (USED BY HOME SLOT TILE UI)
+// INCOME EVENT
 // ------------------------------------------------------
 class HomeIncomeEvent {
   final int slotIndex;
