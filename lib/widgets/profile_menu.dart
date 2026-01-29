@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/login_dialog.dart';
+import '../auth/register_dialog.dart';
 
 class ProfileMenu extends StatefulWidget {
   const ProfileMenu({super.key});
@@ -11,7 +12,6 @@ class ProfileMenu extends StatefulWidget {
 
 class _ProfileMenuState extends State<ProfileMenu>
     with SingleTickerProviderStateMixin {
-  final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
   bool _isOpen = false;
 
@@ -19,7 +19,8 @@ class _ProfileMenuState extends State<ProfileMenu>
       AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
   late final Animation<Offset> _slideAnimation =
       Tween<Offset>(begin: const Offset(0, -0.1), end: Offset.zero).animate(
-          CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+        CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+      );
   late final Animation<double> _fadeAnimation =
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
@@ -44,58 +45,85 @@ class _ProfileMenuState extends State<ProfileMenu>
   }
 
   OverlayEntry _createOverlay(User? user) {
-    RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
+    final renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
 
-    List<_ProfileMenuItem> items = [];
+    final List<_ProfileMenuItem> items = [];
 
     if (user == null) {
-      items.add(_ProfileMenuItem(
-        icon: Icons.login,
-        title: 'Login',
-        onTap: () {
-          Navigator.of(context).push(
-            PageRouteBuilder(
-              opaque: false,
-              pageBuilder: (_, __, ___) => const LoginDialog(),
-            ),
-          );
-          _closeMenu();
-        },
-      ));
+      // NOT LOGGED IN
+      items.add(
+        _ProfileMenuItem(
+          icon: Icons.login,
+          title: 'Login',
+          onTap: () {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                opaque: false,
+                pageBuilder: (_, __, ___) => const LoginDialog(),
+              ),
+            );
+            _closeMenu();
+          },
+        ),
+      );
+
+      items.add(
+        _ProfileMenuItem(
+          icon: Icons.person_add,
+          title: 'Create account',
+          onTap: () {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                opaque: false,
+                pageBuilder: (_, __, ___) => const RegisterDialog(),
+              ),
+            );
+            _closeMenu();
+          },
+        ),
+      );
     } else {
-      items.add(_ProfileMenuItem(
-        icon: Icons.logout,
-        title: 'Logout',
-        onTap: () async {
-          await FirebaseAuth.instance.signOut();
-          _closeMenu();
-        },
-      ));
+      // LOGGED IN
+      items.add(
+        _ProfileMenuItem(
+          icon: Icons.logout,
+          title: 'Logout',
+          onTap: () async {
+            await FirebaseAuth.instance.signOut();
+            _closeMenu();
+          },
+        ),
+      );
     }
 
-    // Common items
+    // COMMON ITEMS
     items.addAll([
-      _ProfileMenuItem(icon: Icons.settings, title: 'Settings', onTap: _closeMenu),
-      _ProfileMenuItem(icon: Icons.info_outline, title: 'About', onTap: _closeMenu),
+      _ProfileMenuItem(
+        icon: Icons.settings,
+        title: 'Settings',
+        onTap: _closeMenu,
+      ),
+      _ProfileMenuItem(
+        icon: Icons.info_outline,
+        title: 'About',
+        onTap: _closeMenu,
+      ),
     ]);
 
     return OverlayEntry(
-      builder: (context) => Stack(
+      builder: (_) => Stack(
         children: [
-          // Transparent barrier to detect outside taps
           GestureDetector(
             onTap: _closeMenu,
             behavior: HitTestBehavior.translucent,
-            child: Container(
-              color: Colors.transparent,
-            ),
+            child: Container(color: Colors.transparent),
           ),
           Positioned(
-            top: offset.dy + size.height + 4,
+            top: offset.dy + size.height + 6,
             right: 12,
-            width: 180,
+            width: 200,
             child: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(12),
@@ -128,21 +156,16 @@ class _ProfileMenuState extends State<ProfileMenu>
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
+      builder: (_, snapshot) {
         final user = snapshot.data;
-        return CompositedTransformTarget(
-          link: _layerLink,
-          child: GestureDetector(
-            onTap: () => _toggleMenu(user),
-            child: CircleAvatar(
-              radius: 22,
-              backgroundColor: Colors.grey.shade800,
-              child: user != null && user.photoURL != null
-                  ? ClipOval(
-                      child: Image.network(user.photoURL!, fit: BoxFit.cover),
-                    )
-                  : const Icon(Icons.person, color: Colors.white),
-            ),
+        return GestureDetector(
+          onTap: () => _toggleMenu(user),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: Colors.grey.shade800,
+            child: user?.photoURL != null
+                ? ClipOval(child: Image.network(user!.photoURL!, fit: BoxFit.cover))
+                : const Icon(Icons.person, color: Colors.white),
           ),
         );
       },
@@ -166,15 +189,12 @@ class _ProfileMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
           children: [
             Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 12),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white),
-            ),
+            Text(title, style: const TextStyle(color: Colors.white)),
           ],
         ),
       ),
