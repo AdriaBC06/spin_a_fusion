@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "514791304480",
+    "project_id": "spinafusion",
+    "storage_bucket": "spinafusion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514791304480:android:e420f3f9734de5ce0d3b45",
+        "android_client_info": {
+          "package_name": "com.example.spin_a_fusion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlf2wJ9JvTDZbC_b8gO8WAOI6Y_nFcIm0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

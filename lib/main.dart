@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -12,33 +15,56 @@ import 'core/hive/adapters/ball_type_adapter.dart';
 import 'providers/providers.dart';
 import 'screens/screens.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+/// Global flag you can reuse anywhere in the app
+final bool kFirebaseSupported =
+    kIsWeb || Platform.isAndroid || Platform.isIOS;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ----------------------------
+  // HIVE INIT
+  // ----------------------------
   await Hive.initFlutter();
 
-  // ----------------------------
-  // HIVE ADAPTERS
-  // ----------------------------
   Hive.registerAdapter(PokemonAdapter());
   Hive.registerAdapter(FusionEntryAdapter());
   Hive.registerAdapter(GameStateAdapter());
   Hive.registerAdapter(HomeSlotsStateAdapter());
   Hive.registerAdapter(BallTypeAdapter());
 
-  // ----------------------------
-  // PRE-OPEN BOXES
-  // ----------------------------
   await Hive.openBox<Pokemon>('pokedex');
 
   // ----------------------------
-  // INIT PROVIDERS (CRÍTICO)
+  // FIREBASE INIT (CORRECT)
+  // ----------------------------
+  if (kFirebaseSupported) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    debugPrint(
+      '🔥 Firebase connected | '
+      'platform=${kIsWeb ? "web" : Platform.operatingSystem} | '
+      'projectId=${Firebase.app().options.projectId}',
+    );
+  } else {
+    debugPrint(
+      '⚠️ Firebase skipped: unsupported platform '
+      '(${Platform.operatingSystem})',
+    );
+  }
+
+  // ----------------------------
+  // INIT PROVIDERS
   // ----------------------------
   final gameProvider = GameProvider();
   await gameProvider.init();
 
-  final fusionCollectionProvider =
-      FusionCollectionProvider();
+  final fusionCollectionProvider = FusionCollectionProvider();
   await fusionCollectionProvider.init();
 
   final homeSlotsProvider = HomeSlotsProvider();
@@ -49,9 +75,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: gameProvider),
-        ChangeNotifierProvider.value(
-          value: fusionCollectionProvider,
-        ),
+        ChangeNotifierProvider.value(value: fusionCollectionProvider),
         ChangeNotifierProvider(create: (_) => PokedexProvider()),
         ChangeNotifierProvider.value(value: homeSlotsProvider),
       ],
