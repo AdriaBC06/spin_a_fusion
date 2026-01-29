@@ -2,28 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/fusion_entry.dart';
+import 'fusion_pedia_provider.dart';
 
 class FusionCollectionProvider extends ChangeNotifier {
   static const String _boxName = 'fusions';
 
   late Box<FusionEntry> _box;
+  late FusionPediaProvider _pedia;
 
-  // ----------------------------
-  // INIT
-  // ----------------------------
-  Future<void> init() async {
+  Future<void> init(FusionPediaProvider pedia) async {
+    _pedia = pedia;
     _box = await Hive.openBox<FusionEntry>(_boxName);
     notifyListeners();
   }
 
-  // ----------------------------
-  // PUBLIC API
-  // ----------------------------
   List<FusionEntry> get fusions =>
       _box.values.toList().reversed.toList();
 
+  /// 🔓 Raw list (no reverse) for syncing
+  List<FusionEntry> get allFusions =>
+      _box.values.toList();
+
   void addFusion(FusionEntry fusion) {
     _box.add(fusion);
+    _pedia.registerFusion(fusion);
     notifyListeners();
   }
 
@@ -35,11 +37,6 @@ class FusionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool contains(FusionEntry fusion) {
-    return _box.values.contains(fusion);
-  }
-
-  int indexOf(FusionEntry fusion) {
-    return _box.values.toList().indexOf(fusion);
-  }
+  bool contains(FusionEntry fusion) =>
+      _box.values.contains(fusion);
 }

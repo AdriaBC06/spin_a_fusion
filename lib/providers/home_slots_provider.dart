@@ -24,9 +24,6 @@ class HomeSlotsProvider extends ChangeNotifier {
   Timer? _timer;
   GameProvider? _game;
 
-  // ----------------------------
-  // INCOME EVENTS (UI FEEDBACK)
-  // ----------------------------
   final StreamController<HomeIncomeEvent> _incomeController =
       StreamController<HomeIncomeEvent>.broadcast();
 
@@ -36,10 +33,16 @@ class HomeSlotsProvider extends ChangeNotifier {
   // ----------------------------
   // INIT
   // ----------------------------
-  Future<void> init() async {
+  Future<void> init({
+    required List<FusionEntry> inventory,
+  }) async {
     _box = await Hive.openBox<HomeSlotsState>(_boxName);
     _state = _box.get('state') ??
         HomeSlotsState.empty(totalSlots);
+
+    // 🔥 CRITICAL FIX: purge invalid fusions
+    _syncWithInventory(inventory);
+
     await _box.put('state', _state);
 
     _timer = Timer.periodic(
@@ -54,6 +57,38 @@ class HomeSlotsProvider extends ChangeNotifier {
 
   void _save() {
     _box.put('state', _state);
+  }
+
+  // ----------------------------
+  // 🔥 INVENTORY SYNC
+  // ----------------------------
+  void _syncWithInventory(List<FusionEntry> inventory) {
+    bool changed = false;
+
+    for (int i = 0; i < totalSlots; i++) {
+      final fusion = _state.slots[i];
+      if (fusion == null) continue;
+
+      if (!inventory.contains(fusion)) {
+        _state.slots[i] = null;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      notifyListeners();
+    }
+  }
+
+  /// Optional explicit purge (runtime safety)
+  void purgeFusion(FusionEntry fusion) {
+    for (int i = 0; i < totalSlots; i++) {
+      if (_state.slots[i] == fusion) {
+        _state.slots[i] = null;
+      }
+    }
+    _save();
+    notifyListeners();
   }
 
   // ----------------------------
@@ -85,14 +120,7 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 
   void removeFusion(FusionEntry fusion) {
-    for (int i = 0; i < totalSlots; i++) {
-      if (_state.slots[i] == fusion) {
-        _state.slots[i] = null;
-        _save();
-        notifyListeners();
-        return;
-      }
-    }
+    purgeFusion(fusion);
   }
 
   // ----------------------------
@@ -121,9 +149,6 @@ class HomeSlotsProvider extends ChangeNotifier {
     }
   }
 
-  // ----------------------------
-  // CLEANUP
-  // ----------------------------
   @override
   void dispose() {
     _timer?.cancel();

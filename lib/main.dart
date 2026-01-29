@@ -13,14 +13,13 @@ import 'models/home_slots_state.dart';
 import 'core/hive/adapters/ball_type_adapter.dart';
 
 import 'providers/providers.dart';
+import 'providers/fusion_pedia_provider.dart';
 import 'screens/screens.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-/// Global flag you can reuse anywhere in the app
-final bool kFirebaseSupported =
-    kIsWeb || Platform.isAndroid || Platform.isIOS;
+final bool kFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,42 +38,42 @@ Future<void> main() async {
   await Hive.openBox<Pokemon>('pokedex');
 
   // ----------------------------
-  // FIREBASE INIT (CORRECT)
+  // FIREBASE INIT
   // ----------------------------
   if (kFirebaseSupported) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    debugPrint(
-      '🔥 Firebase connected | '
-      'platform=${kIsWeb ? "web" : Platform.operatingSystem} | '
-      'projectId=${Firebase.app().options.projectId}',
-    );
-  } else {
-    debugPrint(
-      '⚠️ Firebase skipped: unsupported platform '
-      '(${Platform.operatingSystem})',
-    );
   }
 
   // ----------------------------
-  // INIT PROVIDERS
+  // INIT PROVIDERS (ORDER MATTERS)
   // ----------------------------
   final gameProvider = GameProvider();
   await gameProvider.init();
 
+  final fusionPediaProvider = FusionPediaProvider();
+  await fusionPediaProvider.init();
+
   final fusionCollectionProvider = FusionCollectionProvider();
-  await fusionCollectionProvider.init();
+  await fusionCollectionProvider.init(fusionPediaProvider);
+
+  // 🔥 BACKFILL PEDIA FROM INVENTORY (ONE-TIME SYNC)
+  fusionPediaProvider.syncFromInventory(fusionCollectionProvider.allFusions);
 
   final homeSlotsProvider = HomeSlotsProvider();
-  await homeSlotsProvider.init();
+  await homeSlotsProvider.init(inventory: fusionCollectionProvider.allFusions);
+
   homeSlotsProvider.bindGameProvider(gameProvider);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: gameProvider),
+
+        // ✅ MUST BE ABOVE collection + screen usage
+        ChangeNotifierProvider.value(value: fusionPediaProvider),
+
         ChangeNotifierProvider.value(value: fusionCollectionProvider),
         ChangeNotifierProvider(create: (_) => PokedexProvider()),
         ChangeNotifierProvider.value(value: homeSlotsProvider),
