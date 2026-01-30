@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:spin_a_fusion/providers/home_slots_provider.dart';
 
 import '../models/fusion_entry.dart';
 import 'fusion_pedia_provider.dart';
@@ -30,12 +31,10 @@ class FusionCollectionProvider extends ChangeNotifier {
   // ----------------------------
   // GETTERS
   // ----------------------------
-  List<FusionEntry> get fusions =>
-      _box.values.toList().reversed.toList();
+  List<FusionEntry> get fusions => _box.values.toList().reversed.toList();
 
   /// 🔓 Raw list (no reverse) for syncing
-  List<FusionEntry> get allFusions =>
-      _box.values.toList();
+  List<FusionEntry> get allFusions => _box.values.toList();
 
   // ----------------------------
   // MUTATIONS
@@ -46,14 +45,17 @@ class FusionCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removeFusion(FusionEntry fusion) {
+  void removeFusion(FusionEntry fusion, {HomeSlotsProvider? homeSlots}) {
     final index = _box.values.toList().indexOf(fusion);
     if (index == -1) return;
 
     _box.deleteAt(index);
+
+    // 🔥 NEW: purge from home slots if present
+    homeSlots?.purgeFusion(fusion);
+
     notifyListeners();
   }
 
-  bool contains(FusionEntry fusion) =>
-      _box.values.contains(fusion);
+  bool contains(FusionEntry fusion) => _box.values.contains(fusion);
 }

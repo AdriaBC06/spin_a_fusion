@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:spin_a_fusion/widgets/trade/receive_fusion_screen.dart';
 
 import '../auth/login_dialog.dart';
 import '../auth/register_dialog.dart';
@@ -13,6 +14,8 @@ import '../providers/home_slots_provider.dart';
 import '../services/firebase_sync_service.dart';
 import '../widgets/confirm_cloud_overwrite_dialog.dart';
 import '../widgets/settings_panel.dart';
+
+import 'trade/send_fusion_flow.dart';
 
 class ProfileMenu extends StatefulWidget {
   const ProfileMenu({super.key});
@@ -62,7 +65,7 @@ class _ProfileMenuState extends State<ProfileMenu>
   }
 
   // ------------------------------------------------------
-  // SYNC → CLOUD (OVERWRITE)
+  // SYNC → CLOUD
   // ------------------------------------------------------
   Future<void> _syncToCloud() async {
     final confirmed = await showConfirmCloudOverwriteDialog(context);
@@ -92,7 +95,7 @@ class _ProfileMenuState extends State<ProfileMenu>
   }
 
   // ------------------------------------------------------
-  // LOGOUT (FULL LOCAL RESET)
+  // LOGOUT
   // ------------------------------------------------------
   Future<void> _logout() async {
     final confirmed = await showDialog<bool>(
@@ -136,7 +139,11 @@ class _ProfileMenuState extends State<ProfileMenu>
     final size = renderBox.size;
 
     final List<_ProfileMenuItem> items = [];
+    final fusionCount = context.read<FusionCollectionProvider>().fusions.length;
 
+    // --------------------------------------------------
+    // NOT LOGGED IN
+    // --------------------------------------------------
     if (user == null) {
       items.addAll([
         _ProfileMenuItem(
@@ -166,8 +173,46 @@ class _ProfileMenuState extends State<ProfileMenu>
           },
         ),
       ]);
-    } else {
+    }
+    // --------------------------------------------------
+    // LOGGED IN
+    // --------------------------------------------------
+    else {
       items.addAll([
+        _ProfileMenuItem(
+          icon: Icons.qr_code,
+          title: 'Receive Fusion',
+          onTap: () {
+            _closeMenu();
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const ReceiveFusionScreen(),
+            );
+          },
+        ),
+
+        _ProfileMenuItem(
+          icon: Icons.qr_code_scanner,
+          title: 'Send Fusion',
+          onTap: fusionCount <= 1
+              ? () {
+                  _closeMenu();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('❌ You need at least 2 fusions to trade'),
+                    ),
+                  );
+                }
+              : () {
+                  _closeMenu();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SendFusionFlow()),
+                  );
+                },
+        ),
+
         _ProfileMenuItem(
           icon: Icons.cloud_upload,
           title: 'Sync to Cloud',
@@ -177,6 +222,9 @@ class _ProfileMenuState extends State<ProfileMenu>
       ]);
     }
 
+    // --------------------------------------------------
+    // COMMON
+    // --------------------------------------------------
     items.addAll([
       _ProfileMenuItem(
         icon: Icons.settings,
@@ -239,6 +287,7 @@ class _ProfileMenuState extends State<ProfileMenu>
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (_, snapshot) {
         final user = snapshot.data;
+
         return GestureDetector(
           onTap: () => _toggleMenu(user),
           child: CircleAvatar(
