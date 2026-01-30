@@ -1,4 +1,4 @@
-const int expectedPokemonCount = 420;
+const int expectedPokemonCount = 30;
 
 enum BallType {
   poke,

@@ -24,15 +24,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  appBar: const TopAppBar(),
-    body: IndexedStack(
-      index: _currentIndex,
-      children: _screens,
-    ),
-    bottomNavigationBar: CustomBottomBar(
-      currentIndex: _currentIndex,
-      onTap: (index) => setState(() => _currentIndex = index),
-    ),
-  );
+      appBar: const TopAppBar(),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: CustomBottomBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+        },
+      ),
+    );
   }
 }

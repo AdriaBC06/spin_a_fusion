@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../constants/pokedex_constants.dart';
@@ -9,6 +10,11 @@ class GameProvider extends ChangeNotifier {
   late Box<GameState> _box;
   late GameState _state;
 
+  Timer? _playTimeTimer;
+
+  // 🔒 Cloud overwrite permission (SESSION ONLY)
+  bool _cloudOverwriteAllowed = false;
+
   // ----------------------------
   // INIT
   // ----------------------------
@@ -16,6 +22,37 @@ class GameProvider extends ChangeNotifier {
     _box = await Hive.openBox<GameState>(_boxName);
     _state = _box.get('state') ?? GameState.initial();
     await _box.put('state', _state);
+
+    _startPlayTimeCounter();
+  }
+
+  void _startPlayTimeCounter() {
+    _playTimeTimer?.cancel();
+
+    _playTimeTimer =
+        Timer.periodic(const Duration(minutes: 1), (_) {
+      _state.playTimeSeconds += 60;
+      _save();
+    });
+  }
+
+  @override
+  void dispose() {
+    _playTimeTimer?.cancel();
+    super.dispose();
+  }
+
+  // ----------------------------
+  // CLOUD OVERWRITE PERMISSION
+  // ----------------------------
+  bool get canOverwriteCloud => _cloudOverwriteAllowed;
+
+  void allowCloudOverwrite() {
+    _cloudOverwriteAllowed = true;
+  }
+
+  void resetCloudOverwritePermission() {
+    _cloudOverwriteAllowed = false;
   }
 
   // ----------------------------
@@ -23,6 +60,7 @@ class GameProvider extends ChangeNotifier {
   // ----------------------------
   int get money => _state.money;
   int get diamonds => _state.diamonds;
+  int get playTimeSeconds => _state.playTimeSeconds;
 
   int ballCount(BallType type) => _state.balls[type] ?? 0;
 

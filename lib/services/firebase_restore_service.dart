@@ -1,0 +1,117 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
+
+import '../constants/pokedex_constants.dart';
+import '../models/fusion_entry.dart';
+import '../models/pokemon.dart';
+import '../providers/game_provider.dart';
+import '../providers/fusion_collection_provider.dart';
+import '../providers/fusion_pedia_provider.dart';
+import '../providers/home_slots_provider.dart';
+
+class FirebaseRestoreService {
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+
+  // --------------------------------------------------
+  // FETCH
+  // --------------------------------------------------
+  Future<Map<String, dynamic>?> fetchCloud() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    final doc = await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (!doc.exists) return null;
+    return doc.data();
+  }
+
+  // --------------------------------------------------
+  // RESTORE
+  // --------------------------------------------------
+  Future<void> restoreFromCloud({
+    required Map<String, dynamic> cloud,
+    required GameProvider game,
+    required FusionCollectionProvider collection,
+    required FusionPediaProvider pedia,
+    required HomeSlotsProvider homeSlots,
+  }) async {
+    // -------- GAME --------
+    game
+      ..spendMoney(game.money)
+      ..addMoney(cloud['money'] ?? 0);
+
+    game
+      ..spendMoney(game.diamonds)
+      ..addMoney(cloud['diamonds'] ?? 0);
+
+    // -------- BALLS --------
+    final balls =
+        Map<String, dynamic>.from(cloud['balls'] ?? {});
+
+    for (final entry in balls.entries) {
+      final type =
+          BallType.values[int.parse(entry.key)];
+      game.addBall(type, amount: entry.value);
+    }
+
+    // -------- FUSIONS --------
+    final pokemonBox = Hive.box<Pokemon>('pokedex');
+
+    FusionEntry decode(int key) {
+      final id1 = key ~/ expectedPokemonCount;
+      final id2 = key % expectedPokemonCount;
+
+      final p1 = pokemonBox.get(id1);
+      final p2 = pokemonBox.get(id2);
+
+      if (p1 == null || p2 == null) {
+        throw Exception(
+            'Pokemon missing ($id1, $id2)');
+      }
+
+      return FusionEntry(
+        p1: p1,
+        p2: p2,
+        ball: BallType.poke,
+        rarity: 1.0,
+      );
+    }
+
+    final owned =
+        List<int>.from(cloud['ownedFusions'] ?? []);
+    for (final key in owned) {
+      collection.addFusion(decode(key));
+    }
+
+    final pediaList =
+        List<int>.from(cloud['pediaFusions'] ?? []);
+    for (final key in pediaList) {
+      pedia.registerFusion(decode(key));
+    }
+
+    // -------- HOME SLOTS --------
+    final rawSlots =
+        Map<String, dynamic>.from(cloud['homeSlots'] ?? {});
+
+    for (final entry in rawSlots.entries) {
+      final index = int.parse(entry.key);
+      if (index >= HomeSlotsProvider.unlockedSlots) {
+        continue;
+      }
+
+      final int? key = entry.value;
+      if (key == null) {
+        homeSlots.setSlot(index, null);
+        continue;
+      }
+
+      final fusion = decode(key);
+      homeSlots.setSlot(index, fusion);
+    }
+  }
+}

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/pokedex_provider.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
 
   @override
-  State<LoadingScreen> createState() => _LoadingScreenState();
+  State<LoadingScreen> createState() =>
+      _LoadingScreenState();
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
@@ -14,6 +16,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
 
+    // Load Pokédex once
     Future.microtask(() {
       context.read<PokedexProvider>().initialize();
     });
@@ -30,7 +33,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 🔲 BACKGROUND PLACEHOLDER
+          // Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -41,7 +44,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             ),
           ),
 
-          // 🔄 LOADING BAR
+          // Loading bar
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -82,7 +85,8 @@ class _GoToHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushReplacementNamed('/home');
+      Navigator.of(context)
+          .pushReplacementNamed('/home');
     });
 
     return const SizedBox.shrink();

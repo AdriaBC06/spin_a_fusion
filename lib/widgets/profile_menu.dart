@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
 import '../auth/login_dialog.dart';
 import '../auth/register_dialog.dart';
+
+import '../providers/game_provider.dart';
+import '../providers/fusion_collection_provider.dart';
+import '../providers/fusion_pedia_provider.dart';
+
+import '../providers/home_slots_provider.dart';
+import '../services/firebase_sync_service.dart';
+import '../widgets/confirm_cloud_overwrite_dialog.dart';
 
 class ProfileMenu extends StatefulWidget {
   const ProfileMenu({super.key});
@@ -15,14 +25,20 @@ class _ProfileMenuState extends State<ProfileMenu>
   OverlayEntry? _overlayEntry;
   bool _isOpen = false;
 
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-  late final Animation<Offset> _slideAnimation =
-      Tween<Offset>(begin: const Offset(0, -0.1), end: Offset.zero).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-      );
-  late final Animation<double> _fadeAnimation =
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  );
+
+  late final Animation<Offset> _slideAnimation = Tween<Offset>(
+    begin: const Offset(0, -0.1),
+    end: Offset.zero,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
+  late final Animation<double> _fadeAnimation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
 
   void _toggleMenu(User? user) {
     if (_isOpen) {
@@ -44,6 +60,37 @@ class _ProfileMenuState extends State<ProfileMenu>
     setState(() => _isOpen = false);
   }
 
+  // ------------------------------------------------------
+  // SYNC → OVERWRITE CLOUD (EXPLICIT)
+  // ------------------------------------------------------
+  Future<void> _syncNow() async {
+    final confirmed = await showConfirmCloudOverwriteDialog(context);
+
+    if (confirmed != true) {
+      _closeMenu();
+      return;
+    }
+
+    try {
+      await FirebaseSyncService().sync(
+        game: context.read<GameProvider>(),
+        collection: context.read<FusionCollectionProvider>(),
+        pedia: context.read<FusionPediaProvider>(),
+        homeSlots: context.read<HomeSlotsProvider>(),
+      );
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('☁️ Cloud overwritten')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('❌ Sync failed: $e')));
+    }
+
+    _closeMenu();
+  }
+
   OverlayEntry _createOverlay(User? user) {
     final renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
@@ -52,7 +99,6 @@ class _ProfileMenuState extends State<ProfileMenu>
     final List<_ProfileMenuItem> items = [];
 
     if (user == null) {
-      // NOT LOGGED IN
       items.add(
         _ProfileMenuItem(
           icon: Icons.login,
@@ -85,7 +131,14 @@ class _ProfileMenuState extends State<ProfileMenu>
         ),
       );
     } else {
-      // LOGGED IN
+      items.add(
+        _ProfileMenuItem(
+          icon: Icons.cloud_upload,
+          title: 'Sync to Cloud',
+          onTap: _syncNow,
+        ),
+      );
+
       items.add(
         _ProfileMenuItem(
           icon: Icons.logout,
@@ -98,7 +151,6 @@ class _ProfileMenuState extends State<ProfileMenu>
       );
     }
 
-    // COMMON ITEMS
     items.addAll([
       _ProfileMenuItem(
         icon: Icons.settings,
@@ -164,7 +216,9 @@ class _ProfileMenuState extends State<ProfileMenu>
             radius: 22,
             backgroundColor: Colors.grey.shade800,
             child: user?.photoURL != null
-                ? ClipOval(child: Image.network(user!.photoURL!, fit: BoxFit.cover))
+                ? ClipOval(
+                    child: Image.network(user!.photoURL!, fit: BoxFit.cover),
+                  )
                 : const Icon(Icons.person, color: Colors.white),
           ),
         );

@@ -14,6 +14,7 @@ class HomeSlotsProvider extends ChangeNotifier {
   static const int totalSlots = 12;
   static const int unlockedSlots = 3;
   static const String _boxName = 'home_slots';
+  static const String _stateKey = 'state';
 
   // ----------------------------
   // STATE
@@ -37,18 +38,27 @@ class HomeSlotsProvider extends ChangeNotifier {
     required List<FusionEntry> inventory,
   }) async {
     _box = await Hive.openBox<HomeSlotsState>(_boxName);
-    _state = _box.get('state') ??
-        HomeSlotsState.empty(totalSlots);
 
-    // 🔥 CRITICAL FIX: purge invalid fusions
-    _syncWithInventory(inventory);
+    final savedState = _box.get(_stateKey);
 
-    await _box.put('state', _state);
+    if (savedState != null) {
+      _state = savedState;
+    } else {
+      _state = HomeSlotsState.empty(totalSlots);
+      await _box.put(_stateKey, _state);
+    }
+
+    final changed = _syncWithInventory(inventory);
+    if (changed) {
+      await _box.put(_stateKey, _state);
+    }
 
     _timer = Timer.periodic(
       const Duration(seconds: 1),
       (_) => _tickIncome(),
     );
+
+    notifyListeners();
   }
 
   void bindGameProvider(GameProvider game) {
@@ -56,39 +66,30 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 
   void _save() {
-    _box.put('state', _state);
+    _box.put(_stateKey, _state);
   }
 
   // ----------------------------
-  // 🔥 INVENTORY SYNC
+  // INVENTORY SYNC
   // ----------------------------
-  void _syncWithInventory(List<FusionEntry> inventory) {
+  bool _syncWithInventory(List<FusionEntry> inventory) {
     bool changed = false;
 
     for (int i = 0; i < totalSlots; i++) {
       final fusion = _state.slots[i];
       if (fusion == null) continue;
 
-      if (!inventory.contains(fusion)) {
+      final exists = inventory.any((f) =>
+          f.p1.fusionId == fusion.p1.fusionId &&
+          f.p2.fusionId == fusion.p2.fusionId);
+
+      if (!exists) {
         _state.slots[i] = null;
         changed = true;
       }
     }
 
-    if (changed) {
-      notifyListeners();
-    }
-  }
-
-  /// Optional explicit purge (runtime safety)
-  void purgeFusion(FusionEntry fusion) {
-    for (int i = 0; i < totalSlots; i++) {
-      if (_state.slots[i] == fusion) {
-        _state.slots[i] = null;
-      }
-    }
-    _save();
-    notifyListeners();
+    return changed;
   }
 
   // ----------------------------
@@ -105,7 +106,9 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 
   bool contains(FusionEntry fusion) =>
-      _state.slots.contains(fusion);
+      _state.slots.any((f) =>
+          f?.p1.fusionId == fusion.p1.fusionId &&
+          f?.p2.fusionId == fusion.p2.fusionId);
 
   bool addFusion(FusionEntry fusion) {
     for (int i = 0; i < unlockedSlots; i++) {
@@ -123,6 +126,34 @@ class HomeSlotsProvider extends ChangeNotifier {
     purgeFusion(fusion);
   }
 
+  void setSlot(int index, FusionEntry? fusion) {
+    if (index < 0 || index >= unlockedSlots) return;
+
+    _state.slots[index] = fusion;
+    _save();
+    notifyListeners();
+  }
+
+  void purgeFusion(FusionEntry fusion) {
+    bool changed = false;
+
+    for (int i = 0; i < totalSlots; i++) {
+      final f = _state.slots[i];
+      if (f == null) continue;
+
+      if (f.p1.fusionId == fusion.p1.fusionId &&
+          f.p2.fusionId == fusion.p2.fusionId) {
+        _state.slots[i] = null;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      _save();
+      notifyListeners();
+    }
+  }
+
   // ----------------------------
   // PASSIVE INCOME
   // ----------------------------
@@ -138,7 +169,6 @@ class HomeSlotsProvider extends ChangeNotifier {
 
       if (income > 0) {
         _game!.addMoney(income);
-
         _incomeController.add(
           HomeIncomeEvent(
             slotIndex: i,
@@ -157,8 +187,6 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 }
 
-// ------------------------------------------------------
-// INCOME EVENT
 // ------------------------------------------------------
 class HomeIncomeEvent {
   final int slotIndex;

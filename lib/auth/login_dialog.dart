@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'auth_service.dart';
+
+import '../services/firebase_restore_service.dart';
+import '../widgets/cloud_restore_dialog.dart';
+
+import '../providers/game_provider.dart';
+import '../providers/fusion_collection_provider.dart';
+import '../providers/fusion_pedia_provider.dart';
+import '../providers/home_slots_provider.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -17,18 +27,66 @@ class _LoginDialogState extends State<LoginDialog> {
 
   Future<void> _login() async {
     setState(() => _loading = true);
+
     try {
+      // ----------------------------
+      // LOGIN
+      // ----------------------------
       await _authService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      if (mounted) Navigator.of(context).pop(); // close dialog on success
+
+      // ----------------------------
+      // CHECK CLOUD
+      // ----------------------------
+      final restoreService = FirebaseRestoreService();
+      final cloud = await restoreService.fetchCloud();
+
+      if (cloud != null && mounted) {
+        final localSeconds =
+            context.read<GameProvider>().playTimeSeconds;
+
+        final cloudSeconds =
+            cloud['playTimeSeconds'] as int? ?? 0;
+
+        final choice = await showCloudRestoreDialog(
+          context,
+          localSeconds: localSeconds,
+          cloudSeconds: cloudSeconds,
+        );
+
+        if (choice == CloudRestoreChoice.cloud) {
+          await restoreService.restoreFromCloud(
+            cloud: cloud,
+            game: context.read<GameProvider>(),
+            collection:
+                context.read<FusionCollectionProvider>(),
+            pedia:
+                context.read<FusionPediaProvider>(),
+            homeSlots:
+                context.read<HomeSlotsProvider>(),
+          );
+        }
+      }
+
+      // ----------------------------
+      // CLOSE DIALOG
+      // ----------------------------
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
-    setState(() => _loading = false);
+
+    if (mounted) {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -40,18 +98,22 @@ class _LoginDialogState extends State<LoginDialog> {
         children: [
           TextField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration:
+                const InputDecoration(labelText: 'Email'),
           ),
           TextField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration:
+                const InputDecoration(labelText: 'Password'),
             obscureText: true,
           ),
         ],
       ),
       actions: [
         TextButton(
-          onPressed: _loading ? null : () => Navigator.of(context).pop(),
+          onPressed: _loading
+              ? null
+              : () => Navigator.of(context).pop(),
           child: const Text('Cancel'),
         ),
         ElevatedButton(
@@ -60,7 +122,8 @@ class _LoginDialogState extends State<LoginDialog> {
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child:
+                      CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Text('Login'),
         ),

@@ -1,3 +1,4 @@
+// main.dart
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -24,9 +25,9 @@ final bool kFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ----------------------------
+  // ---------------------------
   // HIVE INIT
-  // ----------------------------
+  // ---------------------------
   await Hive.initFlutter();
 
   Hive.registerAdapter(PokemonAdapter());
@@ -36,19 +37,20 @@ Future<void> main() async {
   Hive.registerAdapter(BallTypeAdapter());
 
   await Hive.openBox<Pokemon>('pokedex');
+  await Hive.openBox<HomeSlotsState>('home_slots'); // ✅ REQUIRED
 
-  // ----------------------------
+  // ---------------------------
   // FIREBASE INIT
-  // ----------------------------
+  // ---------------------------
   if (kFirebaseSupported) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
 
-  // ----------------------------
-  // INIT PROVIDERS (ORDER MATTERS)
-  // ----------------------------
+  // ---------------------------
+  // PROVIDERS
+  // ---------------------------
   final gameProvider = GameProvider();
   await gameProvider.init();
 
@@ -58,22 +60,21 @@ Future<void> main() async {
   final fusionCollectionProvider = FusionCollectionProvider();
   await fusionCollectionProvider.init(fusionPediaProvider);
 
-  // 🔥 BACKFILL PEDIA FROM INVENTORY (ONE-TIME SYNC)
-  fusionPediaProvider.syncFromInventory(fusionCollectionProvider.allFusions);
+  fusionPediaProvider.syncFromInventory(
+    fusionCollectionProvider.allFusions,
+  );
 
   final homeSlotsProvider = HomeSlotsProvider();
-  await homeSlotsProvider.init(inventory: fusionCollectionProvider.allFusions);
-
+  await homeSlotsProvider.init(
+    inventory: fusionCollectionProvider.allFusions,
+  );
   homeSlotsProvider.bindGameProvider(gameProvider);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: gameProvider),
-
-        // ✅ MUST BE ABOVE collection + screen usage
         ChangeNotifierProvider.value(value: fusionPediaProvider),
-
         ChangeNotifierProvider.value(value: fusionCollectionProvider),
         ChangeNotifierProvider(create: (_) => PokedexProvider()),
         ChangeNotifierProvider.value(value: homeSlotsProvider),
