@@ -10,12 +10,26 @@ class FusionCollectionProvider extends ChangeNotifier {
   late Box<FusionEntry> _box;
   late FusionPediaProvider _pedia;
 
+  // ----------------------------
+  // INIT
+  // ----------------------------
   Future<void> init(FusionPediaProvider pedia) async {
     _pedia = pedia;
     _box = await Hive.openBox<FusionEntry>(_boxName);
     notifyListeners();
   }
 
+  // ----------------------------
+  // RESET (LOGOUT / CLOUD RESTORE)
+  // ----------------------------
+  Future<void> resetToDefault() async {
+    await _box.clear();
+    notifyListeners();
+  }
+
+  // ----------------------------
+  // GETTERS
+  // ----------------------------
   List<FusionEntry> get fusions =>
       _box.values.toList().reversed.toList();
 
@@ -23,6 +37,9 @@ class FusionCollectionProvider extends ChangeNotifier {
   List<FusionEntry> get allFusions =>
       _box.values.toList();
 
+  // ----------------------------
+  // MUTATIONS
+  // ----------------------------
   void addFusion(FusionEntry fusion) {
     _box.add(fusion);
     _pedia.registerFusion(fusion);

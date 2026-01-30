@@ -43,6 +43,17 @@ class GameProvider extends ChangeNotifier {
   }
 
   // ----------------------------
+  // RESET (LOGOUT / CLOUD RESTORE)
+  // ----------------------------
+  Future<void> resetToDefault() async {
+    _state = GameState.initial();
+    _cloudOverwriteAllowed = false;
+
+    await _box.put('state', _state);
+    notifyListeners();
+  }
+
+  // ----------------------------
   // CLOUD OVERWRITE PERMISSION
   // ----------------------------
   bool get canOverwriteCloud => _cloudOverwriteAllowed;

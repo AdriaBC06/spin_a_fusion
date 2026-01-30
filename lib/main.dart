@@ -15,12 +15,14 @@ import 'core/hive/adapters/ball_type_adapter.dart';
 
 import 'providers/providers.dart';
 import 'providers/fusion_pedia_provider.dart';
+import 'providers/settings_provider.dart'; // ✅ ADDED
 import 'screens/screens.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-final bool kFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS;
+final bool kFirebaseSupported =
+    kIsWeb || Platform.isAndroid || Platform.isIOS;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,9 +37,10 @@ Future<void> main() async {
   Hive.registerAdapter(GameStateAdapter());
   Hive.registerAdapter(HomeSlotsStateAdapter());
   Hive.registerAdapter(BallTypeAdapter());
+  Hive.registerAdapter(SettingsStateAdapter()); // ✅ ADDED
 
   await Hive.openBox<Pokemon>('pokedex');
-  await Hive.openBox<HomeSlotsState>('home_slots'); // ✅ REQUIRED
+  await Hive.openBox<HomeSlotsState>('home_slots');
 
   // ---------------------------
   // FIREBASE INIT
@@ -57,8 +60,10 @@ Future<void> main() async {
   final fusionPediaProvider = FusionPediaProvider();
   await fusionPediaProvider.init();
 
-  final fusionCollectionProvider = FusionCollectionProvider();
-  await fusionCollectionProvider.init(fusionPediaProvider);
+  final fusionCollectionProvider =
+      FusionCollectionProvider();
+  await fusionCollectionProvider
+      .init(fusionPediaProvider);
 
   fusionPediaProvider.syncFromInventory(
     fusionCollectionProvider.allFusions,
@@ -70,20 +75,37 @@ Future<void> main() async {
   );
   homeSlotsProvider.bindGameProvider(gameProvider);
 
+  // ---------------------------
+  // SETTINGS PROVIDER (NEW)
+  // ---------------------------
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.init();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: gameProvider),
-        ChangeNotifierProvider.value(value: fusionPediaProvider),
-        ChangeNotifierProvider.value(value: fusionCollectionProvider),
-        ChangeNotifierProvider(create: (_) => PokedexProvider()),
-        ChangeNotifierProvider.value(value: homeSlotsProvider),
+        ChangeNotifierProvider.value(
+            value: fusionPediaProvider),
+        ChangeNotifierProvider.value(
+            value: fusionCollectionProvider),
+        ChangeNotifierProvider(
+            create: (_) => PokedexProvider()),
+        ChangeNotifierProvider.value(
+            value: homeSlotsProvider),
+
+        // 🔔 SETTINGS (VIBRATION TOGGLE)
+        ChangeNotifierProvider.value(
+            value: settingsProvider),
       ],
       child: const MyApp(),
     ),
   );
 }
 
+// ------------------------------------------------------
+// ROOT APP
+// ------------------------------------------------------
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

@@ -8,10 +8,11 @@ import '../auth/register_dialog.dart';
 import '../providers/game_provider.dart';
 import '../providers/fusion_collection_provider.dart';
 import '../providers/fusion_pedia_provider.dart';
-
 import '../providers/home_slots_provider.dart';
+
 import '../services/firebase_sync_service.dart';
 import '../widgets/confirm_cloud_overwrite_dialog.dart';
+import '../widgets/settings_panel.dart';
 
 class ProfileMenu extends StatefulWidget {
   const ProfileMenu({super.key});
@@ -61,11 +62,10 @@ class _ProfileMenuState extends State<ProfileMenu>
   }
 
   // ------------------------------------------------------
-  // SYNC → OVERWRITE CLOUD (EXPLICIT)
+  // SYNC → CLOUD (OVERWRITE)
   // ------------------------------------------------------
-  Future<void> _syncNow() async {
+  Future<void> _syncToCloud() async {
     final confirmed = await showConfirmCloudOverwriteDialog(context);
-
     if (confirmed != true) {
       _closeMenu();
       return;
@@ -91,6 +91,45 @@ class _ProfileMenuState extends State<ProfileMenu>
     _closeMenu();
   }
 
+  // ------------------------------------------------------
+  // LOGOUT (FULL LOCAL RESET)
+  // ------------------------------------------------------
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text(
+          'This will log you out and reset all local progress on this device.\n\n'
+          'Cloud data will NOT be affected.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      _closeMenu();
+      return;
+    }
+
+    await context.read<GameProvider>().resetToDefault();
+    await context.read<FusionCollectionProvider>().resetToDefault();
+    await context.read<FusionPediaProvider>().resetToDefault();
+    await context.read<HomeSlotsProvider>().resetToDefault();
+
+    await FirebaseAuth.instance.signOut();
+    _closeMenu();
+  }
+
   OverlayEntry _createOverlay(User? user) {
     final renderBox = context.findRenderObject() as RenderBox;
     final offset = renderBox.localToGlobal(Offset.zero);
@@ -99,7 +138,7 @@ class _ProfileMenuState extends State<ProfileMenu>
     final List<_ProfileMenuItem> items = [];
 
     if (user == null) {
-      items.add(
+      items.addAll([
         _ProfileMenuItem(
           icon: Icons.login,
           title: 'Login',
@@ -113,9 +152,6 @@ class _ProfileMenuState extends State<ProfileMenu>
             _closeMenu();
           },
         ),
-      );
-
-      items.add(
         _ProfileMenuItem(
           icon: Icons.person_add,
           title: 'Create account',
@@ -129,33 +165,26 @@ class _ProfileMenuState extends State<ProfileMenu>
             _closeMenu();
           },
         ),
-      );
+      ]);
     } else {
-      items.add(
+      items.addAll([
         _ProfileMenuItem(
           icon: Icons.cloud_upload,
           title: 'Sync to Cloud',
-          onTap: _syncNow,
+          onTap: _syncToCloud,
         ),
-      );
-
-      items.add(
-        _ProfileMenuItem(
-          icon: Icons.logout,
-          title: 'Logout',
-          onTap: () async {
-            await FirebaseAuth.instance.signOut();
-            _closeMenu();
-          },
-        ),
-      );
+        _ProfileMenuItem(icon: Icons.logout, title: 'Logout', onTap: _logout),
+      ]);
     }
 
     items.addAll([
       _ProfileMenuItem(
         icon: Icons.settings,
         title: 'Settings',
-        onTap: _closeMenu,
+        onTap: () {
+          _closeMenu();
+          showDialog(context: context, builder: (_) => const SettingsPanel());
+        },
       ),
       _ProfileMenuItem(
         icon: Icons.info_outline,
@@ -175,7 +204,7 @@ class _ProfileMenuState extends State<ProfileMenu>
           Positioned(
             top: offset.dy + size.height + 6,
             right: 12,
-            width: 200,
+            width: 220,
             child: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(12),

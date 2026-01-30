@@ -39,10 +39,9 @@ class HomeSlotsProvider extends ChangeNotifier {
   }) async {
     _box = await Hive.openBox<HomeSlotsState>(_boxName);
 
-    final savedState = _box.get(_stateKey);
-
-    if (savedState != null) {
-      _state = savedState;
+    final saved = _box.get(_stateKey);
+    if (saved != null) {
+      _state = saved;
     } else {
       _state = HomeSlotsState.empty(totalSlots);
       await _box.put(_stateKey, _state);
@@ -63,6 +62,15 @@ class HomeSlotsProvider extends ChangeNotifier {
 
   void bindGameProvider(GameProvider game) {
     _game = game;
+  }
+
+  // ----------------------------
+  // RESET (LOGOUT / CLOUD RESTORE)
+  // ----------------------------
+  Future<void> resetToDefault() async {
+    _state = HomeSlotsState.empty(totalSlots);
+    await _box.put(_stateKey, _state);
+    notifyListeners();
   }
 
   void _save() {

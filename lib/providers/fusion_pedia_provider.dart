@@ -7,8 +7,19 @@ class FusionPediaProvider extends ChangeNotifier {
 
   late Box<FusionEntry> _box;
 
+  // ----------------------------
+  // INIT
+  // ----------------------------
   Future<void> init() async {
     _box = await Hive.openBox<FusionEntry>(_boxName);
+    notifyListeners();
+  }
+
+  // ----------------------------
+  // RESET (LOGOUT / CLOUD RESTORE)
+  // ----------------------------
+  Future<void> resetToDefault() async {
+    await _box.clear();
     notifyListeners();
   }
 
@@ -24,7 +35,7 @@ class FusionPediaProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 🔥 NEW: ensure inventory fusions exist in pedia
+  /// 🔥 Ensure inventory fusions exist in pedia
   void syncFromInventory(List<FusionEntry> inventory) {
     bool changed = false;
 

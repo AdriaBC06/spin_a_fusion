@@ -1,25 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers/pokedex_provider.dart';
+import '../providers/game_provider.dart';
+import '../providers/fusion_collection_provider.dart';
+import '../providers/fusion_pedia_provider.dart';
+import '../providers/home_slots_provider.dart';
+
+import '../services/firebase_restore_service.dart';
+import '../widgets/confirm_restore_from_cloud_dialog.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
 
   @override
-  State<LoadingScreen> createState() =>
-      _LoadingScreenState();
+  State<LoadingScreen> createState() => _LoadingScreenState();
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
+  bool _restoreChecked = false;
+
   @override
   void initState() {
     super.initState();
 
-    // Load Pokédex once
     Future.microtask(() {
       context.read<PokedexProvider>().initialize();
     });
+  }
+
+  Future<void> _maybeRestoreFromCloud() async {
+    if (_restoreChecked) return;
+    _restoreChecked = true;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final restoreService = FirebaseRestoreService();
+    final cloud = await restoreService.fetchCloud();
+    if (cloud == null) return;
+
+    final cloudPlaytime = cloud['playTimeSeconds'] ?? 0;
+    final localPlaytime =
+        context.read<GameProvider>().playTimeSeconds;
+
+    if (cloudPlaytime <= localPlaytime) return;
+
+    final confirmed =
+        await showConfirmRestoreFromCloudDialog(context);
+
+    if (confirmed != true) return;
+
+    await context.read<GameProvider>().resetToDefault();
+    await context.read<FusionCollectionProvider>().resetToDefault();
+    await context.read<FusionPediaProvider>().resetToDefault();
+    await context.read<HomeSlotsProvider>().resetToDefault();
+
+    await restoreService.restoreFromCloud(
+      cloud: cloud,
+      game: context.read<GameProvider>(),
+      collection: context.read<FusionCollectionProvider>(),
+      pedia: context.read<FusionPediaProvider>(),
+      homeSlots: context.read<HomeSlotsProvider>(),
+    );
   }
 
   @override
@@ -27,13 +71,19 @@ class _LoadingScreenState extends State<LoadingScreen> {
     final pokedex = context.watch<PokedexProvider>();
 
     if (pokedex.isLoaded) {
-      return const _GoToHome();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeRestoreFromCloud().then((_) {
+          Navigator.of(context)
+              .pushReplacementNamed('/home');
+        });
+      });
+
+      return const SizedBox.shrink();
     }
 
     return Scaffold(
       body: Stack(
         children: [
-          // Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -43,8 +93,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
               ),
             ),
           ),
-
-          // Loading bar
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -76,19 +124,5 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ],
       ),
     );
-  }
-}
-
-class _GoToHome extends StatelessWidget {
-  const _GoToHome();
-
-  @override
-  Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context)
-          .pushReplacementNamed('/home');
-    });
-
-    return const SizedBox.shrink();
   }
 }
