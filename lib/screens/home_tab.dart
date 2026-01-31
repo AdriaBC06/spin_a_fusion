@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/widgets.dart';
+import '../features/home/widgets/home_slots_grid.dart';
+import '../features/shop/widgets/inventory_section.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
