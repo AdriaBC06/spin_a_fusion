@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../providers/home_slots_provider.dart';
-import '../services/firebase_restore_service.dart';
-import '../services/firebase_sync_service.dart';
-import '../providers/game_provider.dart';
-import '../providers/fusion_collection_provider.dart';
-import '../providers/fusion_pedia_provider.dart';
+import '../../../providers/home_slots_provider.dart';
+import 'firebase_restore_service.dart';
+import 'firebase_sync_service.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
 
 enum CloudDecision { useLocal, useCloud, autoLocal, autoUploadLocal }
 

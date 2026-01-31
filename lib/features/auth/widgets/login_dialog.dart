@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'auth_service.dart';
+import '../service/auth_service.dart';
 
-import '../services/firebase_restore_service.dart';
-import '../widgets/cloud_restore_dialog.dart';
+import '../../cloud/services/firebase_restore_service.dart';
+import '../../cloud/widgets/cloud_restore_dialog.dart';
 
-import '../providers/game_provider.dart';
-import '../providers/fusion_collection_provider.dart';
-import '../providers/fusion_pedia_provider.dart';
-import '../providers/home_slots_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/home_slots_provider.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});

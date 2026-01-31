@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 import '../models/fusion_entry.dart';
 import '../models/home_slots_state.dart';
 import 'game_provider.dart';
-import '../economy/fusion_economy.dart';
+import '../features/fusion/fusion_economy.dart';
 
 class HomeSlotsProvider extends ChangeNotifier {
   // ----------------------------

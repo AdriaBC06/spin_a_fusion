@@ -51,7 +51,6 @@ class Pokemon {
     required this.catchRate,
   });
 
-  /// ✅ DERIVED VALUE (KEEP THIS)
   int get totalStats =>
       hp + attack + defense + specialAttack + specialDefense + speed;
 

@@ -7,9 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:spin_a_fusion/providers/home_slots_provider.dart';
 
-import '../../services/firebase_trade_service.dart';
-import '../../providers/fusion_collection_provider.dart';
-import '../../models/fusion_entry.dart';
+import '../services/firebase_trade_service.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../models/fusion_entry.dart';
 import 'fusion_picker_dialog.dart';
 
 class SendFusionFlow extends StatefulWidget {

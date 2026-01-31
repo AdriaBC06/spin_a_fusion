@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 
-import '../../services/firebase_trade_service.dart';
-import '../../providers/fusion_collection_provider.dart';
-import '../../providers/settings_provider.dart';
-import '../../models/fusion_entry.dart';
-import '../../models/pokemon.dart';
-import '../../core/constants/pokedex_constants.dart';
+import '../services/firebase_trade_service.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/settings_provider.dart';
+import '../../../models/fusion_entry.dart';
+import '../../../models/pokemon.dart';
+import '../../../core/constants/pokedex_constants.dart';
 import 'trade_qr_widget.dart';
 
 class ReceiveFusionScreen extends StatefulWidget {

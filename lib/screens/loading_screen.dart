@@ -8,8 +8,8 @@ import '../providers/fusion_collection_provider.dart';
 import '../providers/fusion_pedia_provider.dart';
 import '../providers/home_slots_provider.dart';
 
-import '../services/firebase_restore_service.dart';
-import '../widgets/confirm_restore_from_cloud_dialog.dart';
+import '../features/cloud/services/firebase_restore_service.dart';
+import '../features/cloud/widgets/confirm_restore_from_cloud_dialog.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});

@@ -14,7 +14,6 @@ class GameState {
   @HiveField(2)
   Map<BallType, int> balls;
 
-  // ⏱️ NUEVO: tiempo jugado en segundos
   @HiveField(3)
   int playTimeSeconds;
 

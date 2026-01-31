@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 import '../models/pokemon.dart';
-import '../services/pokemon_service.dart';
+import '../features/pokemon/services/pokemon_service.dart';
 import '../core/constants/pokedex_constants.dart';
 import '../core/constants/fusion_pokemon_list.dart';
 

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../models/fusion_entry.dart';
 import '../../../providers/home_slots_provider.dart';
-import '../../../economy/fusion_economy.dart';
+import '../../fusion/fusion_economy.dart';
 import '../../shared/floating_money_text.dart';
 import '../../fusion/widgets/fusion_summary_modal.dart';
 

@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../core/constants/pokedex_constants.dart';
-import '../models/fusion_entry.dart';
-import '../providers/fusion_collection_provider.dart';
+import '../../../core/constants/pokedex_constants.dart';
+import '../../../models/fusion_entry.dart';
+import '../../../providers/fusion_collection_provider.dart';
 
 /// ------------------------------------------------------
 /// TRADE SESSION DATA

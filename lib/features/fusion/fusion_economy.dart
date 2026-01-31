@@ -1,5 +1,5 @@
 import 'dart:math';
-import '../models/fusion_entry.dart';
+import '../../models/fusion_entry.dart';
 
 class FusionEconomy {
   static const int baseValue = 500;

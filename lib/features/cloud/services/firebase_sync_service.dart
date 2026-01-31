@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../providers/game_provider.dart';
-import '../providers/fusion_collection_provider.dart';
-import '../providers/fusion_pedia_provider.dart';
-import '../providers/home_slots_provider.dart';
-import '../core/constants/pokedex_constants.dart';
-import '../models/fusion_entry.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/home_slots_provider.dart';
+import '../../../core/constants/pokedex_constants.dart';
+import '../../../models/fusion_entry.dart';
 
 class FirebaseSyncService {
   final FirebaseFirestore _firestore =
