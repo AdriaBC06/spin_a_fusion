@@ -1,31 +1,29 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 import '../../models/spin_data.dart';
-import 'fusion_roulette_tile.dart';
-import '../../../../providers/settings_provider.dart';
+import 'spin_roulette_tile.dart';
 
-class FusionRoulette extends StatefulWidget {
+class SpinRoulette extends StatefulWidget {
   final AnimationController controller;
   final SpinData data;
-  final bool enableHaptics;
+  final bool hapticsEnabled;
 
-  const FusionRoulette({
+  const SpinRoulette({
     super.key,
     required this.controller,
     required this.data,
-    this.enableHaptics = true,
+    required this.hapticsEnabled,
   });
 
   static const double itemWidth = 120;
 
   @override
-  State<FusionRoulette> createState() => _FusionRouletteState();
+  State<SpinRoulette> createState() => _SpinRouletteState();
 }
 
-class _FusionRouletteState extends State<FusionRoulette> {
+class _SpinRouletteState extends State<SpinRoulette> {
   int? _lastCenterIndex;
   int _lastVibrationMs = 0;
 
@@ -44,29 +42,21 @@ class _FusionRouletteState extends State<FusionRoulette> {
   }
 
   void _handleTick() {
-    if (!widget.enableHaptics) return;
-
-    final settings = context.read<SettingsProvider>();
-    if (!settings.vibrationEnabled) return;
+    if (!widget.hapticsEnabled) return;
 
     final data = widget.data;
     final controller = widget.controller;
 
-    final eased =
-        Curves.easeOutQuart.transform(controller.value);
+    final eased = Curves.easeOutQuart.transform(controller.value);
 
-    final start =
-        data.startIndex * FusionRoulette.itemWidth;
-    final end =
-        data.resultIndex * FusionRoulette.itemWidth;
+    final start = data.startIndex * SpinRoulette.itemWidth;
+    final end = data.resultIndex * SpinRoulette.itemWidth;
 
-    final scrollOffset =
-        lerpDouble(start, end, eased)!;
+    final scrollOffset = lerpDouble(start, end, eased)!;
 
     // 🎯 VISUAL CENTER INDEX (DIRECTION SAFE)
     final centerIndex =
-        ((scrollOffset + FusionRoulette.itemWidth / 2) /
-                FusionRoulette.itemWidth)
+        ((scrollOffset + SpinRoulette.itemWidth / 2) / SpinRoulette.itemWidth)
             .floor()
             .clamp(0, data.items.length - 1);
 
@@ -95,12 +85,10 @@ class _FusionRouletteState extends State<FusionRoulette> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final centerOffset =
-                (constraints.maxWidth - FusionRoulette.itemWidth) / 2;
+                (constraints.maxWidth - SpinRoulette.itemWidth) / 2;
 
-            final start =
-                widget.data.startIndex * FusionRoulette.itemWidth;
-            final end =
-                widget.data.resultIndex * FusionRoulette.itemWidth;
+            final start = widget.data.startIndex * SpinRoulette.itemWidth;
+            final end = widget.data.resultIndex * SpinRoulette.itemWidth;
 
             return AnimatedBuilder(
               animation: widget.controller,
@@ -109,8 +97,7 @@ class _FusionRouletteState extends State<FusionRoulette> {
                   widget.controller.value,
                 );
 
-                final dx =
-                    centerOffset - lerpDouble(start, end, eased)!;
+                final dx = centerOffset - lerpDouble(start, end, eased)!;
 
                 return ClipRect(
                   child: SizedBox(
@@ -128,25 +115,17 @@ class _FusionRouletteState extends State<FusionRoulette> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: widget.data.items
-                                  .map(
-                                    (p) => FusionRouletteTile(
-                                      pokemon: p,
-                                    ),
-                                  )
+                                  .map((p) => SpinRouletteTile(pokemon: p))
                                   .toList(),
                             ),
                           ),
                         ),
                         Container(
-                          width: FusionRoulette.itemWidth,
+                          width: SpinRoulette.itemWidth,
                           height: 150,
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.amber,
-                              width: 3,
-                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.amber, width: 3),
                           ),
                         ),
                       ],

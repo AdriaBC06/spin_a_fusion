@@ -7,6 +7,7 @@ import '../../../providers/fusion_collection_provider.dart';
 import '../../../models/fusion_entry.dart';
 import '../../../widgets/widgets.dart';
 import '../../../core/constants/pokedex_constants.dart';
+import '../widgets/fusion_spin_dialog/fusion_spin_dialog_widget.dart';
 
 class FusionSpinService {
   static Future<void> open({

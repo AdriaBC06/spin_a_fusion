@@ -15,7 +15,7 @@ import 'core/hive/adapters/ball_type_adapter.dart';
 
 import 'providers/providers.dart';
 import 'providers/fusion_pedia_provider.dart';
-import 'providers/settings_provider.dart'; // ✅ ADDED
+import 'providers/settings_provider.dart';
 import 'screens/screens.dart';
 
 import 'package:firebase_core/firebase_core.dart';

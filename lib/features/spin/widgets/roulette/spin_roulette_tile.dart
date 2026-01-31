@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../models/pokemon.dart';
 
-class FusionRouletteTile extends StatelessWidget {
+class SpinRouletteTile extends StatelessWidget {
   final Pokemon pokemon;
 
-  const FusionRouletteTile({super.key, required this.pokemon});
+  const SpinRouletteTile({super.key, required this.pokemon});
 
   @override
   Widget build(BuildContext context) {

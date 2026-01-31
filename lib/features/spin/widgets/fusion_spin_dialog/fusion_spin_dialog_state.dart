@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../models/pokemon.dart';
-import '../shared/fusion_overlay.dart';
-import '../roulette/fusion_roulette_widget.dart';
 import '../../models/spin_data.dart';
+import '../roulette/spin_roulette_widget.dart';
+import '../shared/fusion_overlay.dart';
 import 'fusion_spin_dialog_widget.dart';
+import '../../../../providers/settings_provider.dart';
 
 class FusionSpinDialogState extends State<FusionSpinDialog>
     with TickerProviderStateMixin {
@@ -60,6 +63,9 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   int _lastMergeVibrationMs = 0;
   bool _fusionImpactTriggered = false;
 
+  bool get _hapticsEnabled =>
+      context.read<SettingsProvider>().vibrationEnabled;
+
   // --------------------------------------------------
   // LIFECYCLE
   // --------------------------------------------------
@@ -96,25 +102,17 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   // INITIALIZATION
   // --------------------------------------------------
   void _initControllers() {
-    _spinControllerTop = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    );
+    _spinControllerTop =
+        AnimationController(vsync: this, duration: const Duration(seconds: 6));
 
-    _spinControllerBottom = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    );
+    _spinControllerBottom =
+        AnimationController(vsync: this, duration: const Duration(seconds: 6));
 
-    _mergeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
+    _mergeController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
 
-    _fusionController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
+    _fusionController =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
   }
 
   void _initAnimations() {
@@ -122,15 +120,13 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
       CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
     );
 
-    _mergeScale = Tween(
-      begin: 1.0,
-      end: 0.7,
-    ).animate(CurvedAnimation(parent: _mergeController, curve: Curves.easeIn));
+    _mergeScale = Tween(begin: 1.0, end: 0.7).animate(
+      CurvedAnimation(parent: _mergeController, curve: Curves.easeIn),
+    );
 
-    _mergeBrightness = Tween(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _mergeController, curve: Curves.easeIn));
+    _mergeBrightness = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _mergeController, curve: Curves.easeIn),
+    );
 
     _moveUp = Tween(begin: const Offset(0, -1.2), end: Offset.zero).animate(
       CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
@@ -163,6 +159,7 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   // --------------------------------------------------
   void _handleMergeHaptics() {
     if (!_mergeController.isAnimating) return;
+    if (!_hapticsEnabled) return;
 
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastMergeVibrationMs < 120) return;
@@ -173,6 +170,7 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
 
   void _handleFusionHaptics() {
     if (_fusionImpactTriggered) return;
+    if (!_hapticsEnabled) return;
 
     if (_fusionController.value > 0.05) {
       _fusionImpactTriggered = true;
@@ -190,9 +188,10 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
       _playController(_spinControllerBottom),
     ]);
 
-    // Final spin stop impact
-    HapticFeedback.vibrate();
-    Future.delayed(const Duration(milliseconds: 40), HapticFeedback.vibrate);
+    if (_hapticsEnabled) {
+      HapticFeedback.vibrate();
+      Future.delayed(const Duration(milliseconds: 40), HapticFeedback.vibrate);
+    }
 
     setState(() {
       _showSpin = false;
@@ -228,7 +227,11 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   // --------------------------------------------------
   // SPIN DATA
   // --------------------------------------------------
-  SpinData _buildSpinData(Pokemon result, Random rng, {bool reverse = false}) {
+  SpinData _buildSpinData(
+    Pokemon result,
+    Random rng, {
+    bool reverse = false,
+  }) {
     final coreCount = 15 + rng.nextInt(6);
 
     final pool = List<Pokemon>.from(widget.allPokemon)
@@ -237,10 +240,8 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
 
     final before = pool.take(spinBufferSize).toList();
     final core = pool.skip(spinBufferSize).take(coreCount).toList();
-    final after = pool
-        .skip(spinBufferSize + coreCount)
-        .take(spinBufferSize)
-        .toList();
+    final after =
+        pool.skip(spinBufferSize + coreCount).take(spinBufferSize).toList();
 
     var items = [...before, ...core, result, ...after];
     var resultIndex = before.length + core.length;
@@ -265,6 +266,9 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
+    final hapticsEnabled =
+        context.watch<SettingsProvider>().vibrationEnabled;
+
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -273,16 +277,16 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FusionRoulette(
+                SpinRoulette(
                   controller: _spinControllerTop,
                   data: _topSpin,
-                  enableHaptics: true,
+                  hapticsEnabled: hapticsEnabled,
                 ),
                 const SizedBox(height: 24),
-                FusionRoulette(
+                SpinRoulette(
                   controller: _spinControllerBottom,
                   data: _bottomSpin,
-                  enableHaptics: true,
+                  hapticsEnabled: hapticsEnabled,
                 ),
               ],
             ),
