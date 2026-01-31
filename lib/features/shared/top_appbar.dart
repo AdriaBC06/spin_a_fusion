@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'money_counter.dart';
 import 'diamond_counter.dart';
-import 'profile_menu.dart';
+import '../profile/widgets/profile_menu.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
   const TopAppBar({super.key});

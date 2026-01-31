@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/fusion_pedia_provider.dart';
-import '../widgets/pedia_fusion_tile.dart';
+import '../features/fusion/widgets/pedia_fusion_tile.dart';
 
 class PediaScreen extends StatelessWidget {
   const PediaScreen({super.key});

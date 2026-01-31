@@ -5,7 +5,7 @@ import '../models/fusion_entry.dart';
 import '../providers/fusion_collection_provider.dart';
 import '../providers/home_slots_provider.dart';
 import '../economy/fusion_economy.dart';
-import '../widgets/fusion_inventory_card.dart';
+import '../features/fusion/widgets/fusion_inventory_card.dart';
 
 class FusionScreen extends StatelessWidget {
   const FusionScreen({super.key});

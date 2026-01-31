@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/game_provider.dart';
+import '../../providers/game_provider.dart';
 
 class MoneyCounter extends StatelessWidget {
   const MoneyCounter({super.key});

@@ -3,19 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:spin_a_fusion/widgets/trade/receive_fusion_screen.dart';
 
-import '../auth/login_dialog.dart';
-import '../auth/register_dialog.dart';
+import '../../../auth/login_dialog.dart';
+import '../../../auth/register_dialog.dart';
 
-import '../providers/game_provider.dart';
-import '../providers/fusion_collection_provider.dart';
-import '../providers/fusion_pedia_provider.dart';
-import '../providers/home_slots_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/home_slots_provider.dart';
 
-import '../services/firebase_sync_service.dart';
-import '../widgets/confirm_cloud_overwrite_dialog.dart';
-import '../widgets/settings_panel.dart';
+import '../../../services/firebase_sync_service.dart';
+import '../../../widgets/confirm_cloud_overwrite_dialog.dart';
+import 'settings_panel.dart';
 
-import 'trade/send_fusion_flow.dart';
+import '../../../widgets/trade/send_fusion_flow.dart';
 
 class ProfileMenu extends StatefulWidget {
   const ProfileMenu({super.key});

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/fusion_entry.dart';
-import '../providers/home_slots_provider.dart';
-import '../providers/fusion_collection_provider.dart';
-import '../providers/game_provider.dart';
-import '../economy/fusion_economy.dart';
+import '../../../models/fusion_entry.dart';
+import '../../../providers/home_slots_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../economy/fusion_economy.dart';
 import 'fusion_summary_modal.dart';
 
 class FusionInventoryCard extends StatelessWidget {

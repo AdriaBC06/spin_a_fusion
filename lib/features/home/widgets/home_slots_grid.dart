@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/home_slots_provider.dart';
+import '../../../providers/home_slots_provider.dart';
 import 'home_slot_tile.dart';
 
 class HomeSlotsGrid extends StatelessWidget {

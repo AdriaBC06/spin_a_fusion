@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/game_provider.dart';
-import '../widgets/shop_ball_card.dart';
+import '../features/shop/widgets/shop_ball_card.dart';
 import '../core/constants/pokedex_constants.dart';
 
 class ShopScreen extends StatelessWidget {

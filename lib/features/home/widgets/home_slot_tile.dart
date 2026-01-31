@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/fusion_entry.dart';
-import '../providers/home_slots_provider.dart';
-import '../economy/fusion_economy.dart';
-import 'floating_money_text.dart';
-import 'fusion_summary_modal.dart';
+import '../../../models/fusion_entry.dart';
+import '../../../providers/home_slots_provider.dart';
+import '../../../economy/fusion_economy.dart';
+import '../../shared/floating_money_text.dart';
+import '../../fusion/widgets/fusion_summary_modal.dart';
 
 class HomeSlotTile extends StatefulWidget {
   final int index;

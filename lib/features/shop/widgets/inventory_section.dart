@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/game_provider.dart';
-import '../features/spin/services/fusion_spin_service.dart';
+import '../../../providers/game_provider.dart';
+import '../../spin/services/fusion_spin_service.dart';
 import 'inventory_ball_card.dart';
-import '../core/constants/pokedex_constants.dart';
+import '../../../core/constants/pokedex_constants.dart';
 
 class InventorySection extends StatelessWidget {
   const InventorySection({super.key});

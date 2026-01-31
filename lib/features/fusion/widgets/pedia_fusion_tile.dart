@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/fusion_entry.dart';
+import '../../../models/fusion_entry.dart';
 import 'fusion_summary_modal.dart';
 
 class PediaFusionTile extends StatelessWidget {

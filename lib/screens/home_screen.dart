@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/widgets.dart';
+import '../features/shared/custom_bottom_bar.dart';
+import '../features/shared/top_appbar.dart';
 import 'home_tab.dart';
 import 'screens.dart';
 

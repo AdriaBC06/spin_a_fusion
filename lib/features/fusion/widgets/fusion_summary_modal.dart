@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../models/fusion_entry.dart';
-import '../models/pokemon.dart';
+import '../../../models/fusion_entry.dart';
+import '../../../models/pokemon.dart';
 
 class FusionSummaryModal extends StatelessWidget {
   final FusionEntry fusion;

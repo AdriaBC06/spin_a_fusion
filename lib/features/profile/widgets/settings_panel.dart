@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/settings_provider.dart';
+import '../../../providers/settings_provider.dart';
 
 class SettingsPanel extends StatefulWidget {
   const SettingsPanel({super.key});
