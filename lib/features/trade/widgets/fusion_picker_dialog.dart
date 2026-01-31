@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/fusion_collection_provider.dart';
-import '../../models/fusion_entry.dart';
+import '../../../providers/fusion_collection_provider.dart';
 
 class FusionPickerDialog extends StatelessWidget {
   const FusionPickerDialog({super.key});
