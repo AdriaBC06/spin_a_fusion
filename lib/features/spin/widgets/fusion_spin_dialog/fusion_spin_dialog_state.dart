@@ -4,14 +4,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../models/pokemon.dart';
-import '../../constants/pokedex_constants.dart';
-import 'fusion_overlay.dart';
-import 'roulette/fusion_roulette_widget.dart';
-import 'roulette/spin_data.dart';
-import 'fusion_lootbox_widget.dart';
+import '../../../../models/pokemon.dart';
+import '../../../../core/constants/pokedex_constants.dart';
+import '../../../../widgets/fusion_lootbox/fusion_overlay.dart';
+import '../roulette/fusion_roulette_widget.dart';
+import '../../models/spin_data.dart';
+import 'fusion_spin_dialog_widget.dart';
 
-class FusionLootboxState extends State<FusionLootbox>
+class FusionSpinDialogState extends State<FusionSpinDialog>
     with TickerProviderStateMixin {
   static const int bufferSize = 20;
 

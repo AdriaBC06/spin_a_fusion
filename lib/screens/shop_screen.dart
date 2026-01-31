@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/game_provider.dart';
 import '../widgets/shop_ball_card.dart';
-import '../constants/pokedex_constants.dart';
+import '../core/constants/pokedex_constants.dart';
 
 class ShopScreen extends StatelessWidget {
   const ShopScreen({super.key});

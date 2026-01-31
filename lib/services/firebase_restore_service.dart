@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
 
-import '../constants/pokedex_constants.dart';
+import '../core/constants/pokedex_constants.dart';
 import '../models/fusion_entry.dart';
 import '../models/pokemon.dart';
 import '../providers/game_provider.dart';

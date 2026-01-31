@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/game_provider.dart';
-import '../services/lootbox_service.dart';
+import '../features/spin/services/fusion_spin_service.dart';
 import 'inventory_ball_card.dart';
-import '../constants/pokedex_constants.dart';
+import '../core/constants/pokedex_constants.dart';
 
 class InventorySection extends StatelessWidget {
   const InventorySection({super.key});
@@ -28,7 +28,7 @@ class InventorySection extends StatelessWidget {
             name: 'Poké Ball',
             color: Colors.red,
             amount: game.ballCount(BallType.poke),
-            onOpen: () => LootboxService.open(
+            onOpen: () => FusionSpinService.open(
               context: context,
               ball: BallType.poke,
             ),
@@ -37,7 +37,7 @@ class InventorySection extends StatelessWidget {
             name: 'Super Ball',
             color: Colors.blue,
             amount: game.ballCount(BallType.superBall),
-            onOpen: () => LootboxService.open(
+            onOpen: () => FusionSpinService.open(
               context: context,
               ball: BallType.superBall,
             ),
@@ -46,7 +46,7 @@ class InventorySection extends StatelessWidget {
             name: 'Ultra Ball',
             color: Colors.amber,
             amount: game.ballCount(BallType.ultra),
-            onOpen: () => LootboxService.open(
+            onOpen: () => FusionSpinService.open(
               context: context,
               ball: BallType.ultra,
             ),
@@ -55,7 +55,7 @@ class InventorySection extends StatelessWidget {
             name: 'Master Ball',
             color: Colors.purple,
             amount: game.ballCount(BallType.master),
-            onOpen: () => LootboxService.open(
+            onOpen: () => FusionSpinService.open(
               context: context,
               ball: BallType.master,
             ),

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import '../constants/pokedex_constants.dart';
+import '../core/constants/pokedex_constants.dart';
 import '../models/game_state.dart';
 
 class GameProvider extends ChangeNotifier {

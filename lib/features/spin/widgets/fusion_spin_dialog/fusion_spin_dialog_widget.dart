@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../models/pokemon.dart';
-import 'fusion_lootbox_state.dart';
-import '../../constants/pokedex_constants.dart';
+import '../../../../models/pokemon.dart';
+import 'fusion_spin_dialog_state.dart';
+import '../../../../core/constants/pokedex_constants.dart';
 
-class FusionLootbox extends StatefulWidget {
+class FusionSpinDialog extends StatefulWidget {
   final List<Pokemon> allPokemon;
   final Pokemon result1;
   final Pokemon result2;
   final BallType ball;
   final VoidCallback onFinished;
 
-  const FusionLootbox({
+  const FusionSpinDialog({
     super.key,
     required this.allPokemon,
     required this.result1,
@@ -20,5 +20,5 @@ class FusionLootbox extends StatefulWidget {
   });
 
   @override
-  FusionLootboxState createState() => FusionLootboxState();
+  FusionSpinDialogState createState() => FusionSpinDialogState();
 }

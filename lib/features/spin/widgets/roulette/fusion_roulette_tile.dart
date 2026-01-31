@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/pokemon.dart';
+import '../../../../models/pokemon.dart';
 
 class FusionRouletteTile extends StatelessWidget {
   final Pokemon pokemon;

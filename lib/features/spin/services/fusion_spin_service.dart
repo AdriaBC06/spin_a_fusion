@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/pokedex_provider.dart';
-import '../providers/game_provider.dart';
-import '../providers/fusion_collection_provider.dart';
-import '../models/fusion_entry.dart';
-import '../widgets/widgets.dart';
-import '../constants/pokedex_constants.dart';
+import '../../../providers/pokedex_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../models/fusion_entry.dart';
+import '../../../widgets/widgets.dart';
+import '../../../core/constants/pokedex_constants.dart';
 
-class LootboxService {
+class FusionSpinService {
   static Future<void> open({
     required BuildContext context,
     required BallType ball,
@@ -41,7 +41,7 @@ class LootboxService {
       barrierDismissible: false,
       barrierColor: Colors.black26,
       builder: (_) {
-        return FusionLootbox(
+        return FusionSpinDialog(
           allPokemon: pool,
           result1: p1,
           result2: p2,

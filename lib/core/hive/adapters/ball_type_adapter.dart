@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../../../constants/pokedex_constants.dart';
+import '../../constants/pokedex_constants.dart';
 
 class BallTypeAdapter extends TypeAdapter<BallType> {
   @override

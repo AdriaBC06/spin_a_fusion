@@ -4,7 +4,7 @@ export 'money_counter.dart';
 export 'shop_ball_card.dart';
 export 'inventory_ball_card.dart';
 export 'fusion_inventory_card.dart';
-export 'fusion_lootbox/fusion_lootbox.dart';
+export '../features/spin/widgets/fusion_spin_dialog/fusion_spin_dialog.dart';
 export 'inventory_section.dart';
 export 'home_slot_tile.dart';
 export 'home_slots_grid.dart';

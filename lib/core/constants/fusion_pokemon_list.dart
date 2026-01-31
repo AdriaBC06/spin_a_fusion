@@ -1,12 +1,3 @@
-const int expectedPokemonCount = 30;
-
-enum BallType {
-  poke,
-  superBall,
-  ultra,
-  master,
-}
-
 const List<Map<String, dynamic>> fusionPokemonList = [
   {"fusionId": 1, "name": "bulbasaur"},
   {"fusionId": 2, "name": "ivysaur"},

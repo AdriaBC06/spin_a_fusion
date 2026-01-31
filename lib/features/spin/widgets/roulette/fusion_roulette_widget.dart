@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'spin_data.dart';
+import '../../models/spin_data.dart';
 import 'fusion_roulette_tile.dart';
-import '../../../providers/settings_provider.dart';
+import '../../../../providers/settings_provider.dart';
 
 class FusionRoulette extends StatefulWidget {
   final AnimationController controller;

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/pokemon.dart';
 import '../../providers/pokedex_provider.dart';
-import '../../constants/pokedex_constants.dart';
+import '../../core/constants/pokedex_constants.dart';
 
 class FusionCard extends StatelessWidget {
   final Pokemon p1;

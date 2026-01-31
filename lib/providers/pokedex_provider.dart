@@ -4,7 +4,8 @@ import 'package:hive/hive.dart';
 
 import '../models/pokemon.dart';
 import '../services/pokemon_service.dart';
-import '../constants/constants.dart';
+import '../core/constants/pokedex_constants.dart';
+import '../core/constants/fusion_pokemon_list.dart';
 
 class PokedexProvider extends ChangeNotifier {
   final Box<Pokemon> _box = Hive.box<Pokemon>('pokedex');

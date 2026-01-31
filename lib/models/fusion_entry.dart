@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 import '../models/pokemon.dart';
-import '../constants/pokedex_constants.dart';
+import '../core/constants/pokedex_constants.dart';
 
 part 'fusion_entry.g.dart';
 
