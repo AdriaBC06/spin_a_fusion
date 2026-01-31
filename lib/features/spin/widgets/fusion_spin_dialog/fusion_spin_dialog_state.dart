@@ -5,58 +5,103 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../models/pokemon.dart';
-import '../../../../core/constants/pokedex_constants.dart';
-import '../../../../widgets/fusion_lootbox/fusion_overlay.dart';
+import '../shared/fusion_overlay.dart';
 import '../roulette/fusion_roulette_widget.dart';
 import '../../models/spin_data.dart';
 import 'fusion_spin_dialog_widget.dart';
 
 class FusionSpinDialogState extends State<FusionSpinDialog>
     with TickerProviderStateMixin {
-  static const int bufferSize = 20;
+  // --------------------------------------------------
+  // CONFIG
+  // --------------------------------------------------
+  static const int spinBufferSize = 20;
 
-  late final AnimationController _spin1Controller;
-  late final AnimationController _spin2Controller;
+  // --------------------------------------------------
+  // CONTROLLERS
+  // --------------------------------------------------
+  late final AnimationController _spinControllerTop;
+  late final AnimationController _spinControllerBottom;
   late final AnimationController _mergeController;
   late final AnimationController _fusionController;
 
-  late final SpinData _spin1;
-  late final SpinData _spin2;
-
-  late final Animation<double> mergeRotate;
-  late final Animation<double> mergeScale;
-  late final Animation<double> mergeBrightness;
-  late final Animation<Offset> moveUp;
-  late final Animation<Offset> moveDown;
-
-  late final Animation<double> fusionRotate;
-  late final Animation<double> fusionScale;
-  late final Animation<double> fusionBrightness;
-
-  bool showRoulette = true;
-  bool showFusion = false;
-  bool showCard = false;
+  // --------------------------------------------------
+  // SPIN DATA
+  // --------------------------------------------------
+  late final SpinData _topSpin;
+  late final SpinData _bottomSpin;
 
   // --------------------------------------------------
-  // 🔔 VIBRATION STATE
+  // ANIMATIONS (MERGE)
+  // --------------------------------------------------
+  late final Animation<double> _mergeRotate;
+  late final Animation<double> _mergeScale;
+  late final Animation<double> _mergeBrightness;
+  late final Animation<Offset> _moveUp;
+  late final Animation<Offset> _moveDown;
+
+  // --------------------------------------------------
+  // ANIMATIONS (FUSION)
+  // --------------------------------------------------
+  late final Animation<double> _fusionRotate;
+  late final Animation<double> _fusionScale;
+  late final Animation<double> _fusionBrightness;
+
+  // --------------------------------------------------
+  // UI STATE
+  // --------------------------------------------------
+  bool _showSpin = true;
+  bool _showFusion = false;
+  bool _showResultCard = false;
+
+  // --------------------------------------------------
+  // HAPTICS STATE
   // --------------------------------------------------
   int _lastMergeVibrationMs = 0;
-  bool _fusionVibrated = false;
+  bool _fusionImpactTriggered = false;
 
+  // --------------------------------------------------
+  // LIFECYCLE
+  // --------------------------------------------------
   @override
   void initState() {
     super.initState();
+
     final rng = Random();
 
-    _spin1 = _buildSpin(widget.result1, rng);
-    _spin2 = _buildSpin(widget.result2, rng, reverse: true);
+    _topSpin = _buildSpinData(widget.result1, rng);
+    _bottomSpin = _buildSpinData(widget.result2, rng, reverse: true);
 
-    _spin1Controller = AnimationController(
+    _initControllers();
+    _initAnimations();
+    _initHaptics();
+
+    _startSpinSequence();
+  }
+
+  @override
+  void dispose() {
+    _mergeController.removeListener(_handleMergeHaptics);
+    _fusionController.removeListener(_handleFusionHaptics);
+
+    _spinControllerTop.dispose();
+    _spinControllerBottom.dispose();
+    _mergeController.dispose();
+    _fusionController.dispose();
+
+    super.dispose();
+  }
+
+  // --------------------------------------------------
+  // INITIALIZATION
+  // --------------------------------------------------
+  void _initControllers() {
+    _spinControllerTop = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 6),
     );
 
-    _spin2Controller = AnimationController(
+    _spinControllerBottom = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 6),
     );
@@ -70,140 +115,101 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
+  }
 
-    // 🔔 VIBRATION LISTENERS
-    _mergeController.addListener(_handleMergeVibration);
-    _fusionController.addListener(_handleFusionVibration);
-
-    mergeRotate = Tween(begin: 0.0, end: pi / 2).animate(
-      CurvedAnimation(
-        parent: _mergeController,
-        curve: Curves.easeInOut,
-      ),
+  void _initAnimations() {
+    _mergeRotate = Tween(begin: 0.0, end: pi / 2).animate(
+      CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
     );
 
-    mergeScale = Tween(begin: 1.0, end: 0.7).animate(
-      CurvedAnimation(
-        parent: _mergeController,
-        curve: Curves.easeIn,
-      ),
+    _mergeScale = Tween(
+      begin: 1.0,
+      end: 0.7,
+    ).animate(CurvedAnimation(parent: _mergeController, curve: Curves.easeIn));
+
+    _mergeBrightness = Tween(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _mergeController, curve: Curves.easeIn));
+
+    _moveUp = Tween(begin: const Offset(0, -1.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
     );
 
-    mergeBrightness = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _mergeController,
-        curve: Curves.easeIn,
-      ),
+    _moveDown = Tween(begin: const Offset(0, 1.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _mergeController, curve: Curves.easeInOut),
     );
 
-    moveUp = Tween(
-      begin: const Offset(0, -1.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _mergeController,
-        curve: Curves.easeInOut,
-      ),
+    _fusionRotate = Tween(begin: 0.0, end: pi * 6).animate(
+      CurvedAnimation(parent: _fusionController, curve: Curves.easeOut),
     );
 
-    moveDown = Tween(
-      begin: const Offset(0, 1.2),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _mergeController,
-        curve: Curves.easeInOut,
-      ),
+    _fusionScale = Tween(begin: 0.6, end: 1.2).animate(
+      CurvedAnimation(parent: _fusionController, curve: Curves.easeOutBack),
     );
 
-    fusionRotate = Tween(begin: 0.0, end: pi * 6).animate(
-      CurvedAnimation(
-        parent: _fusionController,
-        curve: Curves.easeOut,
-      ),
+    _fusionBrightness = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _fusionController, curve: Curves.easeOut),
     );
+  }
 
-    fusionScale = Tween(begin: 0.6, end: 1.2).animate(
-      CurvedAnimation(
-        parent: _fusionController,
-        curve: Curves.easeOutBack,
-      ),
-    );
-
-    fusionBrightness = Tween(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _fusionController,
-        curve: Curves.easeOut,
-      ),
-    );
-
-    _startSequence();
+  void _initHaptics() {
+    _mergeController.addListener(_handleMergeHaptics);
+    _fusionController.addListener(_handleFusionHaptics);
   }
 
   // --------------------------------------------------
-  // 🔔 SOFT MERGE VIBRATION (PULSING ENERGY)
+  // HAPTICS
   // --------------------------------------------------
-  void _handleMergeVibration() {
+  void _handleMergeHaptics() {
     if (!_mergeController.isAnimating) return;
 
     final now = DateTime.now().millisecondsSinceEpoch;
-
     if (now - _lastMergeVibrationMs < 120) return;
-    _lastMergeVibrationMs = now;
 
+    _lastMergeVibrationMs = now;
     HapticFeedback.vibrate();
   }
 
-  // --------------------------------------------------
-  // 🔔 STRONG FUSION IMPACT (DOUBLE PULSE)
-  // --------------------------------------------------
-  void _handleFusionVibration() {
-    if (_fusionVibrated) return;
+  void _handleFusionHaptics() {
+    if (_fusionImpactTriggered) return;
 
     if (_fusionController.value > 0.05) {
-      _fusionVibrated = true;
-
+      _fusionImpactTriggered = true;
       HapticFeedback.vibrate();
-      Future.delayed(const Duration(milliseconds: 40), () {
-        HapticFeedback.vibrate();
-      });
+      Future.delayed(const Duration(milliseconds: 40), HapticFeedback.vibrate);
     }
   }
 
-  Future<void> _startSequence() async {
-    // ----------------------------
-    // 🎰 SPIN
-    // ----------------------------
+  // --------------------------------------------------
+  // SEQUENCE
+  // --------------------------------------------------
+  Future<void> _startSpinSequence() async {
     await Future.wait([
-      _forwardAndWait(_spin1Controller),
-      _forwardAndWait(_spin2Controller),
+      _playController(_spinControllerTop),
+      _playController(_spinControllerBottom),
     ]);
 
-    // 🔔 FINAL SPIN STOP (DOUBLE PULSE)
+    // Final spin stop impact
     HapticFeedback.vibrate();
-    Future.delayed(const Duration(milliseconds: 40), () {
-      HapticFeedback.vibrate();
-    });
+    Future.delayed(const Duration(milliseconds: 40), HapticFeedback.vibrate);
 
     setState(() {
-      showRoulette = false;
-      showFusion = true;
+      _showSpin = false;
+      _showFusion = true;
     });
 
-    // ----------------------------
-    // 🔥 MERGE → FUSION
-    // ----------------------------
     await _mergeController.forward();
     await _fusionController.forward();
 
     await Future.delayed(const Duration(milliseconds: 500));
-    setState(() => showCard = true);
+    setState(() => _showResultCard = true);
 
     await Future.delayed(const Duration(seconds: 2));
     widget.onFinished();
   }
 
-  Future<void> _forwardAndWait(AnimationController controller) {
+  Future<void> _playController(AnimationController controller) {
     final completer = Completer<void>();
 
     void listener(AnimationStatus status) {
@@ -219,24 +225,26 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
     return completer.future;
   }
 
-  SpinData _buildSpin(
-    Pokemon result,
-    Random rng, {
-    bool reverse = false,
-  }) {
+  // --------------------------------------------------
+  // SPIN DATA
+  // --------------------------------------------------
+  SpinData _buildSpinData(Pokemon result, Random rng, {bool reverse = false}) {
     final coreCount = 15 + rng.nextInt(6);
+
     final pool = List<Pokemon>.from(widget.allPokemon)
       ..remove(result)
       ..shuffle();
 
-    final before = pool.take(bufferSize).toList();
-    final core = pool.skip(bufferSize).take(coreCount).toList();
-    final after =
-        pool.skip(bufferSize + coreCount).take(bufferSize).toList();
+    final before = pool.take(spinBufferSize).toList();
+    final core = pool.skip(spinBufferSize).take(coreCount).toList();
+    final after = pool
+        .skip(spinBufferSize + coreCount)
+        .take(spinBufferSize)
+        .toList();
 
     var items = [...before, ...core, result, ...after];
     var resultIndex = before.length + core.length;
-    var startIndex = rng.nextInt(bufferSize ~/ 2) + 2;
+    var startIndex = rng.nextInt(spinBufferSize ~/ 2) + 2;
 
     if (reverse) {
       items = items.reversed.toList();
@@ -252,56 +260,46 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
     );
   }
 
-  @override
-  void dispose() {
-    _mergeController.removeListener(_handleMergeVibration);
-    _fusionController.removeListener(_handleFusionVibration);
-
-    _spin1Controller.dispose();
-    _spin2Controller.dispose();
-    _mergeController.dispose();
-    _fusionController.dispose();
-    super.dispose();
-  }
-
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (showRoulette)
+          if (_showSpin)
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 FusionRoulette(
-                  controller: _spin1Controller,
-                  data: _spin1,
+                  controller: _spinControllerTop,
+                  data: _topSpin,
                   enableHaptics: true,
                 ),
                 const SizedBox(height: 24),
                 FusionRoulette(
-                  controller: _spin2Controller,
-                  data: _spin2,
+                  controller: _spinControllerBottom,
+                  data: _bottomSpin,
                   enableHaptics: true,
                 ),
               ],
             ),
-
           FusionOverlay(
-            showFusion: showFusion,
-            showCard: showCard,
+            showFusion: _showFusion,
+            showCard: _showResultCard,
             p1: widget.result1,
             p2: widget.result2,
             ball: widget.ball,
-            mergeRotate: mergeRotate,
-            mergeScale: mergeScale,
-            mergeBrightness: mergeBrightness,
-            moveUp: moveUp,
-            moveDown: moveDown,
-            fusionRotate: fusionRotate,
-            fusionScale: fusionScale,
-            fusionBrightness: fusionBrightness,
+            mergeRotate: _mergeRotate,
+            mergeScale: _mergeScale,
+            mergeBrightness: _mergeBrightness,
+            moveUp: _moveUp,
+            moveDown: _moveDown,
+            fusionRotate: _fusionRotate,
+            fusionScale: _fusionScale,
+            fusionBrightness: _fusionBrightness,
             mergeController: _mergeController,
             fusionController: _fusionController,
           ),

@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-import '../../models/pokemon.dart';
-import '../../core/constants/pokedex_constants.dart';
+import '../../../../models/pokemon.dart';
+import '../../../../core/constants/pokedex_constants.dart';
 import 'fusion_particles.dart';
 import 'fusion_card.dart';
 
