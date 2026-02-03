@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/settings_provider.dart';
-import 'debug_add_currency_dialog.dart';
 
 class SettingsPanel extends StatefulWidget {
   const SettingsPanel({super.key});
@@ -133,20 +132,6 @@ class _SettingsPanelState extends State<SettingsPanel> {
               ),
               value: settings.vibrationEnabled,
               onChanged: settings.setVibrationEnabled,
-            ),
-            const Divider(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => const DebugAddCurrencyDialog(),
-                  );
-                },
-                icon: const Icon(Icons.bug_report),
-                label: const Text('Debug'),
-              ),
             ),
           ],
         ),
