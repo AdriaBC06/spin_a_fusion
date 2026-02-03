@@ -102,6 +102,15 @@ class GameProvider extends ChangeNotifier {
   }
 
   // ----------------------------
+  // DIAMONDS
+  // ----------------------------
+  void addDiamonds(int amount) {
+    _state.diamonds += amount;
+    _save();
+    notifyListeners();
+  }
+
+  // ----------------------------
   // BALLS
   // ----------------------------
   void addBall(BallType type, {int amount = 1}) {

@@ -18,11 +18,15 @@ class FusionEntry {
   @HiveField(3)
   final double rarity;
 
+  @HiveField(4)
+  final bool claimPending;
+
   const FusionEntry({
     required this.p1,
     required this.p2,
     required this.ball,
     required this.rarity,
+    this.claimPending = false,
   });
 
   int get totalStats => p1.totalStats + p2.totalStats;
@@ -44,4 +48,20 @@ class FusionEntry {
       'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
       'pokemon/autogen-fusion-sprites-master/Battlers/'
       '${p1.fusionId}/${p1.fusionId}.${p2.fusionId}.png';
+
+  FusionEntry copyWith({
+    Pokemon? p1,
+    Pokemon? p2,
+    BallType? ball,
+    double? rarity,
+    bool? claimPending,
+  }) {
+    return FusionEntry(
+      p1: p1 ?? this.p1,
+      p2: p2 ?? this.p2,
+      ball: ball ?? this.ball,
+      rarity: rarity ?? this.rarity,
+      claimPending: claimPending ?? this.claimPending,
+    );
+  }
 }

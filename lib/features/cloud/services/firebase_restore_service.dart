@@ -62,7 +62,8 @@ class FirebaseRestoreService {
     // -------- FUSIONS --------
     final pokemonBox = Hive.box<Pokemon>('pokedex');
 
-    FusionEntry decode(int key) {
+    FusionEntry decode(int key,
+        {bool claimPending = false}) {
       final id1 = key ~/ expectedPokemonCount;
       final id2 = key % expectedPokemonCount;
 
@@ -79,6 +80,7 @@ class FirebaseRestoreService {
         p2: p2,
         ball: BallType.poke,
         rarity: 1.0,
+        claimPending: claimPending,
       );
     }
 
@@ -88,10 +90,33 @@ class FirebaseRestoreService {
       collection.addFusion(decode(key));
     }
 
-    final pediaList =
-        List<int>.from(cloud['pediaFusions'] ?? []);
-    for (final key in pediaList) {
-      pedia.registerFusion(decode(key));
+    final pediaClaimsRaw = cloud['pediaFusions'];
+
+    if (pediaClaimsRaw is Map<String, dynamic>) {
+      for (final entry in pediaClaimsRaw.entries) {
+        final key = int.tryParse(entry.key);
+        if (key == null) continue;
+        final pending = entry.value == true;
+        pedia.registerFusionFromCloud(
+          decode(key, claimPending: pending),
+        );
+      }
+    } else {
+      // Backward compatibility (schema <= 2)
+      final pediaList =
+          List<int>.from(cloud['pediaFusions'] ?? []);
+      final pendingList =
+          List<int>.from(cloud['pediaPending'] ?? []);
+      final pendingSet = pendingList.toSet();
+
+      for (final key in pediaList) {
+        pedia.registerFusionFromCloud(
+          decode(
+            key,
+            claimPending: pendingSet.contains(key),
+          ),
+        );
+      }
     }
 
     // -------- HOME SLOTS --------

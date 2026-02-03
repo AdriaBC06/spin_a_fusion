@@ -21,13 +21,14 @@ class FusionEntryAdapter extends TypeAdapter<FusionEntry> {
       p2: fields[1] as Pokemon,
       ball: fields[2] as BallType,
       rarity: fields[3] as double,
+      claimPending: fields[4] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, FusionEntry obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.p1)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class FusionEntryAdapter extends TypeAdapter<FusionEntry> {
       ..writeByte(2)
       ..write(obj.ball)
       ..writeByte(3)
-      ..write(obj.rarity);
+      ..write(obj.rarity)
+      ..writeByte(4)
+      ..write(obj.claimPending);
   }
 
   @override

@@ -50,7 +50,7 @@ class FirebaseSyncService {
     required HomeSlotsProvider homeSlots,
   }) {
     return {
-      'schemaVersion': 1,
+      'schemaVersion': 3,
       'lastSync': DateTime.now().millisecondsSinceEpoch,
 
       'playTimeSeconds': game.playTimeSeconds,
@@ -62,7 +62,7 @@ class FirebaseSyncService {
       'ownedFusions':
           _encodeFusions(collection.allFusions),
       'pediaFusions':
-          _encodeFusions(pedia.sortedFusions),
+          _encodePediaClaims(pedia.sortedFusions),
 
       // 🔥 HOME SLOTS
       'homeSlots': _encodeHomeSlots(homeSlots),
@@ -93,6 +93,21 @@ class FirebaseSyncService {
             ))
         .toSet()
         .toList();
+  }
+
+  Map<String, bool> _encodePediaClaims(
+      List<FusionEntry> fusions) {
+    final map = <String, bool>{};
+
+    for (final fusion in fusions) {
+      final key = _fusionKey(
+        fusion.p1.fusionId,
+        fusion.p2.fusionId,
+      );
+      map[key.toString()] = fusion.claimPending;
+    }
+
+    return map;
   }
 
   Map<String, int?> _encodeHomeSlots(

@@ -26,11 +26,23 @@ class FusionPediaProvider extends ChangeNotifier {
   String _key(FusionEntry f) =>
       '${f.p1.fusionId}-${f.p2.fusionId}';
 
+  FusionEntry _withPendingClaim(FusionEntry fusion) {
+    if (fusion.claimPending) return fusion;
+    return fusion.copyWith(claimPending: true);
+  }
+
   /// Register fusion only once (directional, no duplicates)
   void registerFusion(FusionEntry fusion) {
     final key = _key(fusion);
     if (_box.containsKey(key)) return;
 
+    _box.put(key, _withPendingClaim(fusion));
+    notifyListeners();
+  }
+
+  /// Register fusion from cloud with explicit claim state.
+  void registerFusionFromCloud(FusionEntry fusion) {
+    final key = _key(fusion);
     _box.put(key, fusion);
     notifyListeners();
   }
@@ -43,7 +55,7 @@ class FusionPediaProvider extends ChangeNotifier {
       final key = _key(fusion);
       if (_box.containsKey(key)) continue;
 
-      _box.put(key, fusion);
+      _box.put(key, _withPendingClaim(fusion));
       changed = true;
     }
 
@@ -65,4 +77,36 @@ class FusionPediaProvider extends ChangeNotifier {
   }
 
   bool get isEmpty => _box.isEmpty;
+
+  int get pendingCount =>
+      _box.values.where((f) => f.claimPending).length;
+
+  bool get hasPending => pendingCount > 0;
+
+  bool claimFusion(FusionEntry fusion) {
+    final key = _key(fusion);
+    final stored = _box.get(key);
+    if (stored == null || !stored.claimPending) return false;
+
+    _box.put(key, stored.copyWith(claimPending: false));
+    notifyListeners();
+    return true;
+  }
+
+  int claimAllPending() {
+    int claimed = 0;
+
+    for (final entry in _box.toMap().entries) {
+      final fusion = entry.value;
+      if (!fusion.claimPending) continue;
+      _box.put(entry.key, fusion.copyWith(claimPending: false));
+      claimed += 1;
+    }
+
+    if (claimed > 0) {
+      notifyListeners();
+    }
+
+    return claimed;
+  }
 }
