@@ -7,23 +7,150 @@ import '../providers/home_slots_provider.dart';
 import '../features/fusion/fusion_economy.dart';
 import '../features/fusion/widgets/fusion_inventory_card.dart';
 
-class FusionScreen extends StatelessWidget {
+enum FusionSortField {
+  name,
+  income,
+  rarity,
+}
+
+class FusionScreen extends StatefulWidget {
   const FusionScreen({super.key});
 
+  @override
+  State<FusionScreen> createState() => _FusionScreenState();
+}
+
+class _FusionScreenState extends State<FusionScreen> {
+  FusionSortField? _sortField;
+  bool _ascending = true;
+
+  List<FusionEntry> _sorted(List<FusionEntry> fusions) {
+    final list = List<FusionEntry>.from(fusions);
+    if (_sortField == null) return list;
+
+    int compare(FusionEntry a, FusionEntry b) {
+      int result;
+      switch (_sortField!) {
+        case FusionSortField.name:
+          result = a.fusionName.compareTo(b.fusionName);
+          break;
+        case FusionSortField.income:
+          result = FusionEconomy.incomePerSecond(a)
+              .compareTo(FusionEconomy.incomePerSecond(b));
+          break;
+        case FusionSortField.rarity:
+          result = a.rarity.compareTo(b.rarity);
+          break;
+      }
+      return _ascending ? result : -result;
+    }
+
+    list.sort(compare);
+    return list;
+  }
+
+  // ----------------------------
+  // SORT MENU (HALF WIDTH + TAP OUTSIDE TO CLOSE)
+  // ----------------------------
+  void _openSortMenu() {
+    final width = MediaQuery.of(context).size.width * 0.55;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black54,
+      builder: (_) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.pop(context), // tap outside
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: GestureDetector(
+              onTap: () {}, // absorb taps inside menu
+              child: Container(
+                width: width,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF111C33),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                ),
+                child: SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _sortTile(FusionSortField.name, 'Nombre'),
+                      _sortTile(
+                          FusionSortField.income, 'Dinero generado'),
+                      _sortTile(
+                          FusionSortField.rarity, 'Rareza'),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _sortTile(FusionSortField field, String label) {
+    final bool active = _sortField == field;
+    final IconData? arrow = active
+        ? (_ascending
+            ? Icons.arrow_upward
+            : Icons.arrow_downward)
+        : null;
+
+    return ListTile(
+      onTap: () {
+        setState(() {
+          if (_sortField == field) {
+            _ascending = !_ascending;
+          } else {
+            _sortField = field;
+            _ascending = true;
+          }
+        });
+        Navigator.pop(context);
+      },
+      title: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          if (arrow != null) ...[
+            const SizedBox(width: 8),
+            Icon(
+              arrow,
+              color: Color(0xFF00D1FF),
+              size: 18,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ----------------------------
+  // ORIGINAL LOGIC (UNCHANGED)
+  // ----------------------------
   void _addBestFusions(
     BuildContext context,
     List<FusionEntry> fusions,
   ) {
     final slots = context.read<HomeSlotsProvider>();
 
-    // 1️⃣ Sort by income/sec DESC
     final sorted = List<FusionEntry>.from(fusions)
       ..sort(
-        (a, b) =>
-            FusionEconomy.incomePerSecond(b)
-                .compareTo(
-          FusionEconomy.incomePerSecond(a),
-        ),
+        (a, b) => FusionEconomy.incomePerSecond(b)
+            .compareTo(FusionEconomy.incomePerSecond(a)),
       );
 
     String _key(FusionEntry fusion) =>
@@ -31,17 +158,13 @@ class FusionScreen extends StatelessWidget {
 
     final unlocked = slots.unlockedCount;
     final current = List<FusionEntry?>.from(slots.slots);
-
     final available = List<FusionEntry>.from(sorted);
 
     void _removeOneAvailable(FusionEntry fusion) {
-      final target = _key(fusion);
       final index = available.indexWhere(
-        (f) => _key(f) == target,
+        (f) => _key(f) == _key(fusion),
       );
-      if (index >= 0) {
-        available.removeAt(index);
-      }
+      if (index >= 0) available.removeAt(index);
     }
 
     for (int i = 0; i < unlocked; i++) {
@@ -54,29 +177,20 @@ class FusionScreen extends StatelessWidget {
     FusionEntry? _nextBest() =>
         available.isEmpty ? null : available.removeAt(0);
 
-    // 2️⃣ Fill empty slots first
     for (int i = 0; i < unlocked; i++) {
-      final currentFusion = current[i];
-      if (currentFusion != null) continue;
-
+      if (current[i] != null) continue;
       final best = _nextBest();
       if (best == null) break;
       slots.setSlot(i, best);
     }
 
-    // 3️⃣ Replace only if strictly better (no wasted picks)
     for (int i = 0; i < unlocked; i++) {
       final currentFusion = current[i];
-      if (currentFusion == null) continue;
+      if (currentFusion == null || available.isEmpty) continue;
 
-      if (available.isEmpty) break;
       final best = available.first;
-
-      final currentIncome =
-          FusionEconomy.incomePerSecond(currentFusion);
-      final bestIncome = FusionEconomy.incomePerSecond(best);
-
-      if (bestIncome > currentIncome) {
+      if (FusionEconomy.incomePerSecond(best) >
+          FusionEconomy.incomePerSecond(currentFusion)) {
         slots.setSlot(i, best);
         available.removeAt(0);
       }
@@ -104,10 +218,9 @@ class FusionScreen extends StatelessWidget {
 
     for (final fusion in fusions) {
       final inHome = homeKeys.contains(_key(fusion));
-      final isProtected = inHome || protectedTopN.contains(fusion);
-      final isFavorite = fusion.favorite;
-
-      if (!isProtected && !isFavorite) {
+      final isProtected =
+          inHome || protectedTopN.contains(fusion);
+      if (!isProtected && !fusion.favorite) {
         toSell.add(fusion);
       }
     }
@@ -121,19 +234,13 @@ class FusionScreen extends StatelessWidget {
       '${fusion.p1.fusionId}:${fusion.p2.fusionId}';
 
   List<FusionEntry> _topNFusions(
-    List<FusionEntry> fusions,
-    int n,
-  ) {
+      List<FusionEntry> fusions, int n) {
     if (n <= 0) return [];
-
     final sorted = List<FusionEntry>.from(fusions)
       ..sort(
-        (a, b) =>
-            FusionEconomy.incomePerSecond(b)
-                .compareTo(FusionEconomy.incomePerSecond(a)),
+        (a, b) => FusionEconomy.incomePerSecond(b)
+            .compareTo(FusionEconomy.incomePerSecond(a)),
       );
-
-    if (sorted.length <= n) return sorted;
     return sorted.take(n).toList();
   }
 
@@ -141,8 +248,7 @@ class FusionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final fusionProvider =
         context.watch<FusionCollectionProvider>();
-    final List<FusionEntry> fusions =
-        fusionProvider.fusions;
+    final fusions = _sorted(fusionProvider.fusions);
 
     return Stack(
       children: [
@@ -163,15 +269,13 @@ class FusionScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 24),
-
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      color: Color(0xFF00D1FF),
-                    ),
+                    const Icon(Icons.auto_awesome,
+                        color: Color(0xFF00D1FF)),
                     const SizedBox(width: 8),
                     Text(
                       'Fusiones',
@@ -182,78 +286,62 @@ class FusionScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: fusions
                       .map(
-                        (fusion) =>
-                            FusionInventoryCard(
-                                fusion: fusion),
+                        (f) =>
+                            FusionInventoryCard(fusion: f),
                       )
                       .toList(),
                 ),
               ),
-
-              const SizedBox(height: 100),
+              const SizedBox(height: 140),
             ],
           ),
         ),
 
-        // ---------------------------------
-        // AÑADIR MEJORES BUTTON
-        // ---------------------------------
+        // AUTO-VENDER
         Positioned(
           right: 16,
-          bottom: 16,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 14,
-              ),
-              backgroundColor: const Color(0xFF00D1FF),
-              foregroundColor: Colors.black,
-            ),
+          bottom: 84,
+          child: ElevatedButton.icon(
             onPressed: fusions.isEmpty
                 ? null
-                : () => _addBestFusions(context, fusions),
-            child: const Text(
-              'Añadir Mejores',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                : () => _autoSellFusions(context, fusions),
+            icon: const Icon(Icons.delete_sweep),
+            label: const Text('Auto-vender'),
           ),
         ),
+
+        // SORT
         Positioned(
           left: 16,
           bottom: 16,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 14,
-              ),
               backgroundColor: const Color(0xFFFF2D95),
               foregroundColor: Colors.white,
             ),
+            onPressed:
+                fusions.isEmpty ? null : _openSortMenu,
+            icon: const Icon(Icons.sort),
+            label: const Text('Ordenar'),
+          ),
+        ),
+
+        // AÑADIR MEJORES
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: ElevatedButton(
             onPressed: fusions.isEmpty
                 ? null
-                : () => _autoSellFusions(context, fusions),
-            icon: const Icon(Icons.delete_sweep),
-            label: const Text(
-              'Auto-vender',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+                : () => _addBestFusions(context, fusions),
+            child: const Text('Añadir Mejores'),
           ),
         ),
       ],
