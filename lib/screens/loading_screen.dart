@@ -97,6 +97,27 @@ class _LoadingScreenState extends State<LoadingScreen> {
               ),
             ),
           ),
+          Positioned.fill(
+            child: SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 24,
+                    ),
+                    child: Image.asset(
+                      'assets/images/loading.png',
+                      fit: BoxFit.contain,
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
