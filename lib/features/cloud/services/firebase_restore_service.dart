@@ -60,7 +60,7 @@ class FirebaseRestoreService {
     // -------- FUSIONS --------
     final pokemonBox = Hive.box<Pokemon>('pokedex');
 
-    FusionEntry decode(
+    FusionEntry? decode(
       int key, {
       bool claimPending = false,
       bool favorite = false,
@@ -72,8 +72,7 @@ class FirebaseRestoreService {
       final p2 = pokemonBox.get(id2);
 
       if (p1 == null || p2 == null) {
-        throw Exception(
-            'Pokemon missing ($id1, $id2)');
+        return null;
       }
 
       return FusionEntry(
@@ -100,7 +99,10 @@ class FirebaseRestoreService {
     final owned = List<int>.from(cloud['ownedFusions'] ?? []);
     for (final key in owned) {
       final favorite = favoriteMap[key] ?? false;
-      collection.addFusion(decode(key, favorite: favorite));
+      final fusion = decode(key, favorite: favorite);
+      if (fusion != null) {
+        collection.addFusion(fusion);
+      }
     }
 
     final pediaClaimsRaw = cloud['pediaFusions'];
@@ -110,9 +112,10 @@ class FirebaseRestoreService {
         final key = int.tryParse(entry.key);
         if (key == null) continue;
         final pending = entry.value == true;
-        pedia.registerFusionFromCloud(
-          decode(key, claimPending: pending),
-        );
+        final fusion = decode(key, claimPending: pending);
+        if (fusion != null) {
+          pedia.registerFusionFromCloud(fusion);
+        }
       }
     } else {
       // Backward compatibility (schema <= 2)
@@ -123,12 +126,13 @@ class FirebaseRestoreService {
       final pendingSet = pendingList.toSet();
 
       for (final key in pediaList) {
-        pedia.registerFusionFromCloud(
-          decode(
-            key,
-            claimPending: pendingSet.contains(key),
-          ),
+        final fusion = decode(
+          key,
+          claimPending: pendingSet.contains(key),
         );
+        if (fusion != null) {
+          pedia.registerFusionFromCloud(fusion);
+        }
       }
     }
 
@@ -154,7 +158,11 @@ class FirebaseRestoreService {
       }
 
       final fusion = decode(key);
-      homeSlots.setSlot(index, fusion);
+      if (fusion != null) {
+        homeSlots.setSlot(index, fusion);
+      } else {
+        homeSlots.setSlot(index, null);
+      }
     }
   }
 }
