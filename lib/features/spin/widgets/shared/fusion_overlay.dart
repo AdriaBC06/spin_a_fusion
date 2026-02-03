@@ -75,6 +75,21 @@ class FusionOverlay extends StatelessWidget {
         return Stack(
           alignment: Alignment.center,
           children: [
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: RadialGradient(
+                      colors: [
+                        Color(0x332B0F46),
+                        Color(0x00151E2C),
+                      ],
+                      radius: 0.8,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             // ----------------------------
             // MERGING POKÉMON
             // ----------------------------

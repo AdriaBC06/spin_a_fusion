@@ -24,7 +24,25 @@ class PediaFusionTile extends StatelessWidget {
           builder: (_) => FusionSummaryModal(fusion: fusion),
         );
       },
-      child: Card(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF111C33), Color(0xFF182647)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFF00D1FF).withOpacity(0.35),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00D1FF).withOpacity(0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Stack(
           children: [
             Padding(
@@ -45,7 +63,7 @@ class PediaFusionTile extends StatelessWidget {
                   height: 8,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: Colors.red,
+                      color: Color(0xFFFF2D95),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -67,7 +85,7 @@ class PediaFusionTile extends StatelessWidget {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade700,
+                    backgroundColor: const Color(0xFFFF2D95),
                     foregroundColor: Colors.white,
                     padding:
                         const EdgeInsets.symmetric(vertical: 2),

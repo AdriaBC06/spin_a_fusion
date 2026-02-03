@@ -31,13 +31,11 @@ class _SpinRouletteState extends State<SpinRoulette> {
   void initState() {
     super.initState();
     widget.controller.addListener(_handleTick);
-    debugPrint('🎰 FusionRoulette init');
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_handleTick);
-    debugPrint('🎰 FusionRoulette dispose');
     super.dispose();
   }
 
@@ -69,73 +67,108 @@ class _SpinRouletteState extends State<SpinRoulette> {
     if (now - _lastVibrationMs < 30) return;
     _lastVibrationMs = now;
 
-    debugPrint('🎯 CENTER = $centerIndex');
-
     // 🔔 REAL DEVICE VIBRATION (WORKS)
     HapticFeedback.vibrate();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 26,
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final centerOffset =
-                (constraints.maxWidth - SpinRoulette.itemWidth) / 2;
-
-            final start = widget.data.startIndex * SpinRoulette.itemWidth;
-            final end = widget.data.resultIndex * SpinRoulette.itemWidth;
-
-            return AnimatedBuilder(
-              animation: widget.controller,
-              builder: (_, __) {
-                final eased = Curves.easeOutQuart.transform(
-                  widget.controller.value,
-                );
-
-                final dx = centerOffset - lerpDouble(start, end, eased)!;
-
-                return ClipRect(
-                  child: SizedBox(
-                    width: constraints.maxWidth,
-                    height: 160,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Transform.translate(
-                          offset: Offset(dx, 0),
-                          child: OverflowBox(
-                            alignment: Alignment.centerLeft,
-                            minWidth: 0,
-                            maxWidth: double.infinity,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: widget.data.items
-                                  .map((p) => SpinRouletteTile(pokemon: p))
-                                  .toList(),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: SpinRoulette.itemWidth,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: Colors.amber, width: 3),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0B1020), Color(0xFF182647)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFF00D1FF).withOpacity(0.4),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00D1FF).withOpacity(0.2),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final centerOffset =
+              (constraints.maxWidth - SpinRoulette.itemWidth) / 2;
+
+          final start = widget.data.startIndex * SpinRoulette.itemWidth;
+          final end = widget.data.resultIndex * SpinRoulette.itemWidth;
+
+          return AnimatedBuilder(
+            animation: widget.controller,
+            builder: (_, __) {
+              final eased = Curves.easeOutQuart.transform(
+                widget.controller.value,
+              );
+
+              final dx = centerOffset - lerpDouble(start, end, eased)!;
+
+              return ClipRect(
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  height: 170,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Transform.translate(
+                        offset: Offset(dx, 0),
+                        child: OverflowBox(
+                          alignment: Alignment.centerLeft,
+                          minWidth: 0,
+                          maxWidth: double.infinity,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: widget.data.items
+                                .map((p) => SpinRouletteTile(pokemon: p))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: SpinRoulette.itemWidth,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFFFD645),
+                            width: 2.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFD645)
+                                  .withOpacity(0.35),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        child: Container(
+                          width: 60,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD645),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

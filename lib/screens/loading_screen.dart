@@ -87,7 +87,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.black, Colors.deepPurple],
+                colors: [
+                  Color(0xFF0B1020),
+                  Color(0xFF0B2E5E),
+                  Color(0xFF2B0F46),
+                ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -105,6 +109,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -113,8 +118,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     child: LinearProgressIndicator(
                       value: pokedex.progress,
                       minHeight: 10,
-                      backgroundColor: Colors.white24,
-                      color: Colors.amber,
+                      backgroundColor: Colors.white12,
+                      color: Color(0xFF00D1FF),
                     ),
                   ),
                 ],

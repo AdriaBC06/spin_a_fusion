@@ -59,22 +59,55 @@ class HomeSlotLockedTile extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.black54,
-          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0B1020), Color(0xFF2B0F46)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFFFF2D95).withOpacity(0.5),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFF2D95).withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock, color: Colors.white),
+              const Icon(
+                Icons.lock,
+                color: Colors.white,
+                size: 26,
+              ),
               if (cost != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  '$cost 💎',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFF2D95)
+                          .withOpacity(0.6),
+                    ),
+                  ),
+                  child: Text(
+                    '$cost 💎',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

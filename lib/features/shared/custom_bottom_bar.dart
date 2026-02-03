@@ -23,16 +23,16 @@ class CustomBottomBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: [
         const BottomNavigationBarItem(
-          icon: Icon(Icons.store),
-          label: 'Shop',
+          icon: Icon(Icons.storefront_rounded),
+          label: 'Tienda',
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.home),
           label: 'Home',
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.monetization_on),
-          label: 'Fusion',
+          icon: Icon(Icons.auto_awesome),
+          label: 'Fusión',
         ),
         BottomNavigationBarItem(
           icon: Stack(

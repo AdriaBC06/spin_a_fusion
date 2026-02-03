@@ -57,12 +57,29 @@ class FusionCard extends StatelessWidget {
         '${p1.fusionId}.${p2.fusionId}.png';
 
     return Card(
-      elevation: 20,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
+      elevation: 0,
+      color: Colors.transparent,
+      child: Container(
         padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF111C33), Color(0xFF182647)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFF00D1FF).withOpacity(0.45),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00D1FF).withOpacity(0.25),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -82,6 +99,7 @@ class FusionCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
@@ -91,6 +109,7 @@ class FusionCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
+                color: Colors.white70,
               ),
               textAlign: TextAlign.center,
             ),

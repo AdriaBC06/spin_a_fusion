@@ -67,8 +67,30 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
     if (widget.fusion == null) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.grey.shade300,
-          borderRadius: BorderRadius.circular(12),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF111C33), Color(0xFF182647)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: const Color(0xFF00D1FF).withOpacity(0.5),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00D1FF).withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.add,
+            color: Colors.white54,
+            size: 28,
+          ),
         ),
       );
     }
@@ -90,11 +112,26 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
           // TILE
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0B1020), Color(0xFF15254A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF00D1FF).withOpacity(0.5),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00D1FF).withOpacity(0.18),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               child: Image.network(
                 fusion.customFusionUrl,
                 fit: BoxFit.contain,
@@ -109,14 +146,26 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
 
           // ❌ REMOVE
           Positioned(
-            top: 4,
-            right: 4,
+            top: 6,
+            right: 6,
             child: GestureDetector(
               onTap: () => slots.removeFusion(fusion),
-              child: const CircleAvatar(
-                radius: 10,
-                backgroundColor: Colors.red,
-                child: Icon(
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFF2D95),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF2D95)
+                          .withOpacity(0.5),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
                   Icons.close,
                   size: 12,
                   color: Colors.white,
@@ -127,16 +176,29 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
 
           // 💰 INCOME TEXT
           Positioned(
-            bottom: 4,
-            left: 0,
-            right: 0,
-            child: Center(
+            bottom: 6,
+            left: 6,
+            right: 6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFF00D1FF)
+                      .withOpacity(0.4),
+                ),
+              ),
               child: Text(
                 '$incomePerSec Dinero/s',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: Colors.green,
+                  color: Color(0xFF9CFF8A),
                 ),
               ),
             ),

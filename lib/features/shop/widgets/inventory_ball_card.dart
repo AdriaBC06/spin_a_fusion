@@ -22,17 +22,40 @@ class InventoryBallCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color, width: 2),
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.25),
+            const Color(0xFF0B1020),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color, width: 1.4),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Row(
         children: [
           // Icon
-          Icon(
-            Icons.catching_pokemon,
-            color: color,
-            size: 32,
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black.withOpacity(0.35),
+              border: Border.all(color: color, width: 1.2),
+            ),
+            child: Icon(
+              Icons.catching_pokemon,
+              color: color,
+              size: 26,
+            ),
           ),
 
           const SizedBox(width: 12),
@@ -47,12 +70,13 @@ class InventoryBallCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
                 Text(
                   'Cantidad: $amount',
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
+                  style: const TextStyle(
+                    color: Colors.white70,
                   ),
                 ),
               ],
@@ -64,7 +88,8 @@ class InventoryBallCard extends StatelessWidget {
             onPressed: enabled ? onOpen : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
-              disabledBackgroundColor: Colors.grey.shade400,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: Colors.white24,
             ),
             child: const Text('Abrir'),
           ),

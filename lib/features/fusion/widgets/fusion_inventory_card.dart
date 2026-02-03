@@ -27,105 +27,145 @@ class FusionInventoryCard extends StatelessWidget {
     final int incomePerSec =
         FusionEconomy.incomePerSecond(fusion);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // ----------------------------
-            // BIG IMAGE (FITS CONTAINER)
-            // ----------------------------
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) =>
-                      FusionSummaryModal(fusion: fusion),
-                );
-              },
-              child: SizedBox(
-                width: 96,
-                height: 96,
-                child: Image.network(
-                  fusion.customFusionUrl,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF111C33), Color(0xFF182647)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFF00D1FF).withOpacity(0.35),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00D1FF).withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // ----------------------------
+          // BIG IMAGE (FITS CONTAINER)
+          // ----------------------------
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (_) =>
+                    FusionSummaryModal(fusion: fusion),
+              );
+            },
+            child: Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.35),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color:
+                      const Color(0xFF00D1FF).withOpacity(0.4),
+                ),
+              ),
+              child: Image.network(
+                fusion.customFusionUrl,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) =>
+                    Image.network(
+                  fusion.autoGenFusionUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) =>
-                      Image.network(
-                    fusion.autoGenFusionUrl,
-                    fit: BoxFit.contain,
-                  ),
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(width: 12),
+          const SizedBox(width: 12),
 
-            // ----------------------------
-            // INFO
-            // ----------------------------
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    fusion.fusionName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '$incomePerSec Dinero/s',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            // ----------------------------
-            // ACTIONS
-            // ----------------------------
-            Column(
-              mainAxisSize: MainAxisSize.min,
+          // ----------------------------
+          // INFO
+          // ----------------------------
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ElevatedButton(
-                  onPressed: isAdded
-                      ? () => slots.removeFusion(fusion)
-                      : canAdd
-                          ? () => slots.addFusion(fusion)
-                          : null,
-                  child: Text(isAdded ? 'Quitar' : 'Añadir'),
+                Text(
+                  fusion.fusionName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
                   ),
-                  onPressed: () {
-                    if (isAdded) {
-                      slots.removeFusion(fusion);
-                    }
-                    collection.removeFusion(fusion);
-
-                    final value =
-                        FusionEconomy.sellPrice(fusion);
-                    game.addMoney(value);
-                  },
-                  child: const Text('Vender'),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF00D1FF)
+                          .withOpacity(0.4),
+                    ),
+                  ),
+                  child: Text(
+                    '$incomePerSec Dinero/s',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF9CFF8A),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // ----------------------------
+          // ACTIONS
+          // ----------------------------
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: isAdded
+                    ? () => slots.removeFusion(fusion)
+                    : canAdd
+                        ? () => slots.addFusion(fusion)
+                        : null,
+                child: Text(isAdded ? 'Quitar' : 'Añadir'),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF2D95),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  if (isAdded) {
+                    slots.removeFusion(fusion);
+                  }
+                  collection.removeFusion(fusion);
+
+                  final value =
+                      FusionEconomy.sellPrice(fusion);
+                  game.addMoney(value);
+                },
+                child: const Text('Vender'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

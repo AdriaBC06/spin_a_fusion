@@ -49,22 +49,40 @@ class FusionScreen extends StatelessWidget {
 
     return Stack(
       children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF0B1020),
+                Color(0xFF0E1B36),
+                Color(0xFF1A0F3A),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 72),
+              const SizedBox(height: 24),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Fusiones',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      color: Color(0xFF00D1FF),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Fusiones',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium,
+                    ),
+                  ],
                 ),
               ),
 
@@ -101,7 +119,8 @@ class FusionScreen extends StatelessWidget {
                 horizontal: 20,
                 vertical: 14,
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: const Color(0xFF00D1FF),
+              foregroundColor: Colors.black,
             ),
             onPressed: fusions.isEmpty
                 ? null

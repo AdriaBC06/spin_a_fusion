@@ -269,45 +269,71 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
     final hapticsEnabled =
         context.watch<SettingsProvider>().vibrationEnabled;
 
+    final showContainerBackground = !_showFusion || _showResultCard;
+
     return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          if (_showSpin)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SpinRoulette(
-                  controller: _spinControllerTop,
-                  data: _topSpin,
-                  hapticsEnabled: hapticsEnabled,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: showContainerBackground
+            ? BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0B1020), Color(0xFF151E2C)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const SizedBox(height: 24),
-                SpinRoulette(
-                  controller: _spinControllerBottom,
-                  data: _bottomSpin,
-                  hapticsEnabled: hapticsEnabled,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: const Color(0xFF00D1FF).withOpacity(0.35),
                 ),
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00D1FF).withOpacity(0.2),
+                    blurRadius: 22,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              )
+            : null,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (_showSpin)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SpinRoulette(
+                    controller: _spinControllerTop,
+                    data: _topSpin,
+                    hapticsEnabled: hapticsEnabled,
+                  ),
+                  const SizedBox(height: 20),
+                  SpinRoulette(
+                    controller: _spinControllerBottom,
+                    data: _bottomSpin,
+                    hapticsEnabled: hapticsEnabled,
+                  ),
+                ],
+              ),
+            FusionOverlay(
+              showFusion: _showFusion,
+              showCard: _showResultCard,
+              p1: widget.result1,
+              p2: widget.result2,
+              ball: widget.ball,
+              mergeRotate: _mergeRotate,
+              mergeScale: _mergeScale,
+              mergeBrightness: _mergeBrightness,
+              moveUp: _moveUp,
+              moveDown: _moveDown,
+              fusionRotate: _fusionRotate,
+              fusionScale: _fusionScale,
+              fusionBrightness: _fusionBrightness,
+              mergeController: _mergeController,
+              fusionController: _fusionController,
             ),
-          FusionOverlay(
-            showFusion: _showFusion,
-            showCard: _showResultCard,
-            p1: widget.result1,
-            p2: widget.result2,
-            ball: widget.ball,
-            mergeRotate: _mergeRotate,
-            mergeScale: _mergeScale,
-            mergeBrightness: _mergeBrightness,
-            moveUp: _moveUp,
-            moveDown: _moveDown,
-            fusionRotate: _fusionRotate,
-            fusionScale: _fusionScale,
-            fusionBrightness: _fusionBrightness,
-            mergeController: _mergeController,
-            fusionController: _fusionController,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
