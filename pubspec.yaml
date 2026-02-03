@@ -24,6 +24,7 @@ dependencies:
   firebase_auth: ^6.1.4
   cloud_firestore: ^6.1.2
   firebase_remote_config: ^6.1.4
+  firebase_crashlytics: ^5.0.7
 
   # Local storage
   hive: ^2.2.3
