@@ -7,19 +7,19 @@ Future<bool?> showConfirmCloudOverwriteDialog(
     context: context,
     barrierDismissible: false,
     builder: (_) => AlertDialog(
-      title: const Text('Overwrite cloud save?'),
+      title: const Text('¿Sobrescribir la nube?'),
       content: const Text(
-        'This device has more recent progress than the cloud.\n\n'
-        'Do you want to overwrite the cloud save with this device?',
+        'Este dispositivo tiene un progreso más reciente que la nube.\n\n'
+        '¿Quieres sobrescribir la partida en la nube con la de este dispositivo?',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Overwrite cloud'),
+          child: const Text('Sobrescribir nube'),
         ),
       ],
     ),

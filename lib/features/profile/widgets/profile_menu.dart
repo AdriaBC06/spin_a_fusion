@@ -15,6 +15,7 @@ import '../../cloud/services/firebase_sync_service.dart';
 import '../../cloud/widgets/confirm_cloud_overwrite_dialog.dart';
 import 'settings_panel.dart';
 import 'leaderboard_dialog.dart';
+import 'info_dialog.dart';
 
 import '../../trade/widgets/send_fusion_flow.dart';
 
@@ -85,11 +86,11 @@ class _ProfileMenuState extends State<ProfileMenu>
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('☁️ Cloud overwritten')));
+      ).showSnackBar(const SnackBar(content: Text('☁️ Nube sobrescrita')));
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('❌ Sync failed: $e')));
+      ).showSnackBar(SnackBar(content: Text('❌ Falló la sincronización: $e')));
     }
 
     _closeMenu();
@@ -102,19 +103,19 @@ class _ProfileMenuState extends State<ProfileMenu>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Logout'),
+        title: const Text('Cerrar sesión'),
         content: const Text(
-          'This will log you out and reset all local progress on this device.\n\n'
-          'Cloud data will NOT be affected.',
+          'Esto cerrará tu sesión y reiniciará todo el progreso local en este dispositivo.\n\n'
+          'Los datos en la nube NO se verán afectados.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Logout'),
+            child: const Text('Cerrar sesión'),
           ),
         ],
       ),
@@ -136,7 +137,7 @@ class _ProfileMenuState extends State<ProfileMenu>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Sync failed: $e')),
+          SnackBar(content: Text('❌ Falló la sincronización: $e')),
         );
       }
     }
@@ -166,7 +167,7 @@ class _ProfileMenuState extends State<ProfileMenu>
       items.addAll([
         _ProfileMenuItem(
           icon: Icons.login,
-          title: 'Login',
+          title: 'Iniciar sesión',
           onTap: () {
             Navigator.of(context).push(
               PageRouteBuilder(
@@ -179,7 +180,7 @@ class _ProfileMenuState extends State<ProfileMenu>
         ),
         _ProfileMenuItem(
           icon: Icons.person_add,
-          title: 'Create account',
+          title: 'Crear cuenta',
           onTap: () {
             Navigator.of(context).push(
               PageRouteBuilder(
@@ -199,7 +200,7 @@ class _ProfileMenuState extends State<ProfileMenu>
       items.addAll([
         _ProfileMenuItem(
           icon: Icons.qr_code,
-          title: 'Receive Fusion',
+          title: 'Recibir fusión',
           onTap: () {
             _closeMenu();
             showDialog(
@@ -212,13 +213,13 @@ class _ProfileMenuState extends State<ProfileMenu>
 
         _ProfileMenuItem(
           icon: Icons.qr_code_scanner,
-          title: 'Send Fusion',
+          title: 'Enviar fusión',
           onTap: fusionCount <= 1
               ? () {
                   _closeMenu();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('❌ You need at least 2 fusions to trade'),
+                      content: Text('❌ Necesitas al menos 2 fusiones para intercambiar'),
                     ),
                   );
                 }
@@ -233,10 +234,14 @@ class _ProfileMenuState extends State<ProfileMenu>
 
         _ProfileMenuItem(
           icon: Icons.cloud_upload,
-          title: 'Sync to Cloud',
+          title: 'Sincronizar con la nube',
           onTap: _syncToCloud,
         ),
-        _ProfileMenuItem(icon: Icons.logout, title: 'Logout', onTap: _logout),
+        _ProfileMenuItem(
+          icon: Icons.logout,
+          title: 'Cerrar sesión',
+          onTap: _logout,
+        ),
       ]);
     }
 
@@ -246,7 +251,7 @@ class _ProfileMenuState extends State<ProfileMenu>
     items.addAll([
       _ProfileMenuItem(
         icon: Icons.emoji_events,
-        title: 'Leaderboard',
+        title: 'Clasificación',
         onTap: () {
           _closeMenu();
           showDialog(
@@ -257,7 +262,7 @@ class _ProfileMenuState extends State<ProfileMenu>
       ),
       _ProfileMenuItem(
         icon: Icons.settings,
-        title: 'Settings',
+        title: 'Ajustes',
         onTap: () {
           _closeMenu();
           showDialog(context: context, builder: (_) => const SettingsPanel());
@@ -265,8 +270,14 @@ class _ProfileMenuState extends State<ProfileMenu>
       ),
       _ProfileMenuItem(
         icon: Icons.info_outline,
-        title: 'About',
-        onTap: _closeMenu,
+        title: 'Info',
+        onTap: () {
+          _closeMenu();
+          showDialog(
+            context: context,
+            builder: (_) => const InfoDialog(),
+          );
+        },
       ),
     ]);
 

@@ -179,7 +179,7 @@ class LeaderboardDialog extends StatelessWidget {
                       color: Color(0xFFFFD645)),
                   const SizedBox(width: 8),
                   Text(
-                    'Leaderboard',
+                    'Clasificación',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ],
@@ -230,7 +230,7 @@ class LeaderboardDialog extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
+                  child: const Text('Cerrar'),
                 ),
               ),
             ],

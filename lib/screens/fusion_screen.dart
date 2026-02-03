@@ -83,6 +83,60 @@ class FusionScreen extends StatelessWidget {
     }
   }
 
+  void _autoSellFusions(
+    BuildContext context,
+    List<FusionEntry> fusions,
+  ) {
+    final slots = context.read<HomeSlotsProvider>();
+    final collection = context.read<FusionCollectionProvider>();
+
+    final homeKeys = <String>{
+      for (final fusion in slots.slots)
+        if (fusion != null) _key(fusion),
+    };
+
+    final protectedTopN = _topNFusions(
+      fusions,
+      slots.unlockedCount,
+    ).toSet();
+
+    final toSell = <FusionEntry>[];
+
+    for (final fusion in fusions) {
+      final inHome = homeKeys.contains(_key(fusion));
+      final isProtected = inHome || protectedTopN.contains(fusion);
+      final isFavorite = fusion.favorite;
+
+      if (!isProtected && !isFavorite) {
+        toSell.add(fusion);
+      }
+    }
+
+    for (final fusion in toSell) {
+      collection.removeFusion(fusion, homeSlots: slots);
+    }
+  }
+
+  String _key(FusionEntry fusion) =>
+      '${fusion.p1.fusionId}:${fusion.p2.fusionId}';
+
+  List<FusionEntry> _topNFusions(
+    List<FusionEntry> fusions,
+    int n,
+  ) {
+    if (n <= 0) return [];
+
+    final sorted = List<FusionEntry>.from(fusions)
+      ..sort(
+        (a, b) =>
+            FusionEconomy.incomePerSecond(b)
+                .compareTo(FusionEconomy.incomePerSecond(a)),
+      );
+
+    if (sorted.length <= n) return sorted;
+    return sorted.take(n).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final fusionProvider =
@@ -170,6 +224,31 @@ class FusionScreen extends StatelessWidget {
                 : () => _addBestFusions(context, fusions),
             child: const Text(
               'Añadir Mejores',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 16,
+          bottom: 16,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 14,
+              ),
+              backgroundColor: const Color(0xFFFF2D95),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: fusions.isEmpty
+                ? null
+                : () => _autoSellFusions(context, fusions),
+            icon: const Icon(Icons.delete_sweep),
+            label: const Text(
+              'Auto-vender',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

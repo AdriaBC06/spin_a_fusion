@@ -58,4 +58,13 @@ class FusionCollectionProvider extends ChangeNotifier {
   }
 
   bool contains(FusionEntry fusion) => _box.values.contains(fusion);
+
+  void toggleFavorite(FusionEntry fusion) {
+    final index = _box.values.toList().indexOf(fusion);
+    if (index == -1) return;
+
+    final updated = fusion.copyWith(favorite: !fusion.favorite);
+    _box.putAt(index, updated);
+    notifyListeners();
+  }
 }

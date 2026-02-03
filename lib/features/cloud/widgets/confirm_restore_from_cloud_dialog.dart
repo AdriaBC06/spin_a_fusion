@@ -7,20 +7,20 @@ Future<bool?> showConfirmRestoreFromCloudDialog(
     context: context,
     barrierDismissible: false,
     builder: (_) => AlertDialog(
-      title: const Text('Cloud save found'),
+      title: const Text('Se encontró una partida en la nube'),
       content: const Text(
-        'A cloud save was found for this account.\n\n'
-        'Do you want to overwrite your local progress '
-        'with the cloud save?',
+        'Se encontró una partida en la nube para esta cuenta.\n\n'
+        '¿Quieres sobrescribir tu progreso local '
+        'con la partida de la nube?',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Keep local'),
+          child: const Text('Mantener local'),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Use cloud'),
+          child: const Text('Usar nube'),
         ),
       ],
     ),

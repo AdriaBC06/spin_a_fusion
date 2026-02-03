@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../providers/pokedex_provider.dart';
 import '../providers/game_provider.dart';
@@ -9,7 +10,10 @@ import '../providers/fusion_pedia_provider.dart';
 import '../providers/home_slots_provider.dart';
 
 import '../features/cloud/services/firebase_restore_service.dart';
+import '../features/cloud/services/remote_config_service.dart';
 import '../features/cloud/widgets/confirm_restore_from_cloud_dialog.dart';
+import '../features/shared/force_update_screen.dart';
+import '../core/bootstrap/app_init.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -20,6 +24,10 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
   bool _restoreChecked = false;
+  bool _updateChecked = false;
+  bool _needsUpdate = false;
+  String _updateMessage = '';
+  String _updateUrl = '';
 
   @override
   void initState() {
@@ -28,6 +36,37 @@ class _LoadingScreenState extends State<LoadingScreen> {
     Future.microtask(() {
       context.read<PokedexProvider>().initialize();
     });
+
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate() async {
+    if (!kFirebaseSupported) {
+      if (mounted) setState(() => _updateChecked = true);
+      return;
+    }
+
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final build =
+          int.tryParse(info.buildNumber) ?? 0;
+
+      final remote = RemoteConfigService();
+      await remote.init();
+
+      if (!mounted) return;
+
+      setState(() {
+        _updateChecked = true;
+        _needsUpdate = build < remote.minBuild;
+        _updateMessage = remote.message;
+        _updateUrl = remote.updateUrl;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => _updateChecked = true);
+      }
+    }
   }
 
   Future<void> _maybeRestoreFromCloud() async {
@@ -70,13 +109,22 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     final pokedex = context.watch<PokedexProvider>();
 
+    if (_updateChecked && _needsUpdate) {
+      return ForceUpdateScreen(
+        message: _updateMessage,
+        updateUrl: _updateUrl,
+      );
+    }
+
     if (pokedex.isLoaded) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _maybeRestoreFromCloud().then((_) {
-          Navigator.of(context)
-              .pushReplacementNamed('/home');
+      if (_updateChecked) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _maybeRestoreFromCloud().then((_) {
+            Navigator.of(context)
+                .pushReplacementNamed('/home');
+          });
         });
-      });
+      }
 
       return const SizedBox.shrink();
     }

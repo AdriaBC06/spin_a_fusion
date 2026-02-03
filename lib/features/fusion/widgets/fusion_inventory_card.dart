@@ -117,14 +117,49 @@ class FusionInventoryCard extends StatelessWidget {
                       const Color(0xFF00D1FF).withOpacity(0.4),
                 ),
               ),
-              child: Image.network(
-                fusion.customFusionUrl,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    Image.network(
-                  fusion.autoGenFusionUrl,
-                  fit: BoxFit.contain,
-                ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.network(
+                      fusion.customFusionUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          Image.network(
+                        fusion.autoGenFusionUrl,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () =>
+                          collection.toggleFavorite(fusion),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: fusion.favorite
+                                ? const Color(0xFFFFD645)
+                                : Colors.white24,
+                          ),
+                        ),
+                        child: Icon(
+                          fusion.favorite
+                              ? Icons.star
+                              : Icons.star_border,
+                          size: 16,
+                          color: fusion.favorite
+                              ? const Color(0xFFFFD645)
+                              : Colors.white70,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

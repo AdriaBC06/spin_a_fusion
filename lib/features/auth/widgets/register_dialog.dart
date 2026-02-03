@@ -28,7 +28,7 @@ class _RegisterDialogState extends State<RegisterDialog> {
     try {
       final username = _usernameController.text.trim();
       if (username.isEmpty) {
-        throw Exception('Username is required');
+        throw Exception('Se requiere nombre de usuario');
       }
 
       await _authService.register(
@@ -62,22 +62,22 @@ class _RegisterDialogState extends State<RegisterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create account'),
+      title: const Text('Crear cuenta'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _usernameController,
             decoration:
-                const InputDecoration(labelText: 'Username'),
+                const InputDecoration(labelText: 'Nombre de usuario'),
           ),
           TextField(
             controller: _emailController,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'Correo'),
           ),
           TextField(
             controller: _passwordController,
-            decoration: const InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Contraseña'),
             obscureText: true,
           ),
         ],
@@ -85,7 +85,7 @@ class _RegisterDialogState extends State<RegisterDialog> {
       actions: [
         TextButton(
           onPressed: _loading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: _loading ? null : _register,
@@ -95,7 +95,7 @@ class _RegisterDialogState extends State<RegisterDialog> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Create'),
+              : const Text('Crear'),
         ),
       ],
     );

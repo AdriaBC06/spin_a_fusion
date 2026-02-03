@@ -114,7 +114,7 @@ class _InventorySectionState extends State<InventorySection> {
                   autoSpinUnlocked
                       ? (autoSpinActive
                           ? Icons.stop_circle
-                          : Icons.auto_awesome)
+                          : Icons.autorenew)
                       : Icons.lock,
                   size: 18,
                 ),

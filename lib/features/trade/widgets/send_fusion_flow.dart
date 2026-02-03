@@ -117,7 +117,7 @@ class _SendFusionFlowState extends State<SendFusionFlow> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('🎁 Fusion sent successfully')),
+        const SnackBar(content: Text('🎁 Fusión enviada con éxito')),
       );
 
       Navigator.pop(context);
@@ -135,7 +135,7 @@ class _SendFusionFlowState extends State<SendFusionFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Send Fusion')),
+      appBar: AppBar(title: const Text('Enviar fusión')),
       body: MobileScanner(
         onDetect: (capture) {
           final barcode = capture.barcodes.first;

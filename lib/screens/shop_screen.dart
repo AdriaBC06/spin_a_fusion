@@ -29,7 +29,7 @@ class ShopScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Balls',
+            'Pokéballs',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),

@@ -103,19 +103,19 @@ class _LoginDialogState extends State<LoginDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Login'),
+      title: const Text('Iniciar sesión'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _emailController,
             decoration:
-                const InputDecoration(labelText: 'Email'),
+                const InputDecoration(labelText: 'Correo'),
           ),
           TextField(
             controller: _passwordController,
             decoration:
-                const InputDecoration(labelText: 'Password'),
+                const InputDecoration(labelText: 'Contraseña'),
             obscureText: true,
           ),
         ],
@@ -125,7 +125,7 @@ class _LoginDialogState extends State<LoginDialog> {
           onPressed: _loading
               ? null
               : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: _loading ? null : _login,
@@ -136,7 +136,7 @@ class _LoginDialogState extends State<LoginDialog> {
                   child:
                       CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Login'),
+              : const Text('Iniciar sesión'),
         ),
       ],
     );

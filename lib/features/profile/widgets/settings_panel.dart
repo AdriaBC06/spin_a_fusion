@@ -59,7 +59,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Username updated')),
+        const SnackBar(content: Text('Nombre de usuario actualizado')),
       );
     }
   }
@@ -76,7 +76,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
     final isLoggedIn = _user != null;
 
     return AlertDialog(
-      title: const Text('Settings'),
+      title: const Text('Ajustes'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -88,7 +88,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Username',
+                  'Nombre de usuario',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
@@ -98,7 +98,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
               TextField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
-                  hintText: 'Enter your username',
+                  hintText: 'Escribe tu nombre de usuario',
                   border: OutlineInputBorder(),
                 ),
                 maxLength: 20,
@@ -118,6 +118,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
                           ),
                         )
                       : const Text('Save username'),
+                      : const Text('Guardar nombre de usuario'),
                 ),
               ),
               const Divider(height: 32),
@@ -127,9 +128,9 @@ class _SettingsPanelState extends State<SettingsPanel> {
             // VIBRATION TOGGLE
             // ----------------------------------
             SwitchListTile(
-              title: const Text('Vibration'),
+              title: const Text('Vibración'),
               subtitle: const Text(
-                'Enable vibration effects',
+                'Activar efectos de vibración',
               ),
               value: settings.vibrationEnabled,
               onChanged: settings.setVibrationEnabled,
@@ -154,7 +155,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+          child: const Text('Cerrar'),
         ),
       ],
     );

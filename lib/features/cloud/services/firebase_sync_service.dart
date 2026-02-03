@@ -82,6 +82,8 @@ class FirebaseSyncService {
 
       'ownedFusions':
           _encodeFusions(collection.allFusions),
+      'ownedFusionsV2':
+          _encodeFusionsWithFavorites(collection.allFusions),
       'pediaFusions':
           _encodePediaClaims(pedia.sortedFusions),
       'pediaCount': pedia.sortedFusions.length,
@@ -116,6 +118,26 @@ class FirebaseSyncService {
             ))
         .toSet()
         .toList();
+  }
+
+  Map<String, bool> _encodeFusionsWithFavorites(
+      List<FusionEntry> fusions) {
+    final map = <String, bool>{};
+
+    for (final fusion in fusions) {
+      final key = _fusionKey(
+        fusion.p1.fusionId,
+        fusion.p2.fusionId,
+      );
+
+      if (fusion.favorite) {
+        map[key.toString()] = true;
+      } else {
+        map.putIfAbsent(key.toString(), () => false);
+      }
+    }
+
+    return map;
   }
 
   Map<String, bool> _encodePediaClaims(

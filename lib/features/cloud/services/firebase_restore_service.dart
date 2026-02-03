@@ -60,8 +60,11 @@ class FirebaseRestoreService {
     // -------- FUSIONS --------
     final pokemonBox = Hive.box<Pokemon>('pokedex');
 
-    FusionEntry decode(int key,
-        {bool claimPending = false}) {
+    FusionEntry decode(
+      int key, {
+      bool claimPending = false,
+      bool favorite = false,
+    }) {
       final id1 = key ~/ expectedPokemonCount;
       final id2 = key % expectedPokemonCount;
 
@@ -79,13 +82,25 @@ class FirebaseRestoreService {
         ball: BallType.poke,
         rarity: 1.0,
         claimPending: claimPending,
+        favorite: favorite,
       );
     }
 
-    final owned =
-        List<int>.from(cloud['ownedFusions'] ?? []);
+    final ownedFavoritesRaw = cloud['ownedFusionsV2'];
+    final favoriteMap = <int, bool>{};
+
+    if (ownedFavoritesRaw is Map<String, dynamic>) {
+      for (final entry in ownedFavoritesRaw.entries) {
+        final key = int.tryParse(entry.key);
+        if (key == null) continue;
+        favoriteMap[key] = entry.value == true;
+      }
+    }
+
+    final owned = List<int>.from(cloud['ownedFusions'] ?? []);
     for (final key in owned) {
-      collection.addFusion(decode(key));
+      final favorite = favoriteMap[key] ?? false;
+      collection.addFusion(decode(key, favorite: favorite));
     }
 
     final pediaClaimsRaw = cloud['pediaFusions'];

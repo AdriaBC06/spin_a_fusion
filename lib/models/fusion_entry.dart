@@ -21,12 +21,16 @@ class FusionEntry {
   @HiveField(4)
   final bool claimPending;
 
+  @HiveField(5)
+  final bool favorite;
+
   const FusionEntry({
     required this.p1,
     required this.p2,
     required this.ball,
     required this.rarity,
     this.claimPending = false,
+    this.favorite = false,
   });
 
   int get totalStats => p1.totalStats + p2.totalStats;
@@ -55,6 +59,7 @@ class FusionEntry {
     BallType? ball,
     double? rarity,
     bool? claimPending,
+    bool? favorite,
   }) {
     return FusionEntry(
       p1: p1 ?? this.p1,
@@ -62,6 +67,7 @@ class FusionEntry {
       ball: ball ?? this.ball,
       rarity: rarity ?? this.rarity,
       claimPending: claimPending ?? this.claimPending,
+      favorite: favorite ?? this.favorite,
     );
   }
 }

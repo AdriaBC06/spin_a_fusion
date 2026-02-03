@@ -63,7 +63,7 @@ class ShopDiamondCard extends StatelessWidget {
             )
           else
             const Icon(
-              Icons.auto_awesome,
+              Icons.autorenew,
               color: Color(0xFF7DE7FF),
               size: 28,
             ),

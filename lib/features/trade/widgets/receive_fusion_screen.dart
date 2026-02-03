@@ -167,11 +167,11 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
       HapticFeedback.mediumImpact();
     }
 
-    final senderName = data['senderName'] ?? 'Someone';
+    final senderName = data['senderName'] ?? 'Alguien';
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('🎁 Fusion received from $senderName'),
+        content: Text('🎁 Fusión recibida de $senderName'),
       ),
     );
 
@@ -218,7 +218,7 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Receive Fusion'),
+        title: const Text('Recibir fusión'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: _cancel,
@@ -237,7 +237,7 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Expires in ${_remaining.inSeconds}s',
+                    'Expira en ${_remaining.inSeconds}s',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),

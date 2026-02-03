@@ -11,11 +11,11 @@ class FusionPickerDialog extends StatelessWidget {
     final fusions = context.watch<FusionCollectionProvider>().fusions;
 
     return AlertDialog(
-      title: const Text('Select Fusion to Send'),
+      title: const Text('Selecciona la fusión a enviar'),
       content: SizedBox(
         width: double.maxFinite,
         child: fusions.length <= 1
-            ? const Text('You need at least 2 fusions to trade.')
+            ? const Text('Necesitas al menos 2 fusiones para intercambiar.')
             : ListView.builder(
                 shrinkWrap: true,
                 itemCount: fusions.length <= 1 ? 0 : fusions.length,
@@ -30,23 +30,23 @@ class FusionPickerDialog extends StatelessWidget {
                           Image.network(fusion.autoGenFusionUrl, width: 48),
                     ),
                     title: Text(fusion.fusionName),
-                    subtitle: Text('Ball: ${fusion.ball.name}'),
+                    subtitle: Text('Bola: ${fusion.ball.name}'),
                     onTap: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (_) => AlertDialog(
-                          title: const Text('Confirm Send'),
+                          title: const Text('Confirmar envío'),
                           content: Text(
-                            'Send ${fusion.fusionName}?',
+                            '¿Enviar ${fusion.fusionName}?',
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                              child: const Text('Cancelar'),
                             ),
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Send'),
+                              child: const Text('Enviar'),
                             ),
                           ],
                         ),
@@ -63,7 +63,7 @@ class FusionPickerDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
       ],
     );

@@ -33,7 +33,7 @@ class _DebugAddCurrencyDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Debug: Add Currency'),
+      title: const Text('Debug: Añadir moneda'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -41,7 +41,7 @@ class _DebugAddCurrencyDialogState
             controller: _moneyController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Money',
+              labelText: 'Dinero',
               border: OutlineInputBorder(),
             ),
           ),
@@ -50,7 +50,7 @@ class _DebugAddCurrencyDialogState
             controller: _diamondController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Diamonds',
+              labelText: 'Diamantes',
               border: OutlineInputBorder(),
             ),
           ),
@@ -62,20 +62,20 @@ class _DebugAddCurrencyDialogState
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (_) => AlertDialog(
-                    title: const Text('Reset Progress'),
+                    title: const Text('Reiniciar progreso'),
                     content: const Text(
-                      'This will reset all local progress on this device.',
+                      'Esto reiniciará todo el progreso local en este dispositivo.',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () =>
                             Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                        child: const Text('Cancelar'),
                       ),
                       ElevatedButton(
                         onPressed: () =>
                             Navigator.pop(context, true),
-                        child: const Text('Reset'),
+                        child: const Text('Reiniciar'),
                       ),
                     ],
                   ),
@@ -98,7 +98,7 @@ class _DebugAddCurrencyDialogState
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Reset All Progress'),
+              child: const Text('Reiniciar todo el progreso'),
             ),
           ),
         ],
@@ -106,7 +106,7 @@ class _DebugAddCurrencyDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -122,7 +122,7 @@ class _DebugAddCurrencyDialogState
 
             Navigator.pop(context);
           },
-          child: const Text('Add'),
+          child: const Text('Añadir'),
         ),
       ],
     );

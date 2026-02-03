@@ -23,18 +23,18 @@ class HomeSlotLockedTile extends StatelessWidget {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (_) => AlertDialog(
-            title: const Text('Unlock Slot'),
+            title: const Text('Desbloquear casilla'),
             content: Text(
-              'Spend $cost diamonds to unlock this slot?',
+              '¿Gastar $cost diamantes para desbloquear esta casilla?',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: const Text('Cancelar'),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Buy'),
+                child: const Text('Comprar'),
               ),
             ],
           ),
@@ -50,8 +50,8 @@ class HomeSlotLockedTile extends StatelessWidget {
             SnackBar(
               content: Text(
                 diamonds < (cost ?? 0)
-                    ? '❌ Not enough diamonds'
-                    : '❌ Slot unavailable',
+                    ? '❌ No tienes suficientes diamantes'
+                    : '❌ Casilla no disponible',
               ),
             ),
           );

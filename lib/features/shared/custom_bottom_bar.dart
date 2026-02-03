@@ -28,7 +28,7 @@ class CustomBottomBar extends StatelessWidget {
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Inicio',
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.auto_awesome),
