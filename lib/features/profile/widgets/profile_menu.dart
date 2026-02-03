@@ -14,7 +14,6 @@ import '../../../providers/home_slots_provider.dart';
 import '../../cloud/services/firebase_sync_service.dart';
 import '../../cloud/widgets/confirm_cloud_overwrite_dialog.dart';
 import 'settings_panel.dart';
-import 'debug_add_currency_dialog.dart';
 import 'leaderboard_dialog.dart';
 
 import '../../trade/widgets/send_fusion_flow.dart';
@@ -253,17 +252,6 @@ class _ProfileMenuState extends State<ProfileMenu>
           showDialog(
             context: context,
             builder: (_) => LeaderboardDialog(),
-          );
-        },
-      ),
-      _ProfileMenuItem(
-        icon: Icons.bug_report,
-        title: 'Debug: Add Currency',
-        onTap: () {
-          _closeMenu();
-          showDialog(
-            context: context,
-            builder: (_) => const DebugAddCurrencyDialog(),
           );
         },
       ),
