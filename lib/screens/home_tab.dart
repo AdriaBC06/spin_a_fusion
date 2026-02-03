@@ -26,10 +26,7 @@ class HomeTab extends StatelessWidget {
             child: Divider(thickness: 2),
           ),
           SizedBox(height: 16),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: InventorySection(),
-          ),
+          InventorySection(),
           SizedBox(height: 24),
         ],
       ),
