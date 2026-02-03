@@ -13,6 +13,8 @@ class FirebaseSyncService {
       FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  static DateTime? _lastSyncAt;
+
   // ------------------------------------------------------
   // PUBLIC API
   // ------------------------------------------------------
@@ -27,6 +29,13 @@ class FirebaseSyncService {
       throw Exception('User not logged in');
     }
 
+    final now = DateTime.now();
+    if (_lastSyncAt != null &&
+        now.difference(_lastSyncAt!) <
+            const Duration(minutes: 1)) {
+      return;
+    }
+
     final payload = _buildPayload(
       game: game,
       collection: collection,
@@ -38,6 +47,8 @@ class FirebaseSyncService {
         .collection('users')
         .doc(user.uid)
         .set(payload, SetOptions(merge: true));
+
+    _lastSyncAt = now;
   }
 
   // ------------------------------------------------------
@@ -49,13 +60,20 @@ class FirebaseSyncService {
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
   }) {
+    final username = _auth.currentUser?.displayName;
+
     return {
       'schemaVersion': 3,
       'lastSync': DateTime.now().millisecondsSinceEpoch,
 
       'playTimeSeconds': game.playTimeSeconds,
+      'playTimeMinutes': (game.playTimeSeconds / 60).floor(),
       'money': game.money,
       'diamonds': game.diamonds,
+      'totalSpins': game.totalSpins,
+
+      if (username != null && username.isNotEmpty)
+        'username': username,
 
       'balls': _encodeBalls(game),
 
@@ -63,6 +81,7 @@ class FirebaseSyncService {
           _encodeFusions(collection.allFusions),
       'pediaFusions':
           _encodePediaClaims(pedia.sortedFusions),
+      'pediaCount': pedia.sortedFusions.length,
 
       // 🔥 HOME SLOTS
       'homeSlots': _encodeHomeSlots(homeSlots),

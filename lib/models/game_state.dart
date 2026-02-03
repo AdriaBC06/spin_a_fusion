@@ -17,11 +17,15 @@ class GameState {
   @HiveField(3)
   int playTimeSeconds;
 
+  @HiveField(4)
+  int totalSpins;
+
   GameState({
     required this.money,
     required this.diamonds,
     required this.balls,
     required this.playTimeSeconds,
+    required this.totalSpins,
   });
 
   factory GameState.initial() => GameState(
@@ -34,5 +38,6 @@ class GameState {
           BallType.master: 0,
         },
         playTimeSeconds: 0,
+        totalSpins: 0,
       );
 }

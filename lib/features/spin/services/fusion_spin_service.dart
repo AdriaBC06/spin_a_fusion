@@ -22,6 +22,8 @@ class FusionSpinService {
     if (!game.useBall(ball)) return;
     if (!pokedex.isLoaded) return;
 
+    game.addSpin();
+
     // Prepare pool
     final pool = List.of(pokedex.pokemonList)..shuffle();
 

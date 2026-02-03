@@ -72,6 +72,7 @@ class GameProvider extends ChangeNotifier {
   int get money => _state.money;
   int get diamonds => _state.diamonds;
   int get playTimeSeconds => _state.playTimeSeconds;
+  int get totalSpins => _state.totalSpins;
 
   int ballCount(BallType type) => _state.balls[type] ?? 0;
 
@@ -118,6 +119,24 @@ class GameProvider extends ChangeNotifier {
 
   void setMoney(int amount) {
     _state.money = amount;
+    _save();
+    notifyListeners();
+  }
+
+  void setPlayTimeSeconds(int seconds) {
+    _state.playTimeSeconds = seconds;
+    _save();
+    notifyListeners();
+  }
+
+  void setTotalSpins(int amount) {
+    _state.totalSpins = amount;
+    _save();
+    notifyListeners();
+  }
+
+  void addSpin() {
+    _state.totalSpins += 1;
     _save();
     notifyListeners();
   }

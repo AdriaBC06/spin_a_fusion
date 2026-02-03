@@ -43,6 +43,8 @@ class FirebaseRestoreService {
     // -------- GAME --------
     game.setMoney(cloud['money'] ?? 0);
     game.setDiamonds(cloud['diamonds'] ?? 0);
+    game.setPlayTimeSeconds(cloud['playTimeSeconds'] ?? 0);
+    game.setTotalSpins(cloud['totalSpins'] ?? 0);
 
     // -------- BALLS --------
     final balls =

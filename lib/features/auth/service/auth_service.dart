@@ -7,6 +7,7 @@ class AuthService {
   Future<UserCredential> register({
     required String email,
     required String password,
+    required String username,
   }) async {
     debugPrint('🟡 REGISTER START');
     debugPrint('📧 Email: $email');
@@ -17,6 +18,10 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      if (credential.user != null && username.isNotEmpty) {
+        await credential.user!.updateDisplayName(username);
+      }
 
       debugPrint('✅ REGISTER SUCCESS');
       debugPrint('👤 UID: ${credential.user?.uid}');
