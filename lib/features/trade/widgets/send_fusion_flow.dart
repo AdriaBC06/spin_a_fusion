@@ -9,6 +9,9 @@ import 'package:spin_a_fusion/providers/home_slots_provider.dart';
 
 import '../services/firebase_trade_service.dart';
 import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../features/cloud/services/firebase_sync_service.dart';
 import '../../../models/fusion_entry.dart';
 import 'fusion_picker_dialog.dart';
 
@@ -45,7 +48,18 @@ class _SendFusionFlowState extends State<SendFusionFlow> {
       // --------------------------------------
       // FETCH SENDER USERNAME
       // --------------------------------------
-      final user = FirebaseAuth.instance.currentUser!;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('❌ Debes iniciar sesión para enviar'),
+            ),
+          );
+          Navigator.pop(context);
+        }
+        return;
+      }
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -91,6 +105,14 @@ class _SendFusionFlowState extends State<SendFusionFlow> {
         senderCollection: senderCollection,
       );
       context.read<HomeSlotsProvider>().purgeFusion(fusion);
+
+      await FirebaseSyncService().sync(
+        game: context.read<GameProvider>(),
+        collection: context.read<FusionCollectionProvider>(),
+        pedia: context.read<FusionPediaProvider>(),
+        homeSlots: context.read<HomeSlotsProvider>(),
+        force: true,
+      );
 
       if (!mounted) return;
 

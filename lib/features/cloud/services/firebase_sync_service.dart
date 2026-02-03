@@ -23,6 +23,7 @@ class FirebaseSyncService {
     required FusionCollectionProvider collection,
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
+    bool force = false,
   }) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -30,7 +31,8 @@ class FirebaseSyncService {
     }
 
     final now = DateTime.now();
-    if (_lastSyncAt != null &&
+    if (!force &&
+        _lastSyncAt != null &&
         now.difference(_lastSyncAt!) <
             const Duration(minutes: 1)) {
       return;

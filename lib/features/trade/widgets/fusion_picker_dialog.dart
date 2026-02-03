@@ -29,7 +29,7 @@ class FusionPickerDialog extends StatelessWidget {
                       errorBuilder: (_, __, ___) =>
                           Image.network(fusion.autoGenFusionUrl, width: 48),
                     ),
-                    title: Text('${fusion.p1.name} + ${fusion.p2.name}'),
+                    title: Text(fusion.fusionName),
                     subtitle: Text('Ball: ${fusion.ball.name}'),
                     onTap: () async {
                       final confirm = await showDialog<bool>(
@@ -37,7 +37,7 @@ class FusionPickerDialog extends StatelessWidget {
                         builder: (_) => AlertDialog(
                           title: const Text('Confirm Send'),
                           content: Text(
-                            'Send ${fusion.p1.name} + ${fusion.p2.name}?',
+                            'Send ${fusion.fusionName}?',
                           ),
                           actions: [
                             TextButton(

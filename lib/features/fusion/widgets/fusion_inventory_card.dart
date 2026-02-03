@@ -7,6 +7,7 @@ import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/game_provider.dart';
 import '../fusion_economy.dart';
 import 'fusion_summary_modal.dart';
+import '../../../core/constants/pokedex_constants.dart';
 
 class FusionInventoryCard extends StatelessWidget {
   final FusionEntry fusion;
@@ -26,6 +27,21 @@ class FusionInventoryCard extends StatelessWidget {
     final bool canAdd = slots.hasEmptyUnlockedSlot;
     final int incomePerSec =
         FusionEconomy.incomePerSecond(fusion);
+    final int totalFusions = collection.fusions.length;
+    final int money = game.money;
+    final int minBallPrice = ballPrices[BallType.poke]!;
+    final bool hasAnyBall = BallType.values
+        .any((type) => game.ballCount(type) > 0);
+
+    bool _canSell() {
+      if (money >= minBallPrice) {
+        return totalFusions > 0;
+      }
+      if (hasAnyBall) {
+        return totalFusions > 0;
+      }
+      return totalFusions > 2;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -152,6 +168,16 @@ class FusionInventoryCard extends StatelessWidget {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
+                  if (!_canSell()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          '❌ Debes conservar al menos una fusión',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
                   if (isAdded) {
                     slots.removeFusion(fusion);
                   }

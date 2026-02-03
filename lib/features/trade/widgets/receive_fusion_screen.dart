@@ -10,6 +10,10 @@ import 'package:hive/hive.dart';
 import '../services/firebase_trade_service.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/home_slots_provider.dart';
+import '../../cloud/services/firebase_sync_service.dart';
 import '../../../models/fusion_entry.dart';
 import '../../../models/pokemon.dart';
 import '../../../core/constants/pokedex_constants.dart';
@@ -47,7 +51,17 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
   // ======================================================
   Future<void> _startTrade() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Debes iniciar sesión para recibir'),
+          ),
+        );
+        Navigator.pop(context);
+      }
+      return;
+    }
 
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
@@ -140,6 +154,14 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
     );
 
     context.read<FusionCollectionProvider>().addFusion(fusion);
+
+    FirebaseSyncService().sync(
+      game: context.read<GameProvider>(),
+      collection: context.read<FusionCollectionProvider>(),
+      pedia: context.read<FusionPediaProvider>(),
+      homeSlots: context.read<HomeSlotsProvider>(),
+      force: true,
+    );
 
     if (context.read<SettingsProvider>().vibrationEnabled) {
       HapticFeedback.mediumImpact();
