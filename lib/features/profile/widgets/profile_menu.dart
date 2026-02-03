@@ -124,12 +124,29 @@ class _ProfileMenuState extends State<ProfileMenu>
       return;
     }
 
+    // Auto-sync before logout.
+    try {
+      await FirebaseSyncService().sync(
+        game: context.read<GameProvider>(),
+        collection: context.read<FusionCollectionProvider>(),
+        pedia: context.read<FusionPediaProvider>(),
+        homeSlots: context.read<HomeSlotsProvider>(),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Sync failed: $e')),
+        );
+      }
+    }
+
+    // Sign out after sync.
+    await FirebaseAuth.instance.signOut();
+
     await context.read<GameProvider>().resetToDefault();
     await context.read<FusionCollectionProvider>().resetToDefault();
     await context.read<FusionPediaProvider>().resetToDefault();
     await context.read<HomeSlotsProvider>().resetToDefault();
-
-    await FirebaseAuth.instance.signOut();
     _closeMenu();
   }
 

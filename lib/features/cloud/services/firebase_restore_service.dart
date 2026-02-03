@@ -41,13 +41,8 @@ class FirebaseRestoreService {
     required HomeSlotsProvider homeSlots,
   }) async {
     // -------- GAME --------
-    game
-      ..spendMoney(game.money)
-      ..addMoney(cloud['money'] ?? 0);
-
-    game
-      ..spendMoney(game.diamonds)
-      ..addMoney(cloud['diamonds'] ?? 0);
+    game.setMoney(cloud['money'] ?? 0);
+    game.setDiamonds(cloud['diamonds'] ?? 0);
 
     // -------- BALLS --------
     final balls =
