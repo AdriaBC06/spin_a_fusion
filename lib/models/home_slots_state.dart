@@ -8,8 +8,20 @@ class HomeSlotsState {
   @HiveField(0)
   final List<FusionEntry?> slots;
 
-  HomeSlotsState(this.slots);
+  @HiveField(1)
+  int unlockedCount;
 
-  factory HomeSlotsState.empty(int totalSlots) =>
-      HomeSlotsState(List<FusionEntry?>.filled(totalSlots, null));
+  HomeSlotsState({
+    required this.slots,
+    required this.unlockedCount,
+  });
+
+  factory HomeSlotsState.empty(
+    int totalSlots, {
+    int unlockedCount = 3,
+  }) =>
+      HomeSlotsState(
+        slots: List<FusionEntry?>.filled(totalSlots, null),
+        unlockedCount: unlockedCount,
+      );
 }

@@ -57,6 +57,17 @@ class _LoginDialogState extends State<LoginDialog> {
         );
 
         if (choice == CloudRestoreChoice.cloud) {
+          await context.read<GameProvider>().resetToDefault();
+          await context
+              .read<FusionCollectionProvider>()
+              .resetToDefault();
+          await context
+              .read<FusionPediaProvider>()
+              .resetToDefault();
+          await context
+              .read<HomeSlotsProvider>()
+              .resetToDefault();
+
           await restoreService.restoreFromCloud(
             cloud: cloud,
             game: context.read<GameProvider>(),

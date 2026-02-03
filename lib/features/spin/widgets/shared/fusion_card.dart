@@ -33,6 +33,14 @@ class FusionCard extends StatelessWidget {
     return '1 in ${rounded.toInt()}';
   }
 
+  String _fusionName() {
+    final half1 = (p1.name.length / 2).ceil();
+    final half2 = (p2.name.length / 2).ceil();
+    return (p1.name.substring(0, half1) +
+            p2.name.substring(p2.name.length - half2))
+        .toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final pokedex = context.read<PokedexProvider>();
@@ -40,7 +48,7 @@ class FusionCard extends StatelessWidget {
     final fusionProbability = pokedex.probabilityOfFusion(
       p1: p1,
       p2: p2,
-      ball: ball,
+      ball: BallType.poke,
     );
 
     final customUrl =
@@ -70,7 +78,7 @@ class FusionCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '${p1.name.toUpperCase()} - ${p2.name.toUpperCase()}',
+              _fusionName(),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -79,7 +87,7 @@ class FusionCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Rareza de fusión (${ball.name}): ${_formatOneIn(fusionProbability)}',
+              'Rareza de fusión: ${_formatOneIn(fusionProbability)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

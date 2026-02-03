@@ -115,12 +115,17 @@ class FirebaseRestoreService {
     }
 
     // -------- HOME SLOTS --------
+    final unlocked =
+        (cloud['homeSlotsUnlocked'] ?? HomeSlotsProvider.initialUnlocked)
+            as int;
+    homeSlots.setUnlockedCount(unlocked);
+
     final rawSlots =
         Map<String, dynamic>.from(cloud['homeSlots'] ?? {});
 
     for (final entry in rawSlots.entries) {
       final index = int.parse(entry.key);
-      if (index >= HomeSlotsProvider.unlockedSlots) {
+      if (index >= homeSlots.unlockedCount) {
         continue;
       }
 

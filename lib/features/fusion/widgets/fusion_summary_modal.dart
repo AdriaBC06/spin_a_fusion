@@ -1,7 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../models/fusion_entry.dart';
 import '../../../models/pokemon.dart';
+import '../../../providers/pokedex_provider.dart';
+import '../../../core/constants/pokedex_constants.dart';
 
 class FusionSummaryModal extends StatelessWidget {
   final FusionEntry fusion;
@@ -31,6 +34,13 @@ class FusionSummaryModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pokedex = context.read<PokedexProvider>();
+    final fusionProbability = pokedex.probabilityOfFusion(
+      p1: fusion.p1,
+      p2: fusion.p2,
+      ball: BallType.poke,
+    );
+
     return Dialog(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -61,10 +71,8 @@ class FusionSummaryModal extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Text('Stats totales: ${fusion.totalStats}'),
-            Text('Poké Ball: ${fusion.ball.name}'),
             Text(
-              'Rareza: ${_formatOneIn(fusion.rarity)}',
+              'Rareza: ${_formatOneIn(fusionProbability)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],

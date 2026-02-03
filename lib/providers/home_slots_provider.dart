@@ -6,13 +6,14 @@ import '../models/fusion_entry.dart';
 import '../models/home_slots_state.dart';
 import 'game_provider.dart';
 import '../features/fusion/fusion_economy.dart';
+import '../core/constants/home_slot_prices.dart';
 
 class HomeSlotsProvider extends ChangeNotifier {
   // ----------------------------
   // CONFIG
   // ----------------------------
-  static const int totalSlots = 12;
-  static const int unlockedSlots = 3;
+  static const int totalSlots = 15;
+  static const int initialUnlocked = 3;
   static const String _boxName = 'home_slots';
   static const String _stateKey = 'state';
 
@@ -42,8 +43,17 @@ class HomeSlotsProvider extends ChangeNotifier {
     final saved = _box.get(_stateKey);
     if (saved != null) {
       _state = saved;
+      _state.unlockedCount = _state.unlockedCount <= 0
+          ? initialUnlocked
+          : _state.unlockedCount.clamp(
+              initialUnlocked,
+              totalSlots,
+            );
     } else {
-      _state = HomeSlotsState.empty(totalSlots);
+      _state = HomeSlotsState.empty(
+        totalSlots,
+        unlockedCount: initialUnlocked,
+      );
       await _box.put(_stateKey, _state);
     }
 
@@ -106,8 +116,24 @@ class HomeSlotsProvider extends ChangeNotifier {
   List<FusionEntry?> get slots =>
       List.unmodifiable(_state.slots);
 
+  int get unlockedCount => _state.unlockedCount;
+
+  int? get nextUnlockCost {
+    final index = unlockedCount - initialUnlocked;
+    if (index < 0 || index >= homeSlotPrices.length) {
+      return null;
+    }
+    return homeSlotPrices[index];
+  }
+
+  List<FusionEntry?> get displaySlots {
+    final displayCount =
+        (unlockedCount + 1).clamp(0, totalSlots);
+    return List.unmodifiable(_state.slots.take(displayCount));
+  }
+
   bool get hasEmptyUnlockedSlot {
-    for (int i = 0; i < unlockedSlots; i++) {
+    for (int i = 0; i < unlockedCount; i++) {
       if (_state.slots[i] == null) return true;
     }
     return false;
@@ -119,7 +145,7 @@ class HomeSlotsProvider extends ChangeNotifier {
           f?.p2.fusionId == fusion.p2.fusionId);
 
   bool addFusion(FusionEntry fusion) {
-    for (int i = 0; i < unlockedSlots; i++) {
+    for (int i = 0; i < unlockedCount; i++) {
       if (_state.slots[i] == null) {
         _state.slots[i] = fusion;
         _save();
@@ -135,7 +161,7 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 
   void setSlot(int index, FusionEntry? fusion) {
-    if (index < 0 || index >= unlockedSlots) return;
+    if (index < 0 || index >= unlockedCount) return;
 
     _state.slots[index] = fusion;
     _save();
@@ -168,7 +194,7 @@ class HomeSlotsProvider extends ChangeNotifier {
   void _tickIncome() {
     if (_game == null) return;
 
-    for (int i = 0; i < unlockedSlots; i++) {
+    for (int i = 0; i < unlockedCount; i++) {
       final fusion = _state.slots[i];
       if (fusion == null) continue;
 
@@ -185,6 +211,28 @@ class HomeSlotsProvider extends ChangeNotifier {
         );
       }
     }
+  }
+
+  bool unlockNextSlot() {
+    if (_game == null) return false;
+    if (unlockedCount >= totalSlots) return false;
+    final cost = nextUnlockCost;
+    if (cost == null) return false;
+    if (!_game!.spendDiamonds(cost)) return false;
+
+    _state.unlockedCount += 1;
+    _save();
+    notifyListeners();
+    return true;
+  }
+
+  void setUnlockedCount(int count) {
+    _state.unlockedCount = count.clamp(
+      initialUnlocked,
+      totalSlots,
+    );
+    _save();
+    notifyListeners();
   }
 
   @override

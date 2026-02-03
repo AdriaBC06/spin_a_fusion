@@ -6,6 +6,7 @@ import '../../../providers/home_slots_provider.dart';
 import '../../fusion/fusion_economy.dart';
 import '../../shared/floating_money_text.dart';
 import '../../fusion/widgets/fusion_summary_modal.dart';
+import 'home_slot_locked_tile.dart';
 
 class HomeSlotTile extends StatefulWidget {
   final int index;
@@ -55,19 +56,11 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
   Widget build(BuildContext context) {
     final slots = context.read<HomeSlotsProvider>();
     final unlocked =
-        widget.index < HomeSlotsProvider.unlockedSlots;
+        widget.index < slots.unlockedCount;
 
     // LOCKED
     if (!unlocked) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.black54,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Icon(Icons.lock, color: Colors.white),
-        ),
-      );
+      return HomeSlotLockedTile(index: widget.index);
     }
 
     // EMPTY

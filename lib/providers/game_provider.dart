@@ -122,6 +122,17 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool canSpendDiamonds(int amount) =>
+      _state.diamonds >= amount;
+
+  bool spendDiamonds(int amount) {
+    if (!canSpendDiamonds(amount)) return false;
+    _state.diamonds -= amount;
+    _save();
+    notifyListeners();
+    return true;
+  }
+
   // ----------------------------
   // BALLS
   // ----------------------------

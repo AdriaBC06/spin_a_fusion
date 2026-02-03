@@ -9,7 +9,8 @@ class HomeSlotsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slots = context.watch<HomeSlotsProvider>().slots;
+    final slots =
+        context.watch<HomeSlotsProvider>().displaySlots;
 
     return GridView.builder(
       itemCount: slots.length,

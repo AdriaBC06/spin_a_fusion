@@ -17,16 +17,19 @@ class HomeSlotsStateAdapter extends TypeAdapter<HomeSlotsState> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return HomeSlotsState(
-      (fields[0] as List).cast<FusionEntry?>(),
+      slots: (fields[0] as List).cast<FusionEntry?>(),
+      unlockedCount: fields[1] as int? ?? 3,
     );
   }
 
   @override
   void write(BinaryWriter writer, HomeSlotsState obj) {
     writer
-      ..writeByte(1)
+      ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.slots);
+      ..write(obj.slots)
+      ..writeByte(1)
+      ..write(obj.unlockedCount);
   }
 
   @override

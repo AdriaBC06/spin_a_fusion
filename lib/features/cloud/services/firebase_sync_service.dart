@@ -66,6 +66,7 @@ class FirebaseSyncService {
 
       // 🔥 HOME SLOTS
       'homeSlots': _encodeHomeSlots(homeSlots),
+      'homeSlotsUnlocked': homeSlots.unlockedCount,
     };
   }
 
@@ -115,7 +116,7 @@ class FirebaseSyncService {
     final map = <String, int?>{};
 
     for (int i = 0;
-        i < HomeSlotsProvider.unlockedSlots;
+        i < home.unlockedCount;
         i++) {
       final fusion = home.slots[i];
       map[i.toString()] = fusion == null
