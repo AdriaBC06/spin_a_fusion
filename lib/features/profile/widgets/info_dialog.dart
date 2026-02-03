@@ -16,7 +16,7 @@ class InfoDialog extends StatelessWidget {
           ),
           SizedBox(height: 12),
           Text(
-            'v0.2',
+            'v1.0.2',
             style: TextStyle(
               fontWeight: FontWeight.w700,
               color: Colors.white70,

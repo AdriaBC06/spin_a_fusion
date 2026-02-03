@@ -117,7 +117,6 @@ class _SettingsPanelState extends State<SettingsPanel> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text('Save username'),
                       : const Text('Guardar nombre de usuario'),
                 ),
               ),
