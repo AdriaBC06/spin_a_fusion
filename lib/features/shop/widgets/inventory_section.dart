@@ -6,21 +6,137 @@ import '../../spin/services/fusion_spin_service.dart';
 import 'inventory_ball_card.dart';
 import '../../../core/constants/pokedex_constants.dart';
 
-class InventorySection extends StatelessWidget {
+class InventorySection extends StatefulWidget {
   const InventorySection({super.key});
+
+  @override
+  State<InventorySection> createState() =>
+      _InventorySectionState();
+}
+
+class _InventorySectionState extends State<InventorySection> {
+  bool _autoSpinRunning = false;
+
+  BallType? _bestAvailableBall(GameProvider game) {
+    final order = [
+      BallType.master,
+      BallType.ultra,
+      BallType.superBall,
+      BallType.poke,
+    ];
+
+    for (final type in order) {
+      if (game.ballCount(type) > 0) return type;
+    }
+    return null;
+  }
+
+  Future<void> _startAutoSpin() async {
+    if (_autoSpinRunning) return;
+    _autoSpinRunning = true;
+
+    final game = context.read<GameProvider>();
+    game.setAutoSpinActive(true);
+
+    try {
+      while (game.autoSpinActive && mounted) {
+        final nextBall = _bestAvailableBall(game);
+
+        if (nextBall == null) {
+          break;
+        }
+
+        await FusionSpinService.open(
+          context: context,
+          ball: nextBall,
+        );
+
+        if (game.consumeAutoSpinStopRequest()) {
+          game.setAutoSpinActive(false);
+          break;
+        }
+      }
+    } finally {
+      _autoSpinRunning = false;
+      if (game.autoSpinActive) {
+        game.setAutoSpinActive(false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final game = context.watch<GameProvider>();
+    final autoSpinUnlocked = game.autoSpinUnlocked;
+    final autoSpinActive = game.autoSpinActive;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Pokéballs',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Pokéballs',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              OutlinedButton.icon(
+                onPressed: autoSpinUnlocked
+                    ? () {
+                        if (autoSpinActive) {
+                          game.requestAutoSpinStop();
+                          return;
+                        }
+
+                        final nextBall =
+                            _bestAvailableBall(game);
+                        if (nextBall == null) {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'No tienes Pokéballs',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        _startAutoSpin();
+                      }
+                    : null,
+                icon: Icon(
+                  autoSpinUnlocked
+                      ? (autoSpinActive
+                          ? Icons.stop_circle
+                          : Icons.auto_awesome)
+                      : Icons.lock,
+                  size: 18,
+                ),
+                label: Text(
+                  autoSpinActive ? 'Autospin ON' : 'Autospin',
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor:
+                      autoSpinUnlocked ? Colors.white : Colors.white54,
+                  side: BorderSide(
+                    color: autoSpinUnlocked
+                        ? const Color(0xFF00D1FF)
+                        : Colors.white24,
+                  ),
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
 

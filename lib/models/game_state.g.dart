@@ -22,13 +22,14 @@ class GameStateAdapter extends TypeAdapter<GameState> {
       balls: (fields[2] as Map).cast<BallType, int>(),
       playTimeSeconds: fields[3] as int,
       totalSpins: fields[4] as int? ?? 0,
+      autoSpinUnlocked: fields[5] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, GameState obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.money)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class GameStateAdapter extends TypeAdapter<GameState> {
       ..writeByte(3)
       ..write(obj.playTimeSeconds)
       ..writeByte(4)
-      ..write(obj.totalSpins);
+      ..write(obj.totalSpins)
+      ..writeByte(5)
+      ..write(obj.autoSpinUnlocked);
   }
 
   @override

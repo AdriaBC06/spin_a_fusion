@@ -20,12 +20,16 @@ class GameState {
   @HiveField(4)
   int totalSpins;
 
+  @HiveField(5)
+  bool autoSpinUnlocked;
+
   GameState({
     required this.money,
     required this.diamonds,
     required this.balls,
     required this.playTimeSeconds,
     required this.totalSpins,
+    required this.autoSpinUnlocked,
   });
 
   factory GameState.initial() => GameState(
@@ -39,5 +43,6 @@ class GameState {
         },
         playTimeSeconds: 0,
         totalSpins: 0,
+        autoSpinUnlocked: false,
       );
 }

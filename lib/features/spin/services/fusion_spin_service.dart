@@ -43,24 +43,69 @@ class FusionSpinService {
       barrierDismissible: false,
       barrierColor: Colors.black26,
       builder: (_) {
-        return FusionSpinDialog(
-          allPokemon: pool,
-          result1: p1,
-          result2: p2,
-          ball: ball,
-          onFinished: () {
-            // Store fusion in collection
-            fusionCollection.addFusion(
-              FusionEntry(
-                p1: p1,
-                p2: p2,
+        return Stack(
+          children: [
+            Center(
+              child: FusionSpinDialog(
+                allPokemon: pool,
+                result1: p1,
+                result2: p2,
                 ball: ball,
-                rarity: fusionProbability,
-              ),
-            );
+                onFinished: () {
+                  // Store fusion in collection
+                  fusionCollection.addFusion(
+                    FusionEntry(
+                      p1: p1,
+                      p2: p2,
+                      ball: ball,
+                      rarity: fusionProbability,
+                    ),
+                  );
 
-            Navigator.pop(context);
-          },
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            Consumer<GameProvider>(
+              builder: (context, game, _) {
+                if (!game.autoSpinActive) return const SizedBox.shrink();
+
+                return Positioned(
+                  bottom: 20,
+                  right: 20,
+                  child: ElevatedButton.icon(
+                    onPressed: game.autoSpinStopRequested
+                        ? null
+                        : () {
+                            context
+                                .read<GameProvider>()
+                                .requestAutoSpinStop();
+                          },
+                    icon: const Icon(Icons.stop_circle, size: 18),
+                    label: Text(
+                      game.autoSpinStopRequested
+                          ? 'Autospin Detenido'
+                          : 'Detener Autospin',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF2D95),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor:
+                          const Color(0xFF7A2A4A),
+                      disabledForegroundColor: Colors.white70,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         );
       },
     );

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/game_provider.dart';
 import '../features/shop/widgets/shop_ball_card.dart';
+import '../features/shop/widgets/shop_diamond_card.dart';
 import '../core/constants/pokedex_constants.dart';
 
 class ShopScreen extends StatelessWidget {
@@ -12,6 +13,10 @@ class ShopScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = context.watch<GameProvider>();
     final money = game.money;
+    const autoSpinPrice = 100;
+    final autoSpinOwned = game.autoSpinUnlocked;
+    final autoSpinEnabled =
+        !autoSpinOwned && game.diamonds >= autoSpinPrice;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -56,6 +61,50 @@ class ShopScreen extends StatelessWidget {
             color: Colors.purple,
             type: BallType.master,
             enabled: money >= ballPrices[BallType.master]!,
+          ),
+
+          const SizedBox(height: 28),
+          const Text(
+            'Tienda Diamantes',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          GridView.count(
+            crossAxisCount: 3,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.8,
+            children: [
+              ShopDiamondCard(
+                title: 'Autospin',
+                price: autoSpinPrice,
+                enabled: autoSpinEnabled,
+                locked: false,
+                buttonLabel: autoSpinOwned ? 'Comprado' : 'Comprar',
+                onBuy: () {
+                  final ok = context.read<GameProvider>().unlockAutoSpin(
+                        price: autoSpinPrice,
+                      );
+                  if (!ok) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No tienes suficientes diamantes'),
+                      ),
+                    );
+                  }
+                },
+              ),
+              const ShopDiamondCard(
+                title: '?',
+                locked: true,
+              ),
+              const ShopDiamondCard(
+                title: '?',
+                locked: true,
+              ),
+            ],
           ),
         ],
       ),

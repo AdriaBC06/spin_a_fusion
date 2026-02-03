@@ -102,11 +102,15 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   // INITIALIZATION
   // --------------------------------------------------
   void _initControllers() {
-    _spinControllerTop =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6));
+    _spinControllerTop = AnimationController(
+      vsync: this,
+      duration: _spinDurationFor(_topSpin),
+    );
 
-    _spinControllerBottom =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6));
+    _spinControllerBottom = AnimationController(
+      vsync: this,
+      duration: _spinDurationFor(_bottomSpin),
+    );
 
     _mergeController =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
@@ -259,6 +263,21 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
       startIndex: startIndex,
       resultIndex: resultIndex,
     );
+  }
+
+  Duration _spinDurationFor(SpinData data) {
+    const double pixelsPerSecond = 600;
+    const int minMs = 4000;
+    const int maxMs = 8000;
+
+    final distanceItems =
+        (data.resultIndex - data.startIndex).abs().toDouble();
+    final distancePixels = distanceItems * SpinRoulette.itemWidth;
+
+    final rawMs = (distancePixels / pixelsPerSecond) * 1000;
+    final clampedMs = rawMs.clamp(minMs.toDouble(), maxMs.toDouble());
+
+    return Duration(milliseconds: clampedMs.round());
   }
 
   // --------------------------------------------------

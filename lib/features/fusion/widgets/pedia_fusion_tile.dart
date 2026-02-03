@@ -16,7 +16,6 @@ class PediaFusionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPending = fusion.claimPending;
-
     return GestureDetector(
       onTap: () {
         showDialog(

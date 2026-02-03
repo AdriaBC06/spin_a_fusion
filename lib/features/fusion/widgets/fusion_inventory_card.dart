@@ -43,6 +43,34 @@ class FusionInventoryCard extends StatelessWidget {
       return totalFusions > 2;
     }
 
+    Future<bool> _confirmSellIfInHome() async {
+      if (!isAdded) return true;
+
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Atención'),
+            content: const Text(
+              'Esta fusión está en tu hogar. Si la vendes, se quitará del hogar. ¿Deseas continuar?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Vender'),
+              ),
+            ],
+          );
+        },
+      );
+
+      return result ?? false;
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -167,7 +195,7 @@ class FusionInventoryCard extends StatelessWidget {
                   backgroundColor: const Color(0xFFFF2D95),
                   foregroundColor: Colors.white,
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (!_canSell()) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -178,6 +206,8 @@ class FusionInventoryCard extends StatelessWidget {
                     );
                     return;
                   }
+                  final shouldSell = await _confirmSellIfInHome();
+                  if (!shouldSell) return;
                   if (isAdded) {
                     slots.removeFusion(fusion);
                   }

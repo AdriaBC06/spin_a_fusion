@@ -65,7 +65,7 @@ class FirebaseSyncService {
     final username = _auth.currentUser?.displayName;
 
     return {
-      'schemaVersion': 3,
+      'schemaVersion': 4,
       'lastSync': DateTime.now().millisecondsSinceEpoch,
 
       'playTimeSeconds': game.playTimeSeconds,
@@ -73,6 +73,7 @@ class FirebaseSyncService {
       'money': game.money,
       'diamonds': game.diamonds,
       'totalSpins': game.totalSpins,
+      'autoSpinUnlocked': game.autoSpinUnlocked,
 
       if (username != null && username.isNotEmpty)
         'username': username,

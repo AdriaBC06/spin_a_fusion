@@ -13,6 +13,7 @@ class PediaScreen extends StatelessWidget {
     final pedia = context.watch<FusionPediaProvider>();
     final fusions = pedia.sortedFusions;
     final pendingCount = pedia.pendingCount;
+    final totalCount = fusions.length;
 
     if (pedia.isEmpty) {
       return Center(
@@ -71,6 +72,28 @@ class PediaScreen extends StatelessWidget {
                   'Pedia',
                   style:
                       Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D1FF).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF00D1FF).withOpacity(0.5),
+                    ),
+                  ),
+                  child: Text(
+                    totalCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
                 const Spacer(),
                 if (pendingCount > 0)

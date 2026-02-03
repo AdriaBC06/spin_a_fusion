@@ -16,27 +16,70 @@ class FusionScreen extends StatelessWidget {
   ) {
     final slots = context.read<HomeSlotsProvider>();
 
-    // 1️⃣ Remove everything from Home
-    for (final fusion in List<FusionEntry?>.from(slots.slots)) {
-      if (fusion != null) {
-        slots.removeFusion(fusion);
-      }
-    }
-
-    // 2️⃣ Sort by income/sec DESC
+    // 1️⃣ Sort by income/sec DESC
     final sorted = List<FusionEntry>.from(fusions)
       ..sort(
         (a, b) =>
             FusionEconomy.incomePerSecond(b)
                 .compareTo(
-              FusionEconomy.incomePerSecond(a),
-            ),
+          FusionEconomy.incomePerSecond(a),
+        ),
       );
 
-    // 3️⃣ Add best until slots are full
-    for (final fusion in sorted) {
-      if (!slots.hasEmptyUnlockedSlot) break;
-      slots.addFusion(fusion);
+    String _key(FusionEntry fusion) =>
+        '${fusion.p1.fusionId}:${fusion.p2.fusionId}';
+
+    final unlocked = slots.unlockedCount;
+    final current = List<FusionEntry?>.from(slots.slots);
+
+    final available = List<FusionEntry>.from(sorted);
+
+    void _removeOneAvailable(FusionEntry fusion) {
+      final target = _key(fusion);
+      final index = available.indexWhere(
+        (f) => _key(f) == target,
+      );
+      if (index >= 0) {
+        available.removeAt(index);
+      }
+    }
+
+    for (int i = 0; i < unlocked; i++) {
+      final currentFusion = current[i];
+      if (currentFusion != null) {
+        _removeOneAvailable(currentFusion);
+      }
+    }
+
+    FusionEntry? _nextBest() =>
+        available.isEmpty ? null : available.removeAt(0);
+
+    // 2️⃣ Fill empty slots first
+    for (int i = 0; i < unlocked; i++) {
+      final currentFusion = current[i];
+      if (currentFusion != null) continue;
+
+      final best = _nextBest();
+      if (best == null) break;
+      slots.setSlot(i, best);
+    }
+
+    // 3️⃣ Replace only if strictly better (no wasted picks)
+    for (int i = 0; i < unlocked; i++) {
+      final currentFusion = current[i];
+      if (currentFusion == null) continue;
+
+      if (available.isEmpty) break;
+      final best = available.first;
+
+      final currentIncome =
+          FusionEconomy.incomePerSecond(currentFusion);
+      final bestIncome = FusionEconomy.incomePerSecond(best);
+
+      if (bestIncome > currentIncome) {
+        slots.setSlot(i, best);
+        available.removeAt(0);
+      }
     }
   }
 

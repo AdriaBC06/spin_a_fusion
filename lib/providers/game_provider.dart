@@ -16,6 +16,12 @@ class GameProvider extends ChangeNotifier {
   bool _cloudOverwriteAllowed = false;
 
   // ----------------------------
+  // AUTOSPIN (SESSION ONLY)
+  // ----------------------------
+  bool _autoSpinActive = false;
+  bool _autoSpinStopRequested = false;
+
+  // ----------------------------
   // INIT
   // ----------------------------
   Future<void> init() async {
@@ -73,6 +79,9 @@ class GameProvider extends ChangeNotifier {
   int get diamonds => _state.diamonds;
   int get playTimeSeconds => _state.playTimeSeconds;
   int get totalSpins => _state.totalSpins;
+  bool get autoSpinUnlocked => _state.autoSpinUnlocked;
+  bool get autoSpinActive => _autoSpinActive;
+  bool get autoSpinStopRequested => _autoSpinStopRequested;
 
   int ballCount(BallType type) => _state.balls[type] ?? 0;
 
@@ -135,6 +144,32 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setAutoSpinUnlocked(bool value) {
+    _state.autoSpinUnlocked = value;
+    _save();
+    notifyListeners();
+  }
+
+  void setAutoSpinActive(bool value) {
+    _autoSpinActive = value;
+    if (!value) {
+      _autoSpinStopRequested = false;
+    }
+    notifyListeners();
+  }
+
+  void requestAutoSpinStop() {
+    _autoSpinStopRequested = true;
+    notifyListeners();
+  }
+
+  bool consumeAutoSpinStopRequest() {
+    if (!_autoSpinStopRequested) return false;
+    _autoSpinStopRequested = false;
+    notifyListeners();
+    return true;
+  }
+
   void addSpin() {
     _state.totalSpins += 1;
     _save();
@@ -147,6 +182,15 @@ class GameProvider extends ChangeNotifier {
   bool spendDiamonds(int amount) {
     if (!canSpendDiamonds(amount)) return false;
     _state.diamonds -= amount;
+    _save();
+    notifyListeners();
+    return true;
+  }
+
+  bool unlockAutoSpin({required int price}) {
+    if (_state.autoSpinUnlocked) return true;
+    if (!spendDiamonds(price)) return false;
+    _state.autoSpinUnlocked = true;
     _save();
     notifyListeners();
     return true;
