@@ -105,18 +105,26 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
     _spinControllerTop = AnimationController(
       vsync: this,
       duration: _spinDurationFor(_topSpin),
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _spinControllerBottom = AnimationController(
       vsync: this,
       duration: _spinDurationFor(_bottomSpin),
+      animationBehavior: AnimationBehavior.preserve,
     );
 
-    _mergeController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    _mergeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+      animationBehavior: AnimationBehavior.preserve,
+    );
 
-    _fusionController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+    _fusionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+      animationBehavior: AnimationBehavior.preserve,
+    );
   }
 
   void _initAnimations() {

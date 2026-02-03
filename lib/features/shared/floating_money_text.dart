@@ -34,6 +34,7 @@ class _FloatingMoneyTextState extends State<FloatingMoneyText>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _opacity = Tween(begin: 1.0, end: 0.0).animate(
