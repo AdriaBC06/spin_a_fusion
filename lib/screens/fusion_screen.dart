@@ -10,7 +10,6 @@ import '../features/fusion/widgets/fusion_inventory_card.dart';
 enum FusionSortField {
   name,
   income,
-  rarity,
 }
 
 class FusionScreen extends StatefulWidget {
@@ -37,9 +36,6 @@ class _FusionScreenState extends State<FusionScreen> {
         case FusionSortField.income:
           result = FusionEconomy.incomePerSecond(a)
               .compareTo(FusionEconomy.incomePerSecond(b));
-          break;
-        case FusionSortField.rarity:
-          result = a.rarity.compareTo(b.rarity);
           break;
       }
       return _ascending ? result : -result;
@@ -82,8 +78,6 @@ class _FusionScreenState extends State<FusionScreen> {
                       _sortTile(FusionSortField.name, 'Nombre'),
                       _sortTile(
                           FusionSortField.income, 'Dinero generado'),
-                      _sortTile(
-                          FusionSortField.rarity, 'Rareza'),
                       const SizedBox(height: 12),
                     ],
                   ),
@@ -111,7 +105,7 @@ class _FusionScreenState extends State<FusionScreen> {
             _ascending = !_ascending;
           } else {
             _sortField = field;
-            _ascending = true;
+            _ascending = field != FusionSortField.income;
           }
         });
         Navigator.pop(context);

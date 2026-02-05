@@ -70,9 +70,9 @@ class _ProfileMenuState extends State<ProfileMenu>
   // SYNC → CLOUD
   // ------------------------------------------------------
   Future<void> _syncToCloud() async {
+    _closeMenu();
     final confirmed = await showConfirmCloudOverwriteDialog(context);
     if (confirmed != true) {
-      _closeMenu();
       return;
     }
 
@@ -93,7 +93,6 @@ class _ProfileMenuState extends State<ProfileMenu>
       ).showSnackBar(SnackBar(content: Text('❌ Falló la sincronización: $e')));
     }
 
-    _closeMenu();
   }
 
   // ------------------------------------------------------
