@@ -138,62 +138,44 @@ class _FusionScreenState extends State<FusionScreen> {
     );
   }
 
-  // ----------------------------
-  // ORIGINAL LOGIC (UNCHANGED)
-  // ----------------------------
   void _addBestFusions(
     BuildContext context,
     List<FusionEntry> fusions,
   ) {
     final slots = context.read<HomeSlotsProvider>();
-
-    final sorted = List<FusionEntry>.from(fusions)
-      ..sort(
-        (a, b) => FusionEconomy.incomePerSecond(b)
-            .compareTo(FusionEconomy.incomePerSecond(a)),
-      );
-
-    String _key(FusionEntry fusion) =>
-        '${fusion.p1.fusionId}:${fusion.p2.fusionId}';
-
     final unlocked = slots.unlockedCount;
     final current = List<FusionEntry?>.from(slots.slots);
-    final available = List<FusionEntry>.from(sorted);
+    final homeKeys = <String>{
+      for (final fusion in current)
+        if (fusion != null) _key(fusion),
+    };
 
-    void _removeOneAvailable(FusionEntry fusion) {
-      final index = available.indexWhere(
-        (f) => _key(f) == _key(fusion),
-      );
-      if (index >= 0) available.removeAt(index);
-    }
+    final sorted = List<FusionEntry>.from(fusions)
+      ..sort((a, b) {
+        final incomeA = FusionEconomy.incomePerSecond(a);
+        final incomeB = FusionEconomy.incomePerSecond(b);
+        if (incomeA != incomeB) {
+          return incomeB.compareTo(incomeA);
+        }
+
+        if (a.favorite != b.favorite) {
+          return a.favorite ? -1 : 1;
+        }
+
+        final aInHome = homeKeys.contains(_key(a));
+        final bInHome = homeKeys.contains(_key(b));
+        if (aInHome != bInHome) {
+          return aInHome ? -1 : 1;
+        }
+
+        return 0;
+      });
+
+    final best = sorted.take(unlocked).toList();
 
     for (int i = 0; i < unlocked; i++) {
-      final currentFusion = current[i];
-      if (currentFusion != null) {
-        _removeOneAvailable(currentFusion);
-      }
-    }
-
-    FusionEntry? _nextBest() =>
-        available.isEmpty ? null : available.removeAt(0);
-
-    for (int i = 0; i < unlocked; i++) {
-      if (current[i] != null) continue;
-      final best = _nextBest();
-      if (best == null) break;
-      slots.setSlot(i, best);
-    }
-
-    for (int i = 0; i < unlocked; i++) {
-      final currentFusion = current[i];
-      if (currentFusion == null || available.isEmpty) continue;
-
-      final best = available.first;
-      if (FusionEconomy.incomePerSecond(best) >
-          FusionEconomy.incomePerSecond(currentFusion)) {
-        slots.setSlot(i, best);
-        available.removeAt(0);
-      }
+      final fusion = i < best.length ? best[i] : null;
+      slots.setSlot(i, fusion);
     }
   }
 
