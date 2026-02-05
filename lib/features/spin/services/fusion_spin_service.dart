@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,73 @@ import '../../../core/constants/pokedex_constants.dart';
 import '../widgets/fusion_spin_dialog/fusion_spin_dialog_widget.dart';
 
 class FusionSpinService {
+  static double _modifierChance(BallType ball) {
+    switch (ball) {
+      case BallType.poke:
+        return 0.0;
+      case BallType.superBall:
+        return 0.0001;
+      case BallType.ultra:
+        return 0.001;
+      case BallType.master:
+        return 0.01;
+      case BallType.silver:
+      case BallType.gold:
+      case BallType.ruby:
+      case BallType.sapphire:
+      case BallType.emerald:
+        return 1.0;
+      case BallType.test:
+        return 0.0;
+    }
+  }
+
+  static FusionModifier? _rollModifier({
+    required BallType ball,
+    required double fusionProbability,
+    required Random rng,
+  }) {
+    switch (ball) {
+      case BallType.silver:
+        return FusionModifier.silver;
+      case BallType.gold:
+        return FusionModifier.gold;
+      case BallType.ruby:
+        return FusionModifier.ruby;
+      case BallType.sapphire:
+        return FusionModifier.sapphire;
+      case BallType.emerald:
+        return FusionModifier.emerald;
+      case BallType.poke:
+      case BallType.superBall:
+      case BallType.ultra:
+      case BallType.master:
+      case BallType.test:
+        break;
+    }
+
+    final chance = _modifierChance(ball);
+    if (chance <= 0 || rng.nextDouble() > chance) return null;
+
+    final oneIn = fusionProbability <= 0
+        ? double.infinity
+        : 1 / fusionProbability;
+
+    final rarityScore =
+        (((log(oneIn) / ln10) - 2.0) / 3.0)
+            .clamp(0.0, 1.0);
+
+    if (rarityScore > 0.85) return FusionModifier.emerald;
+    if (rarityScore > 0.7) {
+      return rng.nextBool()
+          ? FusionModifier.ruby
+          : FusionModifier.sapphire;
+    }
+    if (rarityScore > 0.5) return FusionModifier.gold;
+
+    return FusionModifier.silver;
+  }
+
   static Future<void> open({
     required BuildContext context,
     required BallType ball,
@@ -24,6 +92,8 @@ class FusionSpinService {
 
     game.addSpin();
 
+    final rng = Random();
+
     // Prepare pool
     final pool = List.of(pokedex.pokemonList)..shuffle();
 
@@ -36,6 +106,12 @@ class FusionSpinService {
       p1: p1,
       p2: p2,
       ball: ball,
+    );
+
+    final modifier = _rollModifier(
+      ball: ball,
+      fusionProbability: fusionProbability,
+      rng: rng,
     );
 
     await showDialog(
@@ -51,6 +127,7 @@ class FusionSpinService {
                 result1: p1,
                 result2: p2,
                 ball: ball,
+                modifier: modifier,
                 onFinished: () {
                   // Store fusion in collection
                   fusionCollection.addFusion(
@@ -59,6 +136,7 @@ class FusionSpinService {
                       p2: p2,
                       ball: ball,
                       rarity: fusionProbability,
+                      modifier: modifier,
                     ),
                   );
 

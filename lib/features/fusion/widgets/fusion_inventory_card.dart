@@ -17,6 +17,108 @@ class FusionInventoryCard extends StatelessWidget {
     required this.fusion,
   });
 
+  String _ballLabel(BallType ball) {
+    switch (ball) {
+      case BallType.poke:
+        return 'Poké';
+      case BallType.superBall:
+        return 'Super';
+      case BallType.ultra:
+        return 'Ultra';
+      case BallType.master:
+        return 'Master';
+      case BallType.silver:
+        return 'Silver';
+      case BallType.gold:
+        return 'Gold';
+      case BallType.ruby:
+        return 'Ruby';
+      case BallType.sapphire:
+        return 'Sapphire';
+      case BallType.emerald:
+        return 'Emerald';
+      case BallType.test:
+        return 'Test';
+    }
+  }
+
+  Color _ballColor(BallType ball) {
+    switch (ball) {
+      case BallType.poke:
+        return Colors.red;
+      case BallType.superBall:
+        return Colors.blue;
+      case BallType.ultra:
+        return Colors.amber;
+      case BallType.master:
+        return Colors.purple;
+      case BallType.silver:
+        return const Color(0xFFB8BCC6);
+      case BallType.gold:
+        return const Color(0xFFFFD76B);
+      case BallType.ruby:
+        return const Color(0xFFE84D4D);
+      case BallType.sapphire:
+        return const Color(0xFF4C7BFF);
+      case BallType.emerald:
+        return const Color(0xFF2ECC71);
+      case BallType.test:
+        return Colors.white;
+    }
+  }
+
+  bool _modifierMatchesBall(FusionEntry fusion) {
+    switch (fusion.ball) {
+      case BallType.silver:
+        return fusion.modifier == FusionModifier.silver;
+      case BallType.gold:
+        return fusion.modifier == FusionModifier.gold;
+      case BallType.ruby:
+        return fusion.modifier == FusionModifier.ruby;
+      case BallType.sapphire:
+        return fusion.modifier == FusionModifier.sapphire;
+      case BallType.emerald:
+        return fusion.modifier == FusionModifier.emerald;
+      case BallType.poke:
+      case BallType.superBall:
+      case BallType.ultra:
+      case BallType.master:
+      case BallType.test:
+        return false;
+    }
+  }
+
+  Widget _chip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.45),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: color.withOpacity(0.6),
+        ),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: color,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+
+  Color? _modifierColor(FusionEntry fusion) {
+    final modifier = fusion.modifier;
+    if (modifier == null) return null;
+    return fusionModifierColors[modifier];
+  }
+
   @override
   Widget build(BuildContext context) {
     final slots = context.watch<HomeSlotsProvider>();
@@ -120,15 +222,32 @@ class FusionInventoryCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.network(
-                      fusion.customFusionUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) =>
-                          Image.network(
-                        fusion.autoGenFusionUrl,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                    child: _modifierColor(fusion) == null
+                        ? Image.network(
+                            fusion.customFusionUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) =>
+                                Image.network(
+                              fusion.autoGenFusionUrl,
+                              fit: BoxFit.contain,
+                            ),
+                          )
+                        : ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              _modifierColor(fusion)!
+                                  .withOpacity(0.45),
+                              BlendMode.srcATop,
+                            ),
+                            child: Image.network(
+                              fusion.customFusionUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) =>
+                                  Image.network(
+                                fusion.autoGenFusionUrl,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
                   ),
                   Positioned(
                     top: 4,
@@ -181,6 +300,19 @@ class FusionInventoryCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                const SizedBox(height: 6),
+                if (fusion.modifier != null)
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      _chip(
+                        fusionModifierLabels[fusion.modifier!]!
+                            .toUpperCase(),
+                        fusionModifierColors[fusion.modifier!]!,
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(

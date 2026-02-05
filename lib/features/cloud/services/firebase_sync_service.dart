@@ -82,10 +82,16 @@ class FirebaseSyncService {
 
       'ownedFusions':
           _encodeFusions(collection.allFusions),
+      'ownedFusionsBalls':
+          _encodeFusionBalls(collection.allFusions),
+      'ownedFusionsV3':
+          _encodeFusionsWithBalls(collection.allFusions),
       'ownedFusionsV2':
           _encodeFusionsWithFavorites(collection.allFusions),
       'pediaFusions':
           _encodePediaClaims(pedia.sortedFusions),
+      'pediaFusionsV2':
+          _encodePediaClaimsV2(pedia.sortedFusions),
       'pediaCount': pedia.sortedFusions.length,
 
       // 🔥 HOME SLOTS
@@ -140,6 +146,31 @@ class FirebaseSyncService {
     return map;
   }
 
+  Map<String, int> _encodeFusionBalls(List<FusionEntry> fusions) {
+    final map = <String, int>{};
+
+    for (final fusion in fusions) {
+      final key = _fusionKey(
+        fusion.p1.fusionId,
+        fusion.p2.fusionId,
+      );
+      map[key.toString()] = fusion.ball.index;
+    }
+
+    return map;
+  }
+
+  List<Map<String, int>> _encodeFusionsWithBalls(
+      List<FusionEntry> fusions) {
+    return fusions
+        .map((f) => {
+              'k': _fusionKey(f.p1.fusionId, f.p2.fusionId),
+              'b': f.ball.index,
+              if (f.uid != null) 'u': f.uid!,
+            })
+        .toList();
+  }
+
   Map<String, bool> _encodePediaClaims(
       List<FusionEntry> fusions) {
     final map = <String, bool>{};
@@ -150,6 +181,19 @@ class FirebaseSyncService {
         fusion.p2.fusionId,
       );
       map[key.toString()] = fusion.claimPending;
+    }
+
+    return map;
+  }
+
+  Map<String, bool> _encodePediaClaimsV2(
+      List<FusionEntry> fusions) {
+    final map = <String, bool>{};
+
+    for (final fusion in fusions) {
+      final key =
+          '${fusion.p1.fusionId}-${fusion.p2.fusionId}-${fusion.ball.index}';
+      map[key] = fusion.claimPending;
     }
 
     return map;

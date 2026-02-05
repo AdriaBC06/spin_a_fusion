@@ -17,6 +17,7 @@ class FusionCollectionProvider extends ChangeNotifier {
   Future<void> init(FusionPediaProvider pedia) async {
     _pedia = pedia;
     _box = await Hive.openBox<FusionEntry>(_boxName);
+    _ensureUids();
     notifyListeners();
   }
 
@@ -40,8 +41,9 @@ class FusionCollectionProvider extends ChangeNotifier {
   // MUTATIONS
   // ----------------------------
   void addFusion(FusionEntry fusion) {
-    _box.add(fusion);
-    _pedia.registerFusion(fusion);
+    final normalized = _withUid(fusion);
+    _box.add(normalized);
+    _pedia.registerFusion(normalized);
     notifyListeners();
   }
 
@@ -63,8 +65,31 @@ class FusionCollectionProvider extends ChangeNotifier {
     final index = _box.values.toList().indexOf(fusion);
     if (index == -1) return;
 
-    final updated = fusion.copyWith(favorite: !fusion.favorite);
+    final updated = fusion.copyWith(
+      favorite: !fusion.favorite,
+      uid: fusion.uid,
+    );
     _box.putAt(index, updated);
     notifyListeners();
+  }
+
+  FusionEntry _withUid(FusionEntry fusion) {
+    if (fusion.uid != null) return fusion;
+    return fusion.copyWith(uid: _generateUid());
+  }
+
+  int _generateUid() {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final salt = _box.length + 1;
+    return now ^ salt;
+  }
+
+  void _ensureUids() {
+    final values = _box.values.toList();
+    for (int i = 0; i < values.length; i++) {
+      final fusion = values[i];
+      if (fusion.uid != null) continue;
+      _box.putAt(i, fusion.copyWith(uid: _generateUid()));
+    }
   }
 }

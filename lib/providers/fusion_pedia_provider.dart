@@ -12,6 +12,7 @@ class FusionPediaProvider extends ChangeNotifier {
   // ----------------------------
   Future<void> init() async {
     _box = await Hive.openBox<FusionEntry>(_boxName);
+    _migrateLegacyKeys();
     notifyListeners();
   }
 
@@ -108,5 +109,32 @@ class FusionPediaProvider extends ChangeNotifier {
     }
 
     return claimed;
+  }
+
+  void _migrateLegacyKeys() {
+    final updates = <String, FusionEntry>{};
+    final deletes = <String>[];
+
+    for (final entry in _box.toMap().entries) {
+      final key = entry.key;
+      final fusion = entry.value;
+      final legacyKey = _key(fusion);
+
+      if (key == legacyKey) continue;
+
+      if (_box.containsKey(legacyKey)) {
+        deletes.add(key);
+      } else {
+        updates[legacyKey] = fusion;
+        deletes.add(key);
+      }
+    }
+
+    for (final key in deletes) {
+      _box.delete(key);
+    }
+    for (final entry in updates.entries) {
+      _box.put(entry.key, entry.value);
+    }
   }
 }

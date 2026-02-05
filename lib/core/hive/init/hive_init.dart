@@ -6,6 +6,7 @@ import '../../../models/game_state.dart';
 import '../../../models/home_slots_state.dart';
 import '../../../providers/settings_provider.dart';
 import '../adapters/ball_type_adapter.dart';
+import '../adapters/fusion_modifier_adapter.dart';
 
 Future<void> initHive() async {
   await Hive.initFlutter();
@@ -18,6 +19,7 @@ Future<void> initHive() async {
   Hive.registerAdapter(GameStateAdapter());
   Hive.registerAdapter(HomeSlotsStateAdapter());
   Hive.registerAdapter(BallTypeAdapter());
+  Hive.registerAdapter(FusionModifierAdapter());
   Hive.registerAdapter(SettingsStateAdapter());
 
   // ---------------------------

@@ -62,6 +62,48 @@ class ShopScreen extends StatelessWidget {
             type: BallType.master,
             enabled: money >= ballPrices[BallType.master]!,
           ),
+          _buildBall(
+            context,
+            name: 'Silver Ball',
+            color: const Color(0xFFB8BCC6),
+            type: BallType.silver,
+            enabled: money >= ballPrices[BallType.silver]!,
+          ),
+          _buildBall(
+            context,
+            name: 'Gold Ball',
+            color: const Color(0xFFFFD76B),
+            type: BallType.gold,
+            enabled: money >= ballPrices[BallType.gold]!,
+          ),
+          _buildBall(
+            context,
+            name: 'Ruby Ball',
+            color: const Color(0xFFE84D4D),
+            type: BallType.ruby,
+            enabled: money >= ballPrices[BallType.ruby]!,
+          ),
+          _buildBall(
+            context,
+            name: 'Sapphire Ball',
+            color: const Color(0xFF4C7BFF),
+            type: BallType.sapphire,
+            enabled: money >= ballPrices[BallType.sapphire]!,
+          ),
+          _buildBall(
+            context,
+            name: 'Emerald Ball',
+            color: const Color(0xFF2ECC71),
+            type: BallType.emerald,
+            enabled: money >= ballPrices[BallType.emerald]!,
+          ),
+          _buildBall(
+            context,
+            name: 'Test Ball',
+            color: Colors.white,
+            type: BallType.test,
+            enabled: money >= ballPrices[BallType.test]!,
+          ),
 
           const SizedBox(height: 28),
           const Text(

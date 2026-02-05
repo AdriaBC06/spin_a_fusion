@@ -23,13 +23,15 @@ class FusionEntryAdapter extends TypeAdapter<FusionEntry> {
       rarity: fields[3] as double,
       claimPending: fields[4] as bool? ?? false,
       favorite: fields[5] as bool? ?? false,
+      modifier: fields[6] as FusionModifier?,
+      uid: fields[7] as int?,
     );
   }
 
   @override
   void write(BinaryWriter writer, FusionEntry obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.p1)
       ..writeByte(1)
@@ -41,7 +43,11 @@ class FusionEntryAdapter extends TypeAdapter<FusionEntry> {
       ..writeByte(4)
       ..write(obj.claimPending)
       ..writeByte(5)
-      ..write(obj.favorite);
+      ..write(obj.favorite)
+      ..writeByte(6)
+      ..write(obj.modifier)
+      ..writeByte(7)
+      ..write(obj.uid);
   }
 
   @override

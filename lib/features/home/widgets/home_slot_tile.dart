@@ -7,6 +7,7 @@ import '../../fusion/fusion_economy.dart';
 import '../../shared/floating_money_text.dart';
 import '../../fusion/widgets/fusion_summary_modal.dart';
 import 'home_slot_locked_tile.dart';
+import '../../../core/constants/pokedex_constants.dart';
 
 class HomeSlotTile extends StatefulWidget {
   final int index;
@@ -98,6 +99,9 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
     final fusion = widget.fusion!;
     final incomePerSec =
         FusionEconomy.incomePerSecond(fusion);
+    final modifierColor = fusion.modifier == null
+        ? null
+        : fusionModifierColors[fusion.modifier!];
 
     return GestureDetector(
       onTap: () {
@@ -132,15 +136,31 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: Image.network(
-                fusion.customFusionUrl,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    Image.network(
-                  fusion.autoGenFusionUrl,
-                  fit: BoxFit.contain,
-                ),
-              ),
+              child: modifierColor == null
+                  ? Image.network(
+                      fusion.customFusionUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) =>
+                          Image.network(
+                        fusion.autoGenFusionUrl,
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  : ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        modifierColor.withOpacity(0.45),
+                        BlendMode.srcATop,
+                      ),
+                      child: Image.network(
+                        fusion.customFusionUrl,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) =>
+                            Image.network(
+                          fusion.autoGenFusionUrl,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
             ),
           ),
 
@@ -173,6 +193,35 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
               ),
             ),
           ),
+
+          if (modifierColor != null)
+            Positioned(
+              top: 6,
+              left: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.55),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: modifierColor.withOpacity(0.8),
+                  ),
+                ),
+                child: Text(
+                  fusionModifierLabels[fusion.modifier!]!
+                      .toUpperCase(),
+                  style: TextStyle(
+                    color: modifierColor,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ),
+            ),
 
           // 💰 INCOME TEXT
           Positioned(

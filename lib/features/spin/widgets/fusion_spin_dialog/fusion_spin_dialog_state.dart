@@ -49,6 +49,8 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
   late final Animation<double> _fusionRotate;
   late final Animation<double> _fusionScale;
   late final Animation<double> _fusionBrightness;
+  late final Animation<double> _fusionFlash;
+  late final Animation<double> _fusionTint;
 
   // --------------------------------------------------
   // UI STATE
@@ -158,6 +160,29 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
 
     _fusionBrightness = Tween(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(parent: _fusionController, curve: Curves.easeOut),
+    );
+
+    _fusionFlash = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween(begin: 0.0, end: 1.0),
+        weight: 40,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: 1.0, end: 0.0),
+        weight: 60,
+      ),
+    ]).animate(
+      CurvedAnimation(
+        parent: _fusionController,
+        curve: const Interval(0.05, 0.35, curve: Curves.easeOut),
+      ),
+    );
+
+    _fusionTint = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fusionController,
+        curve: const Interval(0.25, 0.75, curve: Curves.easeInOut),
+      ),
     );
   }
 
@@ -348,6 +373,7 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
               p1: widget.result1,
               p2: widget.result2,
               ball: widget.ball,
+              modifier: widget.modifier,
               mergeRotate: _mergeRotate,
               mergeScale: _mergeScale,
               mergeBrightness: _mergeBrightness,
@@ -356,6 +382,8 @@ class FusionSpinDialogState extends State<FusionSpinDialog>
               fusionRotate: _fusionRotate,
               fusionScale: _fusionScale,
               fusionBrightness: _fusionBrightness,
+              fusionFlash: _fusionFlash,
+              fusionTint: _fusionTint,
               mergeController: _mergeController,
               fusionController: _fusionController,
             ),

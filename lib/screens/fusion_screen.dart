@@ -221,6 +221,7 @@ class _FusionScreenState extends State<FusionScreen> {
   }
 
   String _key(FusionEntry fusion) =>
+      fusion.uid?.toString() ??
       '${fusion.p1.fusionId}:${fusion.p2.fusionId}';
 
   List<FusionEntry> _topNFusions(

@@ -64,6 +64,7 @@ class FirebaseRestoreService {
       int key, {
       bool claimPending = false,
       bool favorite = false,
+      int? uid,
     }) {
       final id1 = key ~/ expectedPokemonCount;
       final id2 = key % expectedPokemonCount;
@@ -82,10 +83,22 @@ class FirebaseRestoreService {
         rarity: 1.0,
         claimPending: claimPending,
         favorite: favorite,
+        uid: uid,
       );
     }
 
     final ownedFavoritesRaw = cloud['ownedFusionsV2'];
+    final ownedBallsRaw = cloud['ownedFusionsBalls'];
+    final ownedBallMap = <int, int>{};
+
+    if (ownedBallsRaw is Map<String, dynamic>) {
+      for (final entry in ownedBallsRaw.entries) {
+        final key = int.tryParse(entry.key);
+        final ballIndex = entry.value is int ? entry.value as int : null;
+        if (key == null || ballIndex == null) continue;
+        ownedBallMap[key] = ballIndex;
+      }
+    }
     final favoriteMap = <int, bool>{};
 
     if (ownedFavoritesRaw is Map<String, dynamic>) {
@@ -96,18 +109,83 @@ class FirebaseRestoreService {
       }
     }
 
-    final owned = List<int>.from(cloud['ownedFusions'] ?? []);
-    for (final key in owned) {
-      final favorite = favoriteMap[key] ?? false;
-      final fusion = decode(key, favorite: favorite);
-      if (fusion != null) {
-        collection.addFusion(fusion);
+    final ownedV3 = cloud['ownedFusionsV3'];
+    if (ownedV3 is List) {
+      for (final entry in ownedV3) {
+        if (entry is! Map) continue;
+        final rawKey = entry['k'];
+        final rawBall = entry['b'];
+        final rawUid = entry['u'];
+        if (rawKey is! int || rawBall is! int) continue;
+
+        final favorite = favoriteMap[rawKey] ?? false;
+        final ball = rawBall >= 0 &&
+                rawBall < BallType.values.length
+            ? BallType.values[rawBall]
+            : BallType.poke;
+
+        final fusion = decode(
+          rawKey,
+          favorite: favorite,
+          uid: rawUid is int ? rawUid : null,
+        )?.copyWith(ball: ball);
+        if (fusion != null) {
+          collection.addFusion(fusion);
+        }
+      }
+    } else {
+      final owned = List<int>.from(cloud['ownedFusions'] ?? []);
+      for (final key in owned) {
+        final favorite = favoriteMap[key] ?? false;
+        final ballIndex = ownedBallMap[key];
+        final ball = ballIndex != null &&
+                ballIndex >= 0 &&
+                ballIndex < BallType.values.length
+            ? BallType.values[ballIndex]
+            : BallType.poke;
+        final fusion = decode(
+          key,
+          favorite: favorite,
+        )?.copyWith(ball: ball);
+        if (fusion != null) {
+          collection.addFusion(fusion);
+        }
       }
     }
 
+    final pediaClaimsV2Raw = cloud['pediaFusionsV2'];
     final pediaClaimsRaw = cloud['pediaFusions'];
 
-    if (pediaClaimsRaw is Map<String, dynamic>) {
+    if (pediaClaimsV2Raw is Map<String, dynamic>) {
+      for (final entry in pediaClaimsV2Raw.entries) {
+        final parts = entry.key.split('-');
+        if (parts.length < 2) continue;
+
+        final id1 = int.tryParse(parts[0]);
+        final id2 = int.tryParse(parts[1]);
+        if (id1 == null || id2 == null) continue;
+
+        final ballIndex = parts.length >= 3
+            ? int.tryParse(parts[2])
+            : null;
+        final ball = ballIndex != null &&
+                ballIndex >= 0 &&
+                ballIndex < BallType.values.length
+            ? BallType.values[ballIndex]
+            : BallType.poke;
+
+        final key = id1 * expectedPokemonCount + id2;
+        final pending = entry.value == true;
+
+        final fusion = decode(
+          key,
+          claimPending: pending,
+        )?.copyWith(ball: ball);
+        if (fusion != null) {
+          pedia.registerFusionFromCloud(fusion);
+        }
+      }
+    } else if (pediaClaimsRaw is Map<String, dynamic>) {
       for (final entry in pediaClaimsRaw.entries) {
         final key = int.tryParse(entry.key);
         if (key == null) continue;

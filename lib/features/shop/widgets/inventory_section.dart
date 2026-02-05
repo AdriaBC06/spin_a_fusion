@@ -19,10 +19,16 @@ class _InventorySectionState extends State<InventorySection> {
 
   BallType? _bestAvailableBall(GameProvider game) {
     final order = [
+      BallType.emerald,
+      BallType.sapphire,
+      BallType.ruby,
+      BallType.gold,
+      BallType.silver,
       BallType.master,
       BallType.ultra,
       BallType.superBall,
       BallType.poke,
+      BallType.test,
     ];
 
     for (final type in order) {
@@ -174,6 +180,60 @@ class _InventorySectionState extends State<InventorySection> {
             onOpen: () => FusionSpinService.open(
               context: context,
               ball: BallType.master,
+            ),
+          ),
+          InventoryBallCard(
+            name: 'Silver Ball',
+            color: const Color(0xFFB8BCC6),
+            amount: game.ballCount(BallType.silver),
+            onOpen: () => FusionSpinService.open(
+              context: context,
+              ball: BallType.silver,
+            ),
+          ),
+          InventoryBallCard(
+            name: 'Gold Ball',
+            color: const Color(0xFFFFD76B),
+            amount: game.ballCount(BallType.gold),
+            onOpen: () => FusionSpinService.open(
+              context: context,
+              ball: BallType.gold,
+            ),
+          ),
+          InventoryBallCard(
+            name: 'Ruby Ball',
+            color: const Color(0xFFE84D4D),
+            amount: game.ballCount(BallType.ruby),
+            onOpen: () => FusionSpinService.open(
+              context: context,
+              ball: BallType.ruby,
+            ),
+          ),
+          InventoryBallCard(
+            name: 'Sapphire Ball',
+            color: const Color(0xFF4C7BFF),
+            amount: game.ballCount(BallType.sapphire),
+            onOpen: () => FusionSpinService.open(
+              context: context,
+              ball: BallType.sapphire,
+            ),
+          ),
+          InventoryBallCard(
+            name: 'Emerald Ball',
+            color: const Color(0xFF2ECC71),
+            amount: game.ballCount(BallType.emerald),
+            onOpen: () => FusionSpinService.open(
+              context: context,
+              ball: BallType.emerald,
+            ),
+          ),
+          InventoryBallCard(
+            name: 'Test Ball',
+            color: Colors.white,
+            amount: game.ballCount(BallType.test),
+            onOpen: () => FusionSpinService.open(
+              context: context,
+              ball: BallType.test,
             ),
           ),
         ],

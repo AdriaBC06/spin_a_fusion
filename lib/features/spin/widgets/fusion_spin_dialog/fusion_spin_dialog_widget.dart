@@ -8,6 +8,7 @@ class FusionSpinDialog extends StatefulWidget {
   final Pokemon result1;
   final Pokemon result2;
   final BallType ball;
+  final FusionModifier? modifier;
   final VoidCallback onFinished;
 
   const FusionSpinDialog({
@@ -16,6 +17,7 @@ class FusionSpinDialog extends StatefulWidget {
     required this.result1,
     required this.result2,
     required this.ball,
+    required this.modifier,
     required this.onFinished,
   });
 

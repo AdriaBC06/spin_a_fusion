@@ -11,6 +11,7 @@ class FusionCard extends StatelessWidget {
   final Pokemon p2;
   final String autoGenUrl;
   final BallType ball;
+  final FusionModifier? modifier;
 
   const FusionCard({
     super.key,
@@ -18,6 +19,7 @@ class FusionCard extends StatelessWidget {
     required this.p2,
     required this.autoGenUrl,
     required this.ball,
+    required this.modifier,
   });
 
   /// --------------------------------------------------
@@ -44,6 +46,12 @@ class FusionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pokedex = context.read<PokedexProvider>();
+    final modifierColor = modifier == null
+        ? null
+        : fusionModifierColors[modifier!];
+    final modifierLabel = modifier == null
+        ? null
+        : fusionModifierLabels[modifier!];
 
     final fusionProbability = pokedex.probabilityOfFusion(
       p1: p1,
@@ -69,30 +77,78 @@ class FusionCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFF00D1FF).withOpacity(0.45),
+            color: (modifierColor ?? const Color(0xFF00D1FF))
+                .withOpacity(0.45),
             width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00D1FF).withOpacity(0.25),
+              color: (modifierColor ?? const Color(0xFF00D1FF))
+                  .withOpacity(0.25),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
+            if (modifierColor != null)
+              BoxShadow(
+                color: modifierColor.withOpacity(0.35),
+                blurRadius: 26,
+                spreadRadius: 2,
+              ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.network(
-              customUrl,
-              width: 160,
-              errorBuilder: (_, __, ___) {
-                return Image.network(
-                  autoGenUrl,
-                  width: 160,
-                );
-              },
-            ),
+            if (modifierColor != null && modifierLabel != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: modifierColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: modifierColor.withOpacity(0.85),
+                  ),
+                ),
+                child: Text(
+                  modifierLabel.toUpperCase(),
+                  style: TextStyle(
+                    color: modifierColor,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+              ),
+            if (modifierColor != null) const SizedBox(height: 10),
+            modifierColor == null
+                ? Image.network(
+                    customUrl,
+                    width: 160,
+                    errorBuilder: (_, __, ___) {
+                      return Image.network(
+                        autoGenUrl,
+                        width: 160,
+                      );
+                    },
+                  )
+                : ColorFiltered(
+                    colorFilter: ColorFilter.mode(
+                      modifierColor.withOpacity(0.45),
+                      BlendMode.srcATop,
+                    ),
+                    child: Image.network(
+                      customUrl,
+                      width: 160,
+                      errorBuilder: (_, __, ___) {
+                        return Image.network(
+                          autoGenUrl,
+                          width: 160,
+                        );
+                      },
+                    ),
+                  ),
             const SizedBox(height: 12),
             Text(
               _fusionName(),

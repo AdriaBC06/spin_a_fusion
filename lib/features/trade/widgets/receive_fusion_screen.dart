@@ -151,6 +151,7 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
       p2: p2,
       ball: BallType.values[ballIndex],
       rarity: 1.0,
+      uid: DateTime.now().microsecondsSinceEpoch,
     );
 
     context.read<FusionCollectionProvider>().addFusion(fusion);

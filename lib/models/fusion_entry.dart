@@ -24,6 +24,12 @@ class FusionEntry {
   @HiveField(5)
   final bool favorite;
 
+  @HiveField(6)
+  final FusionModifier? modifier;
+
+  @HiveField(7)
+  final int? uid;
+
   const FusionEntry({
     required this.p1,
     required this.p2,
@@ -31,6 +37,8 @@ class FusionEntry {
     required this.rarity,
     this.claimPending = false,
     this.favorite = false,
+    this.modifier,
+    this.uid,
   });
 
   int get totalStats => p1.totalStats + p2.totalStats;
@@ -60,6 +68,8 @@ class FusionEntry {
     double? rarity,
     bool? claimPending,
     bool? favorite,
+    FusionModifier? modifier,
+    int? uid,
   }) {
     return FusionEntry(
       p1: p1 ?? this.p1,
@@ -68,6 +78,8 @@ class FusionEntry {
       rarity: rarity ?? this.rarity,
       claimPending: claimPending ?? this.claimPending,
       favorite: favorite ?? this.favorite,
+      modifier: modifier ?? this.modifier,
+      uid: uid ?? this.uid,
     );
   }
 }

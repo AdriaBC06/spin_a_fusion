@@ -97,13 +97,31 @@ class HomeSlotsProvider extends ChangeNotifier {
       final fusion = _state.slots[i];
       if (fusion == null) continue;
 
-      final exists = inventory.any((f) =>
-          f.p1.fusionId == fusion.p1.fusionId &&
-          f.p2.fusionId == fusion.p2.fusionId);
+      final exists = inventory.any((f) {
+        if (fusion.uid != null && f.uid != null) {
+          return f.uid == fusion.uid;
+        }
+        return f.p1.fusionId == fusion.p1.fusionId &&
+            f.p2.fusionId == fusion.p2.fusionId;
+      });
 
       if (!exists) {
         _state.slots[i] = null;
         changed = true;
+        continue;
+      }
+
+      if (fusion.uid == null) {
+        final match = inventory.firstWhere(
+          (f) =>
+              f.p1.fusionId == fusion.p1.fusionId &&
+              f.p2.fusionId == fusion.p2.fusionId,
+          orElse: () => fusion,
+        );
+        if (match.uid != null) {
+          _state.slots[i] = match;
+          changed = true;
+        }
       }
     }
 
@@ -140,9 +158,14 @@ class HomeSlotsProvider extends ChangeNotifier {
   }
 
   bool contains(FusionEntry fusion) =>
-      _state.slots.any((f) =>
-          f?.p1.fusionId == fusion.p1.fusionId &&
-          f?.p2.fusionId == fusion.p2.fusionId);
+      _state.slots.any((f) {
+        if (f == null) return false;
+        if (fusion.uid != null && f.uid != null) {
+          return f.uid == fusion.uid;
+        }
+        return f.p1.fusionId == fusion.p1.fusionId &&
+            f.p2.fusionId == fusion.p2.fusionId;
+      });
 
   bool addFusion(FusionEntry fusion) {
     for (int i = 0; i < unlockedCount; i++) {
@@ -175,8 +198,12 @@ class HomeSlotsProvider extends ChangeNotifier {
       final f = _state.slots[i];
       if (f == null) continue;
 
-      if (f.p1.fusionId == fusion.p1.fusionId &&
-          f.p2.fusionId == fusion.p2.fusionId) {
+      final matches = (fusion.uid != null && f.uid != null)
+          ? f.uid == fusion.uid
+          : (f.p1.fusionId == fusion.p1.fusionId &&
+              f.p2.fusionId == fusion.p2.fusionId);
+
+      if (matches) {
         _state.slots[i] = null;
         changed = true;
       }

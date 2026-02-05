@@ -17,6 +17,8 @@ class InventoryBallCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool enabled = amount > 0;
+    final buttonTextColor =
+        color.computeLuminance() > 0.7 ? Colors.black : Colors.white;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -88,7 +90,7 @@ class InventoryBallCard extends StatelessWidget {
             onPressed: enabled ? onOpen : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
-              foregroundColor: Colors.white,
+              foregroundColor: buttonTextColor,
               disabledBackgroundColor: Colors.white24,
             ),
             child: const Text('Abrir'),

@@ -12,6 +12,7 @@ class FusionOverlay extends StatelessWidget {
   final Pokemon p1;
   final Pokemon p2;
   final BallType ball;
+  final FusionModifier? modifier;
 
   final Animation<double> mergeRotate;
   final Animation<double> mergeScale;
@@ -22,6 +23,8 @@ class FusionOverlay extends StatelessWidget {
   final Animation<double> fusionRotate;
   final Animation<double> fusionScale;
   final Animation<double> fusionBrightness;
+  final Animation<double> fusionFlash;
+  final Animation<double> fusionTint;
 
   final AnimationController mergeController;
   final AnimationController fusionController;
@@ -33,6 +36,7 @@ class FusionOverlay extends StatelessWidget {
     required this.p1,
     required this.p2,
     required this.ball,
+    required this.modifier,
     required this.mergeRotate,
     required this.mergeScale,
     required this.mergeBrightness,
@@ -41,6 +45,8 @@ class FusionOverlay extends StatelessWidget {
     required this.fusionRotate,
     required this.fusionScale,
     required this.fusionBrightness,
+    required this.fusionFlash,
+    required this.fusionTint,
     required this.mergeController,
     required this.fusionController,
   });
@@ -55,10 +61,20 @@ class FusionOverlay extends StatelessWidget {
     ]);
   }
 
+  ColorFilter _tint(Color color, double strength) {
+    return ColorFilter.mode(
+      color.withOpacity(0.45 * strength),
+      BlendMode.srcATop,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!showFusion) return const SizedBox.shrink();
 
+    final modifierColor = modifier == null
+        ? null
+        : fusionModifierColors[modifier!];
     final fusionUrl =
         'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
         'pokemon/custom-fusion-sprites-main/CustomBattlers/'
@@ -72,6 +88,13 @@ class FusionOverlay extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([mergeController, fusionController]),
       builder: (_, __) {
+        final flash = modifier == null ? 0.0 : fusionFlash.value;
+        final brightness =
+            (fusionBrightness.value + flash).clamp(0.0, 1.0)
+                as double;
+        final tintStrength =
+            modifier == null ? 0.0 : fusionTint.value;
+
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -133,7 +156,10 @@ class FusionOverlay extends StatelessWidget {
             // ----------------------------
             if (fusionController.value > 0 &&
                 fusionController.value < 0.4)
-              FusionParticles(progress: fusionController.value),
+              FusionParticles(
+                progress: fusionController.value,
+                color: modifierColor,
+              ),
 
             // ----------------------------
             // FUSED SPRITE (PRE-CARD)
@@ -144,21 +170,38 @@ class FusionOverlay extends StatelessWidget {
                 child: Transform.scale(
                   scale: fusionScale.value,
                   child: ColorFiltered(
-                    colorFilter:
-                        _brightness(fusionBrightness.value),
-                    child: Image.network(
-                      fusionUrl,
-                      width: 160,
-                      errorBuilder: (_, __, ___) {
-                        return Image.network(
-                          autoGenUrl,
-                          width: 160,
-                        );
-                      },
-                    ),
+                    colorFilter: _brightness(brightness),
+                    child: modifierColor == null
+                        ? Image.network(
+                            fusionUrl,
+                            width: 160,
+                            errorBuilder: (_, __, ___) {
+                              return Image.network(
+                                autoGenUrl,
+                                width: 160,
+                              );
+                            },
+                          )
+                        : ColorFiltered(
+                            colorFilter: _tint(
+                              modifierColor,
+                              tintStrength,
+                            ),
+                            child: Image.network(
+                              fusionUrl,
+                              width: 160,
+                              errorBuilder: (_, __, ___) {
+                                return Image.network(
+                                  autoGenUrl,
+                                  width: 160,
+                                );
+                              },
+                            ),
+                          ),
                   ),
                 ),
               ),
+
 
             // ----------------------------
             // FINAL CARD
@@ -169,6 +212,7 @@ class FusionOverlay extends StatelessWidget {
                 p2: p2,
                 autoGenUrl: autoGenUrl,
                 ball: ball,
+                modifier: modifier,
               ),
           ],
         );

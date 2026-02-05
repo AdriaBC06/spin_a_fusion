@@ -18,6 +18,8 @@ class ShopBallCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonTextColor =
+        color.computeLuminance() > 0.7 ? Colors.black : Colors.white;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -99,7 +101,7 @@ class ShopBallCard extends StatelessWidget {
             onPressed: enabled ? onBuy : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
-              foregroundColor: Colors.white,
+              foregroundColor: buttonTextColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
