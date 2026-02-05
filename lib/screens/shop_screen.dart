@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../providers/game_provider.dart';
 import '../features/shop/widgets/shop_ball_card.dart';
 import '../features/shop/widgets/shop_diamond_card.dart';
 import '../core/constants/pokedex_constants.dart';
+import '../features/shop/services/ball_purchase_limit_service.dart';
 
 class ShopScreen extends StatelessWidget {
   const ShopScreen({super.key});
+
+  String _formatRemaining(Duration remaining) {
+    final totalMinutes = remaining.inMinutes;
+    if (totalMinutes <= 0) return '0m';
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0) {
+      return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+    }
+    return '${minutes}m';
+  }
 
   @override
   Widget build(BuildContext context) {
     final game = context.watch<GameProvider>();
     final money = game.money;
+    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
     const autoSpinPrice = 100;
     final autoSpinOwned = game.autoSpinUnlocked;
     final autoSpinEnabled =
@@ -62,47 +78,67 @@ class ShopScreen extends StatelessWidget {
             type: BallType.master,
             enabled: money >= ballPrices[BallType.master]!,
           ),
-          _buildBall(
-            context,
-            name: 'Silver Ball',
-            color: const Color(0xFFB8BCC6),
-            type: BallType.silver,
-            enabled: money >= ballPrices[BallType.silver]!,
+          const SizedBox(height: 24),
+          const Text(
+            'Special Balls',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-          _buildBall(
-            context,
-            name: 'Gold Ball',
-            color: const Color(0xFFFFD76B),
-            type: BallType.gold,
-            enabled: money >= ballPrices[BallType.gold]!,
+          const SizedBox(height: 12),
+
+          _lockedWrapper(
+            locked: !isLoggedIn,
+            child: _buildBall(
+              context,
+              name: 'Silver Ball',
+              color: const Color(0xFFB8BCC6),
+              type: BallType.silver,
+              enabled: isLoggedIn &&
+                  money >= ballPrices[BallType.silver]!,
+            ),
           ),
-          _buildBall(
-            context,
-            name: 'Ruby Ball',
-            color: const Color(0xFFE84D4D),
-            type: BallType.ruby,
-            enabled: money >= ballPrices[BallType.ruby]!,
+          _lockedWrapper(
+            locked: !isLoggedIn,
+            child: _buildBall(
+              context,
+              name: 'Gold Ball',
+              color: const Color(0xFFFFD76B),
+              type: BallType.gold,
+              enabled:
+                  isLoggedIn && money >= ballPrices[BallType.gold]!,
+            ),
           ),
-          _buildBall(
-            context,
-            name: 'Sapphire Ball',
-            color: const Color(0xFF4C7BFF),
-            type: BallType.sapphire,
-            enabled: money >= ballPrices[BallType.sapphire]!,
+          _lockedWrapper(
+            locked: !isLoggedIn,
+            child: _buildBall(
+              context,
+              name: 'Ruby Ball',
+              color: const Color(0xFFE84D4D),
+              type: BallType.ruby,
+              enabled:
+                  isLoggedIn && money >= ballPrices[BallType.ruby]!,
+            ),
           ),
-          _buildBall(
-            context,
-            name: 'Emerald Ball',
-            color: const Color(0xFF2ECC71),
-            type: BallType.emerald,
-            enabled: money >= ballPrices[BallType.emerald]!,
+          _lockedWrapper(
+            locked: !isLoggedIn,
+            child: _buildBall(
+              context,
+              name: 'Sapphire Ball',
+              color: const Color(0xFF4C7BFF),
+              type: BallType.sapphire,
+              enabled: isLoggedIn &&
+                  money >= ballPrices[BallType.sapphire]!,
+            ),
           ),
-          _buildBall(
-            context,
-            name: 'Test Ball',
-            color: Colors.white,
-            type: BallType.test,
-            enabled: money >= ballPrices[BallType.test]!,
+          _lockedWrapper(
+            locked: !isLoggedIn,
+            child: _buildBall(
+              context,
+              name: 'Emerald Ball',
+              color: const Color(0xFF2ECC71),
+              type: BallType.emerald,
+              enabled: isLoggedIn &&
+                  money >= ballPrices[BallType.emerald]!,
+            ),
           ),
 
           const SizedBox(height: 28),
@@ -161,13 +197,38 @@ class ShopScreen extends StatelessWidget {
     required bool enabled,
   }) {
     final price = ballPrices[type]!;
+    final limiter = BallPurchaseLimitService();
     return ShopBallCard(
       name: name,
       color: color,
       price: price,
       enabled: enabled,
-      onBuy: () {
-        final success = context.read<GameProvider>().buyBall(
+      onBuy: () async {
+        final game = context.read<GameProvider>();
+        if (!game.canSpendMoney(price)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No tienes suficiente dinero'),
+            ),
+          );
+          return;
+        }
+
+        final limitResult = await limiter.tryConsume(type);
+        if (!limitResult.allowed) {
+          final remaining = limitResult.remaining;
+          final msg = remaining == null
+              ? 'Límite diario alcanzado'
+              : 'Disponible en ${_formatRemaining(remaining)}';
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(msg)),
+            );
+          }
+          return;
+        }
+
+        final success = game.buyBall(
               type: type,
               price: price,
             );
@@ -180,6 +241,47 @@ class ShopScreen extends StatelessWidget {
           );
         }
       },
+    );
+  }
+
+  Widget _lockedWrapper({
+    required bool locked,
+    required Widget child,
+  }) {
+    if (!locked) return child;
+
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.55),
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.lock, color: Colors.white, size: 24),
+                    SizedBox(height: 6),
+                    Text(
+                      'Inicia sesión o Registrate\npara desbloquear',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

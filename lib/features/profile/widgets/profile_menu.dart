@@ -198,6 +198,17 @@ class _ProfileMenuState extends State<ProfileMenu>
     else {
       items.addAll([
         _ProfileMenuItem(
+          icon: Icons.emoji_events,
+          title: 'Clasificación',
+          onTap: () {
+            _closeMenu();
+            showDialog(
+              context: context,
+              builder: (_) => LeaderboardDialog(),
+            );
+          },
+        ),
+        _ProfileMenuItem(
           icon: Icons.qr_code,
           title: 'Recibir fusión',
           onTap: () {
@@ -248,17 +259,6 @@ class _ProfileMenuState extends State<ProfileMenu>
     // COMMON
     // --------------------------------------------------
     items.addAll([
-      _ProfileMenuItem(
-        icon: Icons.emoji_events,
-        title: 'Clasificación',
-        onTap: () {
-          _closeMenu();
-          showDialog(
-            context: context,
-            builder: (_) => LeaderboardDialog(),
-          );
-        },
-      ),
       _ProfileMenuItem(
         icon: Icons.settings,
         title: 'Ajustes',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../shared/money_format.dart';
 
 class ShopBallCard extends StatelessWidget {
   final String name;
@@ -81,7 +82,7 @@ class ShopBallCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          price.toString(),
+                          formatMoney(price),
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

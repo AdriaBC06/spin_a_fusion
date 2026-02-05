@@ -28,7 +28,6 @@ class _InventorySectionState extends State<InventorySection> {
       BallType.ultra,
       BallType.superBall,
       BallType.poke,
-      BallType.test,
     ];
 
     for (final type in order) {
@@ -225,15 +224,6 @@ class _InventorySectionState extends State<InventorySection> {
             onOpen: () => FusionSpinService.open(
               context: context,
               ball: BallType.emerald,
-            ),
-          ),
-          InventoryBallCard(
-            name: 'Test Ball',
-            color: Colors.white,
-            amount: game.ballCount(BallType.test),
-            onOpen: () => FusionSpinService.open(
-              context: context,
-              ball: BallType.test,
             ),
           ),
         ],

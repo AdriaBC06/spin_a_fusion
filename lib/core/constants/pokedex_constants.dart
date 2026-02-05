@@ -12,6 +12,7 @@ enum BallType {
   ruby,
   sapphire,
   emerald,
+  // Hidden placeholder to preserve legacy index ordering.
   test,
 }
 
@@ -28,12 +29,11 @@ const Map<BallType, int> ballPrices = {
   BallType.superBall: 250,
   BallType.ultra: 1000,
   BallType.master: 10000,
-  BallType.silver: 1,
-  BallType.gold: 1,
-  BallType.ruby: 1,
-  BallType.sapphire: 1,
-  BallType.emerald: 1,
-  BallType.test: 1,
+  BallType.silver: 50000,
+  BallType.gold: 200000,
+  BallType.ruby: 1000000,
+  BallType.sapphire: 1000000,
+  BallType.emerald: 100000000,
 };
 
 const Map<FusionModifier, String> fusionModifierLabels = {

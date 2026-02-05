@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/game_provider.dart';
+import 'money_format.dart';
 
 class MoneyCounter extends StatelessWidget {
   const MoneyCounter({super.key});
@@ -21,7 +22,7 @@ class MoneyCounter extends StatelessWidget {
           const Icon(Icons.monetization_on, color: Colors.yellow),
           const SizedBox(width: 6),
           Text(
-            money.toString(),
+            formatMoney(money),
             style: const TextStyle(color: Colors.white),
           ),
         ],

@@ -61,6 +61,7 @@ class PokedexProvider extends ChangeNotifier {
   double _ballExponent(BallType ball) {
     switch (ball) {
       case BallType.poke:
+      case BallType.test:
         return 2.4;
       case BallType.superBall:
         return 1.7;
@@ -72,7 +73,6 @@ class PokedexProvider extends ChangeNotifier {
       case BallType.ruby:
       case BallType.sapphire:
       case BallType.emerald:
-      case BallType.test:
         return 0.9;
     }
   }
@@ -80,6 +80,7 @@ class PokedexProvider extends ChangeNotifier {
   int _ballMinCatchRate(BallType ball) {
     switch (ball) {
       case BallType.poke:
+      case BallType.test:
         return 1;
       case BallType.superBall:
         return 35;
@@ -91,7 +92,6 @@ class PokedexProvider extends ChangeNotifier {
       case BallType.ruby:
       case BallType.sapphire:
       case BallType.emerald:
-      case BallType.test:
         return 140;
     }
   }
@@ -101,6 +101,7 @@ class PokedexProvider extends ChangeNotifier {
 
     switch (ball) {
       case BallType.poke:
+      case BallType.test:
         return 0.0;
       case BallType.superBall:
         return 0.05;
@@ -112,7 +113,6 @@ class PokedexProvider extends ChangeNotifier {
       case BallType.ruby:
       case BallType.sapphire:
       case BallType.emerald:
-      case BallType.test:
         return 0.1;
     }
   }
@@ -130,12 +130,6 @@ class PokedexProvider extends ChangeNotifier {
   }
 
   Pokemon getRandomPokemon({BallType ball = BallType.poke}) {
-    for (final p in _pokemonList) {
-      if (p.name.toLowerCase() == 'bulbasaur') {
-        return p;
-      }
-    }
-    return _pokemonList.first;
     final rng = Random();
     double totalWeight = 0;
 

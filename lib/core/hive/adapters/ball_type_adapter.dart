@@ -7,7 +7,14 @@ class BallTypeAdapter extends TypeAdapter<BallType> {
 
   @override
   BallType read(BinaryReader reader) {
-    return BallType.values[reader.readInt()];
+    final index = reader.readInt();
+    if (index == BallType.test.index) {
+      return BallType.poke;
+    }
+    if (index < 0 || index >= BallType.values.length) {
+      return BallType.poke;
+    }
+    return BallType.values[index];
   }
 
   @override

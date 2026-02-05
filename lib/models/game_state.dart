@@ -45,7 +45,6 @@ class GameState {
           BallType.ruby: 0,
           BallType.sapphire: 0,
           BallType.emerald: 0,
-          BallType.test: 0,
         },
         playTimeSeconds: 0,
         totalSpins: 0,
