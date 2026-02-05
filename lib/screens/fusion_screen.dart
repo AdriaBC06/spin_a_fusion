@@ -10,6 +10,7 @@ import '../features/fusion/widgets/fusion_inventory_card.dart';
 enum FusionSortField {
   name,
   income,
+  favorite,
 }
 
 class FusionScreen extends StatefulWidget {
@@ -36,6 +37,13 @@ class _FusionScreenState extends State<FusionScreen> {
         case FusionSortField.income:
           result = FusionEconomy.incomePerSecond(a)
               .compareTo(FusionEconomy.incomePerSecond(b));
+          break;
+        case FusionSortField.favorite:
+          if (a.favorite == b.favorite) {
+            result = 0;
+          } else {
+            result = a.favorite ? -1 : 1;
+          }
           break;
       }
       return _ascending ? result : -result;
@@ -78,6 +86,8 @@ class _FusionScreenState extends State<FusionScreen> {
                       _sortTile(FusionSortField.name, 'Nombre'),
                       _sortTile(
                           FusionSortField.income, 'Dinero generado'),
+                      _sortTile(
+                          FusionSortField.favorite, 'Favoritos'),
                       const SizedBox(height: 12),
                     ],
                   ),
@@ -102,7 +112,11 @@ class _FusionScreenState extends State<FusionScreen> {
       onTap: () {
         setState(() {
           if (_sortField == field) {
-            _ascending = !_ascending;
+            if (field == FusionSortField.favorite) {
+              _sortField = null;
+            } else {
+              _ascending = !_ascending;
+            }
           } else {
             _sortField = field;
             _ascending = field != FusionSortField.income;
