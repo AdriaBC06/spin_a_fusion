@@ -189,7 +189,8 @@ class GameProvider extends ChangeNotifier {
 
   bool unlockAutoSpin({required int price}) {
     if (_state.autoSpinUnlocked) return true;
-    if (!spendDiamonds(price)) return false;
+    if (_state.diamonds < price) return false;
+    _state.diamonds -= price;
     _state.autoSpinUnlocked = true;
     _save();
     notifyListeners();
