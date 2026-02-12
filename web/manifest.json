@@ -1,11 +1,11 @@
 {
-    "name": "spin_a_fusion",
-    "short_name": "spin_a_fusion",
+    "name": "Spin a Fusion",
+    "short_name": "SpinFusion",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Spin a Fusion",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
