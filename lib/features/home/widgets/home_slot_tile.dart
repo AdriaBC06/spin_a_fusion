@@ -26,6 +26,7 @@ class HomeSlotTile extends StatefulWidget {
 
 class _HomeSlotTileState extends State<HomeSlotTile> {
   final List<int> _floatingAmounts = [];
+  bool _showingDialog = false;
 
   Widget _imageUnavailable() {
     return const Center(
@@ -47,7 +48,7 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
       key: imageKey == null ? null : ValueKey(imageKey),
       resolveFusionImageUrl(url),
       fit: fit,
-      webHtmlElementStrategy: WebHtmlElementStrategy.never,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
       errorBuilder: (_, _, _) => onError == null ? _imageUnavailable() : onError(),
     );
   }
@@ -143,12 +144,17 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
         : fusionModifierColors[fusion.modifier!];
 
     return GestureDetector(
-      onTap: () {
-        showDialog(
+      onTap: () async {
+        if (_showingDialog) return;
+        setState(() => _showingDialog = true);
+        await showDialog(
           context: context,
           builder: (_) =>
               FusionSummaryModal(fusion: fusion),
         );
+        if (mounted) {
+          setState(() => _showingDialog = false);
+        }
       },
       child: Stack(
         children: [
@@ -175,15 +181,17 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: modifierColor == null
-                  ? _fusionImage(fusion)
-                  : ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        modifierColor.withOpacity(0.45),
-                        BlendMode.srcATop,
-                      ),
-                      child: _fusionImage(fusion),
-                    ),
+              child: _showingDialog
+                  ? const SizedBox.expand()
+                  : modifierColor == null
+                      ? _fusionImage(fusion)
+                      : ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            modifierColor.withOpacity(0.45),
+                            BlendMode.srcATop,
+                          ),
+                          child: _fusionImage(fusion),
+                        ),
             ),
           ),
 

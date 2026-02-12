@@ -6,13 +6,20 @@ import '../../../providers/game_provider.dart';
 import 'fusion_summary_modal.dart';
 import '../../../core/network/fusion_image_proxy.dart';
 
-class PediaFusionTile extends StatelessWidget {
+class PediaFusionTile extends StatefulWidget {
   final FusionEntry fusion;
 
   const PediaFusionTile({
     super.key,
     required this.fusion,
   });
+
+  @override
+  State<PediaFusionTile> createState() => _PediaFusionTileState();
+}
+
+class _PediaFusionTileState extends State<PediaFusionTile> {
+  bool _showingDialog = false;
 
   Widget _imageUnavailable() {
     return const Center(
@@ -31,31 +38,37 @@ class PediaFusionTile extends StatelessWidget {
     return Image.network(
       resolveFusionImageUrl(url),
       fit: BoxFit.contain,
-      webHtmlElementStrategy: WebHtmlElementStrategy.never,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
       errorBuilder: (_, _, _) => onError == null ? _imageUnavailable() : onError(),
     );
   }
 
   Widget _fusionImage() {
     final secondary = _networkImage(
-      url: fusion.autoGenFusionUrl,
+      url: widget.fusion.autoGenFusionUrl,
       onError: _imageUnavailable,
     );
     return _networkImage(
-      url: fusion.customFusionUrl,
+      url: widget.fusion.customFusionUrl,
       onError: () => secondary,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final fusion = widget.fusion;
     final isPending = fusion.claimPending;
     return GestureDetector(
-      onTap: () {
-        showDialog(
+      onTap: () async {
+        if (_showingDialog) return;
+        setState(() => _showingDialog = true);
+        await showDialog(
           context: context,
           builder: (_) => FusionSummaryModal(fusion: fusion),
         );
+        if (mounted) {
+          setState(() => _showingDialog = false);
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -80,7 +93,9 @@ class PediaFusionTile extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(4),
-              child: _fusionImage(),
+              child: _showingDialog
+                  ? const SizedBox.expand()
+                  : _fusionImage(),
             ),
             if (isPending)
               const Positioned(
