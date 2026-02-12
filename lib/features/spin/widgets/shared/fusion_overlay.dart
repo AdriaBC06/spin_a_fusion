@@ -1,8 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../../models/pokemon.dart';
 import '../../../../core/constants/pokedex_constants.dart';
+import '../../../../core/network/fusion_image_proxy.dart';
 import 'fusion_particles.dart';
 import 'fusion_card.dart';
 
@@ -68,6 +68,69 @@ class FusionOverlay extends StatelessWidget {
     );
   }
 
+  Widget _imageUnavailable(double width) {
+    return SizedBox(
+      width: width,
+      height: width,
+      child: const Icon(
+        Icons.broken_image_outlined,
+        color: Colors.white54,
+        size: 42,
+      ),
+    );
+  }
+
+  Widget _networkImage({
+    required String url,
+    required double width,
+    Widget Function()? onError,
+  }) {
+    return Image.network(
+      url,
+      width: width,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      errorBuilder: (_, _, _) =>
+          onError == null ? _imageUnavailable(width) : onError(),
+    );
+  }
+
+  Widget _buildFusionSprite({
+    required String primaryUrl,
+    required String secondaryUrl,
+    required double width,
+  }) {
+    final primaryProxyUrl = resolveFusionImageUrl(primaryUrl);
+    final secondaryProxyUrl = resolveFusionImageUrl(secondaryUrl);
+
+    Widget secondaryDirect = _networkImage(
+      url: secondaryUrl,
+      width: width,
+      onError: () => _imageUnavailable(width),
+    );
+
+    Widget secondary = secondaryProxyUrl == secondaryUrl
+        ? secondaryDirect
+        : _networkImage(
+            url: secondaryProxyUrl,
+            width: width,
+            onError: () => secondaryDirect,
+          );
+
+    Widget primaryDirect = _networkImage(
+      url: primaryUrl,
+      width: width,
+      onError: () => secondary,
+    );
+
+    return primaryProxyUrl == primaryUrl
+        ? primaryDirect
+        : _networkImage(
+            url: primaryProxyUrl,
+            width: width,
+            onError: () => primaryDirect,
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!showFusion) return const SizedBox.shrink();
@@ -84,14 +147,12 @@ class FusionOverlay extends StatelessWidget {
         'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
         'pokemon/autogen-fusion-sprites-master/Battlers/'
         '${p1.fusionId}/${p1.fusionId}.${p2.fusionId}.png';
-
     return AnimatedBuilder(
       animation: Listenable.merge([mergeController, fusionController]),
       builder: (_, __) {
         final flash = modifier == null ? 0.0 : fusionFlash.value;
         final brightness =
-            (fusionBrightness.value + flash).clamp(0.0, 1.0)
-                as double;
+            (fusionBrightness.value + flash).clamp(0.0, 1.0);
         final tintStrength =
             modifier == null ? 0.0 : fusionTint.value;
 
@@ -172,30 +233,20 @@ class FusionOverlay extends StatelessWidget {
                   child: ColorFiltered(
                     colorFilter: _brightness(brightness),
                     child: modifierColor == null
-                        ? Image.network(
-                            fusionUrl,
+                        ? _buildFusionSprite(
+                            primaryUrl: fusionUrl,
+                            secondaryUrl: autoGenUrl,
                             width: 160,
-                            errorBuilder: (_, __, ___) {
-                              return Image.network(
-                                autoGenUrl,
-                                width: 160,
-                              );
-                            },
                           )
                         : ColorFiltered(
                             colorFilter: _tint(
                               modifierColor,
                               tintStrength,
                             ),
-                            child: Image.network(
-                              fusionUrl,
+                            child: _buildFusionSprite(
+                              primaryUrl: fusionUrl,
+                              secondaryUrl: autoGenUrl,
                               width: 160,
-                              errorBuilder: (_, __, ___) {
-                                return Image.network(
-                                  autoGenUrl,
-                                  width: 160,
-                                );
-                              },
                             ),
                           ),
                   ),

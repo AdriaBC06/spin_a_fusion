@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../models/pokemon.dart';
 import '../../../../providers/pokedex_provider.dart';
 import '../../../../core/constants/pokedex_constants.dart';
+import '../../../../core/network/fusion_image_proxy.dart';
 
 class FusionCard extends StatelessWidget {
   final Pokemon p1;
@@ -43,6 +44,69 @@ class FusionCard extends StatelessWidget {
         .toUpperCase();
   }
 
+  Widget _imageUnavailable(double width) {
+    return SizedBox(
+      width: width,
+      height: width,
+      child: const Icon(
+        Icons.broken_image_outlined,
+        color: Colors.white54,
+        size: 42,
+      ),
+    );
+  }
+
+  Widget _networkImage({
+    required String url,
+    required double width,
+    Widget Function()? onError,
+  }) {
+    return Image.network(
+      url,
+      width: width,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      errorBuilder: (_, _, _) =>
+          onError == null ? _imageUnavailable(width) : onError(),
+    );
+  }
+
+  Widget _buildFusionSprite({
+    required String primaryUrl,
+    required String secondaryUrl,
+    required double width,
+  }) {
+    final primaryProxyUrl = resolveFusionImageUrl(primaryUrl);
+    final secondaryProxyUrl = resolveFusionImageUrl(secondaryUrl);
+
+    Widget secondaryDirect = _networkImage(
+      url: secondaryUrl,
+      width: width,
+      onError: () => _imageUnavailable(width),
+    );
+
+    Widget secondary = secondaryProxyUrl == secondaryUrl
+        ? secondaryDirect
+        : _networkImage(
+            url: secondaryProxyUrl,
+            width: width,
+            onError: () => secondaryDirect,
+          );
+
+    Widget primaryDirect = _networkImage(
+      url: primaryUrl,
+      width: width,
+      onError: () => secondary,
+    );
+
+    return primaryProxyUrl == primaryUrl
+        ? primaryDirect
+        : _networkImage(
+            url: primaryProxyUrl,
+            width: width,
+            onError: () => primaryDirect,
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pokedex = context.read<PokedexProvider>();
@@ -63,7 +127,6 @@ class FusionCard extends StatelessWidget {
         'https://fusioncalc.com/wp-content/themes/twentytwentyone/'
         'pokemon/custom-fusion-sprites-main/CustomBattlers/'
         '${p1.fusionId}.${p2.fusionId}.png';
-
     return Card(
       elevation: 0,
       color: Colors.transparent,
@@ -123,30 +186,20 @@ class FusionCard extends StatelessWidget {
               ),
             if (modifierColor != null) const SizedBox(height: 10),
             modifierColor == null
-                ? Image.network(
-                    customUrl,
+                ? _buildFusionSprite(
+                    primaryUrl: customUrl,
+                    secondaryUrl: autoGenUrl,
                     width: 160,
-                    errorBuilder: (_, __, ___) {
-                      return Image.network(
-                        autoGenUrl,
-                        width: 160,
-                      );
-                    },
                   )
                 : ColorFiltered(
                     colorFilter: ColorFilter.mode(
                       modifierColor.withOpacity(0.45),
                       BlendMode.srcATop,
                     ),
-                    child: Image.network(
-                      customUrl,
+                    child: _buildFusionSprite(
+                      primaryUrl: customUrl,
+                      secondaryUrl: autoGenUrl,
                       width: 160,
-                      errorBuilder: (_, __, ___) {
-                        return Image.network(
-                          autoGenUrl,
-                          width: 160,
-                        );
-                      },
                     ),
                   ),
             const SizedBox(height: 12),

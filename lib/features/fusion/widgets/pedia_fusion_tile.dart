@@ -4,6 +4,7 @@ import '../../../models/fusion_entry.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/game_provider.dart';
 import 'fusion_summary_modal.dart';
+import '../../../core/network/fusion_image_proxy.dart';
 
 class PediaFusionTile extends StatelessWidget {
   final FusionEntry fusion;
@@ -12,6 +13,39 @@ class PediaFusionTile extends StatelessWidget {
     super.key,
     required this.fusion,
   });
+
+  Widget _imageUnavailable() {
+    return const Center(
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: Colors.white54,
+        size: 28,
+      ),
+    );
+  }
+
+  Widget _networkImage({
+    required String url,
+    Widget Function()? onError,
+  }) {
+    return Image.network(
+      resolveFusionImageUrl(url),
+      fit: BoxFit.contain,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      errorBuilder: (_, _, _) => onError == null ? _imageUnavailable() : onError(),
+    );
+  }
+
+  Widget _fusionImage() {
+    final secondary = _networkImage(
+      url: fusion.autoGenFusionUrl,
+      onError: _imageUnavailable,
+    );
+    return _networkImage(
+      url: fusion.customFusionUrl,
+      onError: () => secondary,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +80,7 @@ class PediaFusionTile extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(4),
-              child: Image.network(
-                fusion.customFusionUrl,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    Image.network(fusion.autoGenFusionUrl),
-              ),
+              child: _fusionImage(),
             ),
             if (isPending)
               const Positioned(

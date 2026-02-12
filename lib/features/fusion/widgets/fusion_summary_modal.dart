@@ -5,6 +5,7 @@ import '../../../models/fusion_entry.dart';
 import '../../../models/pokemon.dart';
 import '../../../providers/pokedex_provider.dart';
 import '../../../core/constants/pokedex_constants.dart';
+import '../../../core/network/fusion_image_proxy.dart';
 
 class FusionSummaryModal extends StatelessWidget {
   final FusionEntry fusion;
@@ -22,10 +23,49 @@ class FusionSummaryModal extends StatelessWidget {
     return '1 in ${rounded.toInt()}';
   }
 
+  Widget _imageUnavailable(double width) {
+    return SizedBox(
+      width: width,
+      height: width,
+      child: const Icon(
+        Icons.broken_image_outlined,
+        color: Colors.black45,
+        size: 34,
+      ),
+    );
+  }
+
+  Widget _networkImage({
+    required String url,
+    required double width,
+    Widget Function()? onError,
+  }) {
+    return Image.network(
+      resolveFusionImageUrl(url),
+      width: width,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      errorBuilder: (_, _, _) =>
+          onError == null ? _imageUnavailable(width) : onError(),
+    );
+  }
+
+  Widget _fusionImage(double width) {
+    final secondary = _networkImage(
+      url: fusion.autoGenFusionUrl,
+      width: width,
+      onError: () => _imageUnavailable(width),
+    );
+    return _networkImage(
+      url: fusion.customFusionUrl,
+      width: width,
+      onError: () => secondary,
+    );
+  }
+
   Widget _parent(Pokemon p) {
     return Column(
       children: [
-        Image.network(p.pokemonSprite, width: 64),
+        _networkImage(url: p.pokemonSprite, width: 64),
         const SizedBox(height: 4),
         Text(p.name.toUpperCase()),
       ],
@@ -106,31 +146,15 @@ class FusionSummaryModal extends StatelessWidget {
           children: [
             Stack(
               alignment: Alignment.center,
-              children: [
-                modifierColor == null
-                    ? Image.network(
-                        fusion.customFusionUrl,
-                        width: 160,
-                        errorBuilder: (_, __, ___) =>
-                            Image.network(
-                          fusion.autoGenFusionUrl,
-                          width: 160,
-                        ),
-                      )
+                children: [
+                  modifierColor == null
+                    ? _fusionImage(160)
                     : ColorFiltered(
                         colorFilter: ColorFilter.mode(
                           modifierColor.withOpacity(0.45),
                           BlendMode.srcATop,
                         ),
-                        child: Image.network(
-                          fusion.customFusionUrl,
-                          width: 160,
-                          errorBuilder: (_, __, ___) =>
-                              Image.network(
-                            fusion.autoGenFusionUrl,
-                            width: 160,
-                          ),
-                        ),
+                        child: _fusionImage(160),
                       ),
                 Positioned(
                   top: 0,
