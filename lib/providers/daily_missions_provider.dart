@@ -42,6 +42,12 @@ class DailyMissionsProvider extends ChangeNotifier {
     _game.addListener(_onGameChanged);
   }
 
+  Future<void> resetToDefault() async {
+    _state = <String, dynamic>{};
+    await _box.put(_stateKey, _state);
+    _ensureToday();
+  }
+
   @override
   void dispose() {
     _game.removeListener(_onGameChanged);
@@ -67,6 +73,7 @@ class DailyMissionsProvider extends ChangeNotifier {
   }
 
   void _save() {
+    _state['updatedAt'] = DateTime.now().millisecondsSinceEpoch;
     _box.put(_stateKey, _state);
   }
 
@@ -94,9 +101,83 @@ class DailyMissionsProvider extends ChangeNotifier {
       'claimedSpinLong': false,
       'claimedPlay15': false,
       'claimedPlay45': false,
+      'updatedAt': DateTime.now().millisecondsSinceEpoch,
     };
     _save();
     notifyListeners();
+  }
+
+  Map<String, dynamic> toCloudMap() {
+    _ensureToday();
+    return {
+      'dateKey': _state['dateKey'],
+      'startSpins': _state['startSpins'],
+      'startPlaySeconds': _state['startPlaySeconds'],
+      'spinTargetShort': _state['spinTargetShort'],
+      'spinTargetLong': _state['spinTargetLong'],
+      'claimedSpinShort': _state['claimedSpinShort'] == true,
+      'claimedSpinLong': _state['claimedSpinLong'] == true,
+      'claimedPlay15': _state['claimedPlay15'] == true,
+      'claimedPlay45': _state['claimedPlay45'] == true,
+      'updatedAt': _state['updatedAt'] ?? DateTime.now().millisecondsSinceEpoch,
+    };
+  }
+
+  void restoreFromCloud(Map<String, dynamic>? cloudState) {
+    _ensureToday();
+    if (cloudState == null) return;
+
+    final today = _todayKey();
+    final cloudDate = cloudState['dateKey'];
+    if (cloudDate is! String || cloudDate != today) {
+      return;
+    }
+
+    int readInt(String key, int fallback) {
+      final v = cloudState[key];
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      return fallback;
+    }
+
+    bool readBool(String key, bool fallback) {
+      final v = cloudState[key];
+      if (v is bool) return v;
+      return fallback;
+    }
+
+    _state['dateKey'] = today;
+    _state['startSpins'] = readInt(
+      'startSpins',
+      (_state['startSpins'] as int?) ?? _game.totalSpins,
+    );
+    _state['startPlaySeconds'] = readInt(
+      'startPlaySeconds',
+      (_state['startPlaySeconds'] as int?) ?? _game.playTimeSeconds,
+    );
+
+    final cloudShort = readInt('spinTargetShort', _spinTargetShort);
+    final cloudLong = readInt('spinTargetLong', _spinTargetLong);
+    _state['spinTargetShort'] = cloudShort.clamp(16, 25);
+    _state['spinTargetLong'] = cloudLong.clamp(140, 175);
+
+    _state['claimedSpinShort'] = readBool('claimedSpinShort', false) || _claimed('claimedSpinShort');
+    _state['claimedSpinLong'] = readBool('claimedSpinLong', false) || _claimed('claimedSpinLong');
+    _state['claimedPlay15'] = readBool('claimedPlay15', false) || _claimed('claimedPlay15');
+    _state['claimedPlay45'] = readBool('claimedPlay45', false) || _claimed('claimedPlay45');
+    _state['updatedAt'] = readInt(
+      'updatedAt',
+      DateTime.now().millisecondsSinceEpoch,
+    );
+
+    _save();
+    notifyListeners();
+  }
+
+  Duration get timeUntilReset {
+    final now = DateTime.now();
+    final next = DateTime(now.year, now.month, now.day + 1);
+    return next.difference(now);
   }
 
   int get _spinsToday {

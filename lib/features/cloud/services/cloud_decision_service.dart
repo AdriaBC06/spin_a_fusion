@@ -6,6 +6,7 @@ import 'firebase_sync_service.dart';
 import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 
 enum CloudDecision { useLocal, useCloud, autoLocal, autoUploadLocal }
 
@@ -94,6 +95,7 @@ class CloudDecisionService {
     required FusionCollectionProvider collection,
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
+    required DailyMissionsProvider dailyMissions,
   }) async {
     switch (decision) {
       case CloudDecision.useCloud:
@@ -104,6 +106,7 @@ class CloudDecisionService {
             collection: collection,
             pedia: pedia,
             homeSlots: homeSlots,
+            dailyMissions: dailyMissions,
           );
         }
         break;
@@ -116,6 +119,7 @@ class CloudDecisionService {
           collection: collection,
           pedia: pedia,
           homeSlots: homeSlots,
+          dailyMissions: dailyMissions,
         );
         break;
     }

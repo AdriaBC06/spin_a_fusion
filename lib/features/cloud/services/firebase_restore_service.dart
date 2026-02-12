@@ -9,6 +9,7 @@ import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/home_slots_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 
 class FirebaseRestoreService {
   final _firestore = FirebaseFirestore.instance;
@@ -39,6 +40,7 @@ class FirebaseRestoreService {
     required FusionCollectionProvider collection,
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
+    required DailyMissionsProvider dailyMissions,
   }) async {
     FusionEntry? firstMatch(
       Iterable<FusionEntry> list,
@@ -56,6 +58,11 @@ class FirebaseRestoreService {
     game.setPlayTimeSeconds(cloud['playTimeSeconds'] ?? 0);
     game.setTotalSpins(cloud['totalSpins'] ?? 0);
     game.setAutoSpinUnlocked(cloud['autoSpinUnlocked'] ?? false);
+    dailyMissions.restoreFromCloud(
+      cloud['dailyMissions'] is Map
+          ? Map<String, dynamic>.from(cloud['dailyMissions'] as Map)
+          : null,
+    );
 
     // -------- BALLS --------
     final balls =

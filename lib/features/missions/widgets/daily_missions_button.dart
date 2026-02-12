@@ -1,7 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../features/cloud/services/firebase_sync_service.dart';
 import '../../../providers/daily_missions_provider.dart';
+import '../../../providers/game_provider.dart';
+import '../../../providers/fusion_collection_provider.dart';
+import '../../../providers/fusion_pedia_provider.dart';
+import '../../../providers/home_slots_provider.dart';
 
 class DailyMissionsButton extends StatelessWidget {
   const DailyMissionsButton({super.key});
@@ -54,13 +61,43 @@ class DailyMissionsButton extends StatelessWidget {
   }
 }
 
-class _DailyMissionsDialog extends StatelessWidget {
+class _DailyMissionsDialog extends StatefulWidget {
   const _DailyMissionsDialog();
+
+  @override
+  State<_DailyMissionsDialog> createState() => _DailyMissionsDialogState();
+}
+
+class _DailyMissionsDialogState extends State<_DailyMissionsDialog> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  String _formatCountdown(Duration d) {
+    final total = d.inSeconds < 0 ? 0 : d.inSeconds;
+    final h = (total ~/ 3600).toString().padLeft(2, '0');
+    final m = ((total % 3600) ~/ 60).toString().padLeft(2, '0');
+    final s = (total % 60).toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<DailyMissionsProvider>();
     final missions = provider.missions;
+    final remaining = provider.timeUntilReset;
 
     return Dialog(
       child: Container(
@@ -98,11 +135,14 @@ class _DailyMissionsDialog extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    LinearProgressIndicator(
-                      value: mission.target == 0 ? 0 : progress / mission.target,
-                      backgroundColor: Colors.white12,
-                      color: const Color(0xFF00D1FF),
-                      minHeight: 8,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: LinearProgressIndicator(
+                        value: mission.target == 0 ? 0 : progress / mission.target,
+                        backgroundColor: Colors.white12,
+                        color: const Color(0xFF00D1FF),
+                        minHeight: 10,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -131,6 +171,20 @@ class _DailyMissionsDialog extends StatelessWidget {
                                     .read<DailyMissionsProvider>()
                                     .claimMission(mission.id);
                                 if (ok) {
+                                  FirebaseSyncService()
+                                      .sync(
+                                        game: context.read<GameProvider>(),
+                                        collection: context
+                                            .read<FusionCollectionProvider>(),
+                                        pedia: context
+                                            .read<FusionPediaProvider>(),
+                                        homeSlots:
+                                            context.read<HomeSlotsProvider>(),
+                                        dailyMissions: context
+                                            .read<DailyMissionsProvider>(),
+                                        force: true,
+                                      )
+                                      .catchError((_) {});
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
@@ -148,12 +202,22 @@ class _DailyMissionsDialog extends StatelessWidget {
                 ),
               );
             }),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cerrar'),
-              ),
+            Row(
+              children: [
+                Text(
+                  'Reinicio en ${_formatCountdown(remaining)}',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cerrar'),
+                ),
+              ],
             ),
           ],
         ),

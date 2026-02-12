@@ -7,6 +7,7 @@ import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/home_slots_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 
 class RegisterDialog extends StatefulWidget {
   const RegisterDialog({super.key});
@@ -41,6 +42,7 @@ class _RegisterDialogState extends State<RegisterDialog> {
         collection: context.read<FusionCollectionProvider>(),
         pedia: context.read<FusionPediaProvider>(),
         homeSlots: context.read<HomeSlotsProvider>(),
+        dailyMissions: context.read<DailyMissionsProvider>(),
       );
       if (mounted) Navigator.of(context).pop();
     } catch (e) {

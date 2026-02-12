@@ -11,6 +11,7 @@ import '../services/firebase_trade_service.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/game_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 import '../../../features/cloud/services/firebase_sync_service.dart';
 import '../../../models/fusion_entry.dart';
 import 'fusion_picker_dialog.dart';
@@ -111,6 +112,7 @@ class _SendFusionFlowState extends State<SendFusionFlow> {
         collection: context.read<FusionCollectionProvider>(),
         pedia: context.read<FusionPediaProvider>(),
         homeSlots: context.read<HomeSlotsProvider>(),
+        dailyMissions: context.read<DailyMissionsProvider>(),
         force: true,
       );
 

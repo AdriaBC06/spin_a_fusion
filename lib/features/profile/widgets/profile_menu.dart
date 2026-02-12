@@ -10,6 +10,7 @@ import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/home_slots_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 
 import '../../cloud/services/firebase_sync_service.dart';
 import '../../cloud/widgets/confirm_cloud_overwrite_dialog.dart';
@@ -82,6 +83,7 @@ class _ProfileMenuState extends State<ProfileMenu>
         collection: context.read<FusionCollectionProvider>(),
         pedia: context.read<FusionPediaProvider>(),
         homeSlots: context.read<HomeSlotsProvider>(),
+        dailyMissions: context.read<DailyMissionsProvider>(),
         force: true,
       );
 
@@ -134,6 +136,7 @@ class _ProfileMenuState extends State<ProfileMenu>
         collection: context.read<FusionCollectionProvider>(),
         pedia: context.read<FusionPediaProvider>(),
         homeSlots: context.read<HomeSlotsProvider>(),
+        dailyMissions: context.read<DailyMissionsProvider>(),
         force: true,
       );
     } catch (e) {
@@ -151,6 +154,7 @@ class _ProfileMenuState extends State<ProfileMenu>
     await context.read<FusionCollectionProvider>().resetToDefault();
     await context.read<FusionPediaProvider>().resetToDefault();
     await context.read<HomeSlotsProvider>().resetToDefault();
+    await context.read<DailyMissionsProvider>().resetToDefault();
   }
 
   OverlayEntry _createOverlay(User? user) {

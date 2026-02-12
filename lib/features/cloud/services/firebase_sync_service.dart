@@ -5,6 +5,7 @@ import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/home_slots_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 import '../../../core/constants/pokedex_constants.dart';
 import '../../../models/fusion_entry.dart';
 
@@ -23,6 +24,7 @@ class FirebaseSyncService {
     required FusionCollectionProvider collection,
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
+    required DailyMissionsProvider dailyMissions,
     bool force = false,
   }) async {
     final user = _auth.currentUser;
@@ -43,6 +45,7 @@ class FirebaseSyncService {
       collection: collection,
       pedia: pedia,
       homeSlots: homeSlots,
+      dailyMissions: dailyMissions,
     );
 
     await _firestore
@@ -61,6 +64,7 @@ class FirebaseSyncService {
     required FusionCollectionProvider collection,
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
+    required DailyMissionsProvider dailyMissions,
   }) {
     final username = _auth.currentUser?.displayName;
 
@@ -97,6 +101,9 @@ class FirebaseSyncService {
       // 🔥 HOME SLOTS
       'homeSlots': _encodeHomeSlots(homeSlots),
       'homeSlotsUnlocked': homeSlots.unlockedCount,
+
+      // DAILY MISSIONS
+      'dailyMissions': dailyMissions.toCloudMap(),
     };
   }
 

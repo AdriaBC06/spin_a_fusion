@@ -13,6 +13,7 @@ import '../../../providers/settings_provider.dart';
 import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/home_slots_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 import '../../cloud/services/firebase_sync_service.dart';
 import '../../../models/fusion_entry.dart';
 import '../../../models/pokemon.dart';
@@ -167,6 +168,7 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
       collection: context.read<FusionCollectionProvider>(),
       pedia: context.read<FusionPediaProvider>(),
       homeSlots: context.read<HomeSlotsProvider>(),
+      dailyMissions: context.read<DailyMissionsProvider>(),
       force: true,
     );
 

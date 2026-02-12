@@ -10,6 +10,7 @@ import '../../../providers/game_provider.dart';
 import '../../../providers/fusion_collection_provider.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/home_slots_provider.dart';
+import '../../../providers/daily_missions_provider.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -67,6 +68,9 @@ class _LoginDialogState extends State<LoginDialog> {
           await context
               .read<HomeSlotsProvider>()
               .resetToDefault();
+          await context
+              .read<DailyMissionsProvider>()
+              .resetToDefault();
 
           await restoreService.restoreFromCloud(
             cloud: cloud,
@@ -77,6 +81,8 @@ class _LoginDialogState extends State<LoginDialog> {
                 context.read<FusionPediaProvider>(),
             homeSlots:
                 context.read<HomeSlotsProvider>(),
+            dailyMissions:
+                context.read<DailyMissionsProvider>(),
           );
         }
       }
