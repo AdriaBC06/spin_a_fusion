@@ -33,6 +33,7 @@ dependencies:
   # App info / external links
   package_info_plus: ^8.0.2
   url_launcher: ^6.3.0
+  wakelock_plus: ^1.2.8
 
   # App icon
   flutter_launcher_icons: ^0.14.4
