@@ -8,6 +8,7 @@ import '../../../providers/game_provider.dart';
 import '../fusion_economy.dart';
 import 'fusion_summary_modal.dart';
 import '../../../core/constants/pokedex_constants.dart';
+import '../../../core/network/fusion_image_proxy.dart';
 
 class FusionInventoryCard extends StatelessWidget {
   final FusionEntry fusion;
@@ -119,6 +120,41 @@ class FusionInventoryCard extends StatelessWidget {
     return fusionModifierColors[modifier];
   }
 
+  Widget _imageUnavailable() {
+    return const Center(
+      child: Icon(
+        Icons.broken_image_outlined,
+        color: Colors.white54,
+        size: 36,
+      ),
+    );
+  }
+
+  Widget _networkImage({
+    required String url,
+    BoxFit fit = BoxFit.contain,
+    Widget Function()? onError,
+  }) {
+    return Image.network(
+      resolveFusionImageUrl(url),
+      fit: fit,
+      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      errorBuilder: (_, _, _) => onError == null ? _imageUnavailable() : onError(),
+    );
+  }
+
+  Widget _fusionImage(FusionEntry fusion) {
+    Widget secondary = _networkImage(
+      url: fusion.autoGenFusionUrl,
+      onError: _imageUnavailable,
+    );
+
+    return _networkImage(
+      url: fusion.customFusionUrl,
+      onError: () => secondary,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final slots = context.watch<HomeSlotsProvider>();
@@ -223,30 +259,14 @@ class FusionInventoryCard extends StatelessWidget {
                 children: [
                   Positioned.fill(
                     child: _modifierColor(fusion) == null
-                        ? Image.network(
-                            fusion.customFusionUrl,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) =>
-                                Image.network(
-                              fusion.autoGenFusionUrl,
-                              fit: BoxFit.contain,
-                            ),
-                          )
+                        ? _fusionImage(fusion)
                         : ColorFiltered(
                             colorFilter: ColorFilter.mode(
                               _modifierColor(fusion)!
                                   .withOpacity(0.45),
                               BlendMode.srcATop,
                             ),
-                            child: Image.network(
-                              fusion.customFusionUrl,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) =>
-                                  Image.network(
-                                fusion.autoGenFusionUrl,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
+                            child: _fusionImage(fusion),
                           ),
                   ),
                   Positioned(
