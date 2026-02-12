@@ -47,7 +47,7 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
       key: imageKey == null ? null : ValueKey(imageKey),
       resolveFusionImageUrl(url),
       fit: fit,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      webHtmlElementStrategy: WebHtmlElementStrategy.never,
       errorBuilder: (_, _, _) => onError == null ? _imageUnavailable() : onError(),
     );
   }

@@ -31,7 +31,7 @@ class PediaFusionTile extends StatelessWidget {
     return Image.network(
       resolveFusionImageUrl(url),
       fit: BoxFit.contain,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      webHtmlElementStrategy: WebHtmlElementStrategy.never,
       errorBuilder: (_, _, _) => onError == null ? _imageUnavailable() : onError(),
     );
   }
