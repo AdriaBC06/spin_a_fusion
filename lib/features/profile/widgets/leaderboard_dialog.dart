@@ -6,6 +6,10 @@ class LeaderboardDialog extends StatelessWidget {
 
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance;
+  static const Set<String> _hiddenAccounts = {
+    'dev',
+    'dev2',
+  };
 
   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
       _fetch(String field) async {
@@ -126,7 +130,12 @@ class LeaderboardDialog extends StatelessWidget {
         }
 
         final docs = snapshot.data ?? [];
-        if (docs.isEmpty) {
+        final filteredDocs = docs.where((doc) {
+          final name = _username(doc.data()).trim().toLowerCase();
+          return !_hiddenAccounts.contains(name);
+        }).toList();
+
+        if (filteredDocs.isEmpty) {
           return Center(
             child: Text(
               emptyLabel,
@@ -136,9 +145,9 @@ class LeaderboardDialog extends StatelessWidget {
         }
 
         return ListView.builder(
-          itemCount: docs.length,
+          itemCount: filteredDocs.length,
           itemBuilder: (context, index) {
-            final data = docs[index].data();
+            final data = filteredDocs[index].data();
             return _buildEntry(
               index: index,
               name: _username(data),
