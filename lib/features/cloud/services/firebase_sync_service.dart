@@ -65,7 +65,7 @@ class FirebaseSyncService {
     final username = _auth.currentUser?.displayName;
 
     return {
-      'schemaVersion': 4,
+      'schemaVersion': 5,
       'lastSync': DateTime.now().millisecondsSinceEpoch,
 
       'playTimeSeconds': game.playTimeSeconds,
@@ -166,6 +166,7 @@ class FirebaseSyncService {
         .map((f) => {
               'k': _fusionKey(f.p1.fusionId, f.p2.fusionId),
               'b': f.ball.index,
+              if (f.modifier != null) 'm': f.modifier!.index,
               if (f.uid != null) 'u': f.uid!,
             })
         .toList();
@@ -199,9 +200,9 @@ class FirebaseSyncService {
     return map;
   }
 
-  Map<String, int?> _encodeHomeSlots(
+  Map<String, dynamic> _encodeHomeSlots(
       HomeSlotsProvider home) {
-    final map = <String, int?>{};
+    final map = <String, dynamic>{};
 
     for (int i = 0;
         i < home.unlockedCount;
@@ -209,10 +210,16 @@ class FirebaseSyncService {
       final fusion = home.slots[i];
       map[i.toString()] = fusion == null
           ? null
-          : _fusionKey(
-              fusion.p1.fusionId,
-              fusion.p2.fusionId,
-            );
+          : {
+              'k': _fusionKey(
+                fusion.p1.fusionId,
+                fusion.p2.fusionId,
+              ),
+              'b': fusion.ball.index,
+              if (fusion.modifier != null)
+                'm': fusion.modifier!.index,
+              if (fusion.uid != null) 'u': fusion.uid!,
+            };
     }
 
     return map;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'money_counter.dart';
 import 'diamond_counter.dart';
+import '../missions/widgets/daily_missions_button.dart';
 import '../profile/widgets/profile_menu.dart';
 
 class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -20,6 +21,8 @@ class TopAppBar extends StatelessWidget implements PreferredSizeWidget {
             SizedBox(width: 8),
             DiamondCounter(),
             Spacer(),
+            DailyMissionsButton(),
+            SizedBox(width: 8),
             ProfileMenu(),
           ],
         ),

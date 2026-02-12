@@ -40,9 +40,11 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
   Widget _networkImage({
     required String url,
     BoxFit fit = BoxFit.contain,
+    String? imageKey,
     Widget Function()? onError,
   }) {
     return Image.network(
+      key: imageKey == null ? null : ValueKey(imageKey),
       resolveFusionImageUrl(url),
       fit: fit,
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
@@ -53,10 +55,12 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
   Widget _fusionImage(FusionEntry fusion) {
     final secondary = _networkImage(
       url: fusion.autoGenFusionUrl,
+      imageKey: 'home-${fusion.uid}-autogen',
       onError: _imageUnavailable,
     );
     return _networkImage(
       url: fusion.customFusionUrl,
+      imageKey: 'home-${fusion.uid}-custom',
       onError: () => secondary,
     );
   }

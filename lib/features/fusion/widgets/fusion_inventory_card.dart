@@ -133,9 +133,11 @@ class FusionInventoryCard extends StatelessWidget {
   Widget _networkImage({
     required String url,
     BoxFit fit = BoxFit.contain,
+    String? imageKey,
     Widget Function()? onError,
   }) {
     return Image.network(
+      key: imageKey == null ? null : ValueKey(imageKey),
       resolveFusionImageUrl(url),
       fit: fit,
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
@@ -146,11 +148,13 @@ class FusionInventoryCard extends StatelessWidget {
   Widget _fusionImage(FusionEntry fusion) {
     Widget secondary = _networkImage(
       url: fusion.autoGenFusionUrl,
+      imageKey: 'inventory-${fusion.uid}-autogen',
       onError: _imageUnavailable,
     );
 
     return _networkImage(
       url: fusion.customFusionUrl,
+      imageKey: 'inventory-${fusion.uid}-custom',
       onError: () => secondary,
     );
   }

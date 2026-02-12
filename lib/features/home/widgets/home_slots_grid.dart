@@ -22,9 +22,15 @@ class HomeSlotsGrid extends StatelessWidget {
         crossAxisSpacing: 12,
       ),
       itemBuilder: (_, index) {
+        final fusion = slots[index];
+        final fusionKey = fusion == null
+            ? 'empty'
+            : (fusion.uid?.toString() ??
+                '${fusion.p1.fusionId}:${fusion.p2.fusionId}');
         return HomeSlotTile(
+          key: ValueKey('home-slot-$index-$fusionKey'),
           index: index,
-          fusion: slots[index],
+          fusion: fusion,
         );
       },
     );

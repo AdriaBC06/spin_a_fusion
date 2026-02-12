@@ -19,6 +19,7 @@ Future<void> main() async {
         ChangeNotifierProvider.value(value: deps.fusionCollection),
         ChangeNotifierProvider.value(value: deps.homeSlots),
         ChangeNotifierProvider.value(value: deps.settings),
+        ChangeNotifierProvider.value(value: deps.dailyMissions),
         ChangeNotifierProvider(create: (_) => PokedexProvider()),
       ],
       child: const MyApp(),

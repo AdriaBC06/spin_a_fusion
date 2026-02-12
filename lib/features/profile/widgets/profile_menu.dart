@@ -82,6 +82,7 @@ class _ProfileMenuState extends State<ProfileMenu>
         collection: context.read<FusionCollectionProvider>(),
         pedia: context.read<FusionPediaProvider>(),
         homeSlots: context.read<HomeSlotsProvider>(),
+        force: true,
       );
 
       ScaffoldMessenger.of(
@@ -133,6 +134,7 @@ class _ProfileMenuState extends State<ProfileMenu>
         collection: context.read<FusionCollectionProvider>(),
         pedia: context.read<FusionPediaProvider>(),
         homeSlots: context.read<HomeSlotsProvider>(),
+        force: true,
       );
     } catch (e) {
       if (mounted) {

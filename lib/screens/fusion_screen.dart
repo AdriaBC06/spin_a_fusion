@@ -285,7 +285,12 @@ class _FusionScreenState extends State<FusionScreen> {
                   children: fusions
                       .map(
                         (f) =>
-                            FusionInventoryCard(fusion: f),
+                            FusionInventoryCard(
+                              key: ValueKey(
+                                'fusion-card-${f.uid ?? '${f.p1.fusionId}:${f.p2.fusionId}'}',
+                              ),
+                              fusion: f,
+                            ),
                       )
                       .toList(),
                 ),

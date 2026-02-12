@@ -8,7 +8,6 @@ import '../hive/init/hive_init.dart';
 import '../../firebase_options.dart';
 import '../../providers/providers.dart';
 import '../../providers/fusion_pedia_provider.dart';
-import '../../providers/home_slots_provider.dart';
 import '../../providers/settings_provider.dart';
 
 final bool kFirebaseSupported =
@@ -20,6 +19,7 @@ class AppDependencies {
   final FusionCollectionProvider fusionCollection;
   final HomeSlotsProvider homeSlots;
   final SettingsProvider settings;
+  final DailyMissionsProvider dailyMissions;
 
   AppDependencies({
     required this.game,
@@ -27,6 +27,7 @@ class AppDependencies {
     required this.fusionCollection,
     required this.homeSlots,
     required this.settings,
+    required this.dailyMissions,
   });
 }
 
@@ -82,11 +83,15 @@ Future<AppDependencies> initApp() async {
   final settingsProvider = SettingsProvider();
   await settingsProvider.init();
 
+  final dailyMissionsProvider = DailyMissionsProvider();
+  await dailyMissionsProvider.init(gameProvider);
+
   return AppDependencies(
     game: gameProvider,
     fusionPedia: fusionPediaProvider,
     fusionCollection: fusionCollectionProvider,
     homeSlots: homeSlotsProvider,
     settings: settingsProvider,
+    dailyMissions: dailyMissionsProvider,
   );
 }

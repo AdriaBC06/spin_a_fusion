@@ -40,6 +40,16 @@ class FirebaseRestoreService {
     required FusionPediaProvider pedia,
     required HomeSlotsProvider homeSlots,
   }) async {
+    FusionEntry? firstMatch(
+      Iterable<FusionEntry> list,
+      bool Function(FusionEntry) test,
+    ) {
+      for (final item in list) {
+        if (test(item)) return item;
+      }
+      return null;
+    }
+
     // -------- GAME --------
     game.setMoney(cloud['money'] ?? 0);
     game.setDiamonds(cloud['diamonds'] ?? 0);
@@ -64,6 +74,8 @@ class FirebaseRestoreService {
       int key, {
       bool claimPending = false,
       bool favorite = false,
+      BallType ball = BallType.poke,
+      FusionModifier? modifier,
       int? uid,
     }) {
       final id1 = key ~/ expectedPokemonCount;
@@ -79,10 +91,11 @@ class FirebaseRestoreService {
       return FusionEntry(
         p1: p1,
         p2: p2,
-        ball: BallType.poke,
+        ball: ball,
         rarity: 1.0,
         claimPending: claimPending,
         favorite: favorite,
+        modifier: modifier,
         uid: uid,
       );
     }
@@ -115,6 +128,7 @@ class FirebaseRestoreService {
         if (entry is! Map) continue;
         final rawKey = entry['k'];
         final rawBall = entry['b'];
+        final rawModifier = entry['m'];
         final rawUid = entry['u'];
         if (rawKey is! int || rawBall is! int) continue;
 
@@ -123,12 +137,19 @@ class FirebaseRestoreService {
                 rawBall < BallType.values.length
             ? BallType.values[rawBall]
             : BallType.poke;
+        final modifier = rawModifier is int &&
+                rawModifier >= 0 &&
+                rawModifier < FusionModifier.values.length
+            ? FusionModifier.values[rawModifier]
+            : null;
 
         final fusion = decode(
           rawKey,
+          ball: ball,
+          modifier: modifier,
           favorite: favorite,
           uid: rawUid is int ? rawUid : null,
-        )?.copyWith(ball: ball);
+        );
         if (fusion != null) {
           collection.addFusion(fusion);
         }
@@ -145,8 +166,9 @@ class FirebaseRestoreService {
             : BallType.poke;
         final fusion = decode(
           key,
+          ball: ball,
           favorite: favorite,
-        )?.copyWith(ball: ball);
+        );
         if (fusion != null) {
           collection.addFusion(fusion);
         }
@@ -180,7 +202,8 @@ class FirebaseRestoreService {
         final fusion = decode(
           key,
           claimPending: pending,
-        )?.copyWith(ball: ball);
+          ball: ball,
+        );
         if (fusion != null) {
           pedia.registerFusionFromCloud(fusion);
         }
@@ -215,9 +238,13 @@ class FirebaseRestoreService {
     }
 
     // -------- HOME SLOTS --------
-    final unlocked =
-        (cloud['homeSlotsUnlocked'] ?? HomeSlotsProvider.initialUnlocked)
-            as int;
+    final unlockedRaw =
+        cloud['homeSlotsUnlocked'] ?? HomeSlotsProvider.initialUnlocked;
+    final unlocked = unlockedRaw is int
+        ? unlockedRaw
+        : (unlockedRaw is num
+            ? unlockedRaw.toInt()
+            : HomeSlotsProvider.initialUnlocked);
     homeSlots.setUnlockedCount(unlocked);
 
     final rawSlots =
@@ -229,13 +256,73 @@ class FirebaseRestoreService {
         continue;
       }
 
-      final int? key = entry.value;
+      final value = entry.value;
+      if (value == null) {
+        homeSlots.setSlot(index, null);
+        continue;
+      }
+
+      int? key;
+      int? uid;
+      BallType ball = BallType.poke;
+      FusionModifier? modifier;
+
+      if (value is int) {
+        key = value;
+      } else if (value is Map) {
+        final slotMap = Map<String, dynamic>.from(value);
+        final rawKey = slotMap['k'];
+        final rawUid = slotMap['u'];
+        final rawBall = slotMap['b'];
+        final rawModifier = slotMap['m'];
+
+        if (rawKey is int) key = rawKey;
+        if (rawUid is int) uid = rawUid;
+        if (rawBall is int &&
+            rawBall >= 0 &&
+            rawBall < BallType.values.length) {
+          ball = BallType.values[rawBall];
+        }
+        if (rawModifier is int &&
+            rawModifier >= 0 &&
+            rawModifier < FusionModifier.values.length) {
+          modifier = FusionModifier.values[rawModifier];
+        }
+      }
+
       if (key == null) {
         homeSlots.setSlot(index, null);
         continue;
       }
 
-      final fusion = decode(key);
+      final id1 = key ~/ expectedPokemonCount;
+      final id2 = key % expectedPokemonCount;
+
+      FusionEntry? fusion;
+      if (uid != null) {
+        fusion = firstMatch(collection.allFusions, (f) => f.uid == uid);
+      }
+
+      fusion ??= firstMatch(
+        collection.allFusions,
+        (f) =>
+            f.p1.fusionId == id1 &&
+            f.p2.fusionId == id2 &&
+            f.ball == ball &&
+            f.modifier == modifier,
+      );
+
+      fusion ??= firstMatch(
+        collection.allFusions,
+        (f) => f.p1.fusionId == id1 && f.p2.fusionId == id2,
+      );
+
+      fusion ??= decode(
+        key,
+        ball: ball,
+        modifier: modifier,
+        uid: uid,
+      );
       if (fusion != null) {
         homeSlots.setSlot(index, fusion);
       } else {
