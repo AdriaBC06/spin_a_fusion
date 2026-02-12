@@ -149,6 +149,7 @@ class FirebaseTradeService {
       final fusionPayload = {
         'key': _fusionKey(fusion.p1.fusionId, fusion.p2.fusionId),
         'ball': fusion.ball.index,
+        'modifier': fusion.modifier?.index,
       };
 
       tx.update(ref, {'fusion': fusionPayload, 'status': 'completed'});

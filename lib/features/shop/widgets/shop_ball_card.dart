@@ -7,6 +7,7 @@ class ShopBallCard extends StatelessWidget {
   final int price;
   final bool enabled;
   final VoidCallback onBuy;
+  final String? timerText;
 
   const ShopBallCard({
     super.key,
@@ -15,6 +16,7 @@ class ShopBallCard extends StatelessWidget {
     required this.price,
     required this.onBuy,
     this.enabled = true,
+    this.timerText,
   });
 
   @override
@@ -97,7 +99,6 @@ class ShopBallCard extends StatelessWidget {
             ],
           ),
 
-          // Botón comprar
           ElevatedButton(
             onPressed: enabled ? onBuy : null,
             style: ElevatedButton.styleFrom(
@@ -107,7 +108,7 @@ class ShopBallCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Comprar'),
+            child: Text(timerText ?? 'Comprar'),
           ),
         ],
       ),

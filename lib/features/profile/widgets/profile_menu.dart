@@ -99,6 +99,8 @@ class _ProfileMenuState extends State<ProfileMenu>
   // LOGOUT
   // ------------------------------------------------------
   Future<void> _logout() async {
+    _closeMenu();
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -121,7 +123,6 @@ class _ProfileMenuState extends State<ProfileMenu>
     );
 
     if (confirmed != true) {
-      _closeMenu();
       return;
     }
 
@@ -148,7 +149,6 @@ class _ProfileMenuState extends State<ProfileMenu>
     await context.read<FusionCollectionProvider>().resetToDefault();
     await context.read<FusionPediaProvider>().resetToDefault();
     await context.read<HomeSlotsProvider>().resetToDefault();
-    _closeMenu();
   }
 
   OverlayEntry _createOverlay(User? user) {
@@ -365,7 +365,14 @@ class _ProfileMenuItem extends StatelessWidget {
           children: [
             Icon(icon, color: Colors.white, size: 20),
             const SizedBox(width: 12),
-            Text(title, style: const TextStyle(color: Colors.white)),
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),

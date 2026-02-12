@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../providers/game_provider.dart';
 import '../features/shop/widgets/shop_ball_card.dart';
@@ -8,27 +11,65 @@ import '../features/shop/widgets/shop_diamond_card.dart';
 import '../core/constants/pokedex_constants.dart';
 import '../features/shop/services/ball_purchase_limit_service.dart';
 
-class ShopScreen extends StatelessWidget {
+class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
 
+  @override
+  State<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends State<ShopScreen> {
+  Timer? _ticker;
+  DateTime _now = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
   String _formatRemaining(Duration remaining) {
-    final totalMinutes = remaining.inMinutes;
-    if (totalMinutes <= 0) return '0m';
+    final totalSeconds = remaining.inSeconds < 0 ? 0 : remaining.inSeconds;
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
 
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(hours)}:${two(minutes)}:${two(seconds)}';
+  }
 
-    if (hours > 0) {
-      return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
-    }
-    return '${minutes}m';
+  Duration? _remainingForBall({
+    required BallType type,
+    required Map<String, dynamic> limits,
+    required BallPurchaseLimitService limiter,
+  }) {
+    final cooldown = limiter.cooldownFor(type);
+    if (cooldown == null) return null;
+
+    final raw = limits[type.index.toString()];
+    final last = raw is Timestamp ? raw.toDate() : null;
+    if (last == null) return null;
+
+    final next = last.add(cooldown);
+    if (!_now.isBefore(next)) return null;
+    return next.difference(_now);
   }
 
   @override
   Widget build(BuildContext context) {
     final game = context.watch<GameProvider>();
     final money = game.money;
-    final isLoggedIn = FirebaseAuth.instance.currentUser != null;
+    final user = FirebaseAuth.instance.currentUser;
+    final isLoggedIn = user != null;
     const autoSpinPrice = 100;
     final autoSpinOwned = game.autoSpinUnlocked;
     final autoSpinEnabled =
@@ -85,61 +126,140 @@ class ShopScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          _lockedWrapper(
-            locked: !isLoggedIn,
-            child: _buildBall(
-              context,
-              name: 'Silver Ball',
-              color: const Color(0xFFB8BCC6),
-              type: BallType.silver,
-              enabled: isLoggedIn &&
-                  money >= ballPrices[BallType.silver]!,
+          if (!isLoggedIn)
+            _lockedWrapper(
+              locked: true,
+              child: _buildBall(
+                context,
+                name: 'Silver Ball',
+                color: const Color(0xFFB8BCC6),
+                type: BallType.silver,
+                enabled: false,
+              ),
             ),
-          ),
-          _lockedWrapper(
-            locked: !isLoggedIn,
-            child: _buildBall(
-              context,
-              name: 'Gold Ball',
-              color: const Color(0xFFFFD76B),
-              type: BallType.gold,
-              enabled:
-                  isLoggedIn && money >= ballPrices[BallType.gold]!,
+          if (!isLoggedIn)
+            _lockedWrapper(
+              locked: true,
+              child: _buildBall(
+                context,
+                name: 'Gold Ball',
+                color: const Color(0xFFFFD76B),
+                type: BallType.gold,
+                enabled: false,
+              ),
             ),
-          ),
-          _lockedWrapper(
-            locked: !isLoggedIn,
-            child: _buildBall(
-              context,
-              name: 'Ruby Ball',
-              color: const Color(0xFFE84D4D),
-              type: BallType.ruby,
-              enabled:
-                  isLoggedIn && money >= ballPrices[BallType.ruby]!,
+          if (!isLoggedIn)
+            _lockedWrapper(
+              locked: true,
+              child: _buildBall(
+                context,
+                name: 'Ruby Ball',
+                color: const Color(0xFFE84D4D),
+                type: BallType.ruby,
+                enabled: false,
+              ),
             ),
-          ),
-          _lockedWrapper(
-            locked: !isLoggedIn,
-            child: _buildBall(
-              context,
-              name: 'Sapphire Ball',
-              color: const Color(0xFF4C7BFF),
-              type: BallType.sapphire,
-              enabled: isLoggedIn &&
-                  money >= ballPrices[BallType.sapphire]!,
+          if (!isLoggedIn)
+            _lockedWrapper(
+              locked: true,
+              child: _buildBall(
+                context,
+                name: 'Sapphire Ball',
+                color: const Color(0xFF4C7BFF),
+                type: BallType.sapphire,
+                enabled: false,
+              ),
             ),
-          ),
-          _lockedWrapper(
-            locked: !isLoggedIn,
-            child: _buildBall(
-              context,
-              name: 'Emerald Ball',
-              color: const Color(0xFF2ECC71),
-              type: BallType.emerald,
-              enabled: isLoggedIn &&
-                  money >= ballPrices[BallType.emerald]!,
+          if (!isLoggedIn)
+            _lockedWrapper(
+              locked: true,
+              child: _buildBall(
+                context,
+                name: 'Emerald Ball',
+                color: const Color(0xFF2ECC71),
+                type: BallType.emerald,
+                enabled: false,
+              ),
             ),
-          ),
+          if (isLoggedIn)
+            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user!.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                final data = snapshot.data?.data() ?? {};
+                final limits = Map<String, dynamic>.from(
+                  data['ballPurchaseLimits'] ?? {},
+                );
+                final limiter = BallPurchaseLimitService();
+
+                return Column(
+                  children: [
+                    _buildBall(
+                      context,
+                      name: 'Silver Ball',
+                      color: const Color(0xFFB8BCC6),
+                      type: BallType.silver,
+                      enabled: money >= ballPrices[BallType.silver]!,
+                      cooldownRemaining: _remainingForBall(
+                        type: BallType.silver,
+                        limits: limits,
+                        limiter: limiter,
+                      ),
+                    ),
+                    _buildBall(
+                      context,
+                      name: 'Gold Ball',
+                      color: const Color(0xFFFFD76B),
+                      type: BallType.gold,
+                      enabled: money >= ballPrices[BallType.gold]!,
+                      cooldownRemaining: _remainingForBall(
+                        type: BallType.gold,
+                        limits: limits,
+                        limiter: limiter,
+                      ),
+                    ),
+                    _buildBall(
+                      context,
+                      name: 'Ruby Ball',
+                      color: const Color(0xFFE84D4D),
+                      type: BallType.ruby,
+                      enabled: money >= ballPrices[BallType.ruby]!,
+                      cooldownRemaining: _remainingForBall(
+                        type: BallType.ruby,
+                        limits: limits,
+                        limiter: limiter,
+                      ),
+                    ),
+                    _buildBall(
+                      context,
+                      name: 'Sapphire Ball',
+                      color: const Color(0xFF4C7BFF),
+                      type: BallType.sapphire,
+                      enabled: money >= ballPrices[BallType.sapphire]!,
+                      cooldownRemaining: _remainingForBall(
+                        type: BallType.sapphire,
+                        limits: limits,
+                        limiter: limiter,
+                      ),
+                    ),
+                    _buildBall(
+                      context,
+                      name: 'Emerald Ball',
+                      color: const Color(0xFF2ECC71),
+                      type: BallType.emerald,
+                      enabled: money >= ballPrices[BallType.emerald]!,
+                      cooldownRemaining: _remainingForBall(
+                        type: BallType.emerald,
+                        limits: limits,
+                        limiter: limiter,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
 
           const SizedBox(height: 28),
           const Text(
@@ -195,14 +315,22 @@ class ShopScreen extends StatelessWidget {
     required Color color,
     required BallType type,
     required bool enabled,
+    Duration? cooldownRemaining,
   }) {
     final price = ballPrices[type]!;
     final limiter = BallPurchaseLimitService();
+    final cooldown = limiter.cooldownFor(type);
+    final hasCooldown = cooldown != null;
+    final blockedByCooldown = cooldownRemaining != null;
+    final canBuy = enabled && !blockedByCooldown;
+    final timerText =
+        hasCooldown && blockedByCooldown ? _formatRemaining(cooldownRemaining!) : null;
     return ShopBallCard(
       name: name,
       color: color,
       price: price,
-      enabled: enabled,
+      timerText: timerText,
+      enabled: canBuy,
       onBuy: () async {
         final game = context.read<GameProvider>();
         if (!game.canSpendMoney(price)) {

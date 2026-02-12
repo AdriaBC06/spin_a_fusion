@@ -133,6 +133,7 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
 
     final int key = fusionData['key'];
     final int ballIndex = fusionData['ball'];
+    final int? modifierIndex = fusionData['modifier'] as int?;
 
     final id1 = key ~/ expectedPokemonCount;
     final id2 = key % expectedPokemonCount;
@@ -151,6 +152,11 @@ class _ReceiveFusionScreenState extends State<ReceiveFusionScreen> {
       p2: p2,
       ball: BallType.values[ballIndex],
       rarity: 1.0,
+      modifier: modifierIndex != null &&
+              modifierIndex >= 0 &&
+              modifierIndex < FusionModifier.values.length
+          ? FusionModifier.values[modifierIndex]
+          : null,
       uid: DateTime.now().microsecondsSinceEpoch,
     );
 

@@ -36,7 +36,7 @@ class BallPurchaseLimitService {
       return const LimitResult.allowed();
     }
 
-    final now = await _fetchServerTime();
+    final now = DateTime.now().toUtc();
     final docRef = _firestore.collection('users').doc(user.uid);
 
     final result = await _firestore.runTransaction((tx) async {
@@ -66,13 +66,6 @@ class BallPurchaseLimitService {
     return result;
   }
 
-  Future<DateTime> _fetchServerTime() async {
-    final ref = _firestore.collection('meta').doc('server_time');
-    await ref.set({'ts': FieldValue.serverTimestamp()}, SetOptions(merge: true));
-    final snap = await ref.get();
-    final ts = snap.data()?['ts'] as Timestamp?;
-    return ts?.toDate() ?? DateTime.now().toUtc();
-  }
 }
 
 class LimitResult {
