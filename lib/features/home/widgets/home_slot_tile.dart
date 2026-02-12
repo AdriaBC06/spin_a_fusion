@@ -6,6 +6,7 @@ import '../../../providers/home_slots_provider.dart';
 import '../../fusion/fusion_economy.dart';
 import '../../shared/floating_money_text.dart';
 import '../../fusion/widgets/fusion_summary_modal.dart';
+import '../../fusion/widgets/fusion_dialog_layer_guard.dart';
 import 'home_slot_locked_tile.dart';
 import '../../../core/constants/pokedex_constants.dart';
 import '../../../core/network/fusion_image_proxy.dart';
@@ -26,7 +27,6 @@ class HomeSlotTile extends StatefulWidget {
 
 class _HomeSlotTileState extends State<HomeSlotTile> {
   final List<int> _floatingAmounts = [];
-  bool _showingDialog = false;
 
   Widget _imageUnavailable() {
     return const Center(
@@ -145,16 +145,14 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
 
     return GestureDetector(
       onTap: () async {
-        if (_showingDialog) return;
-        setState(() => _showingDialog = true);
+        if (FusionDialogLayerGuard.isDialogOpen.value) return;
+        FusionDialogLayerGuard.isDialogOpen.value = true;
         await showDialog(
           context: context,
           builder: (_) =>
               FusionSummaryModal(fusion: fusion),
         );
-        if (mounted) {
-          setState(() => _showingDialog = false);
-        }
+        FusionDialogLayerGuard.isDialogOpen.value = false;
       },
       child: Stack(
         children: [
@@ -181,9 +179,11 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: _showingDialog
-                  ? const SizedBox.expand()
-                  : modifierColor == null
+              child: ValueListenableBuilder<bool>(
+                valueListenable: FusionDialogLayerGuard.isDialogOpen,
+                builder: (_, dialogOpen, __) {
+                  if (dialogOpen) return const SizedBox.expand();
+                  return modifierColor == null
                       ? _fusionImage(fusion)
                       : ColorFiltered(
                           colorFilter: ColorFilter.mode(
@@ -191,7 +191,9 @@ class _HomeSlotTileState extends State<HomeSlotTile> {
                             BlendMode.srcATop,
                           ),
                           child: _fusionImage(fusion),
-                        ),
+                        );
+                },
+              ),
             ),
           ),
 

@@ -4,6 +4,7 @@ import '../../../models/fusion_entry.dart';
 import '../../../providers/fusion_pedia_provider.dart';
 import '../../../providers/game_provider.dart';
 import 'fusion_summary_modal.dart';
+import 'fusion_dialog_layer_guard.dart';
 import '../../../core/network/fusion_image_proxy.dart';
 
 class PediaFusionTile extends StatefulWidget {
@@ -19,8 +20,6 @@ class PediaFusionTile extends StatefulWidget {
 }
 
 class _PediaFusionTileState extends State<PediaFusionTile> {
-  bool _showingDialog = false;
-
   Widget _imageUnavailable() {
     return const Center(
       child: Icon(
@@ -60,15 +59,13 @@ class _PediaFusionTileState extends State<PediaFusionTile> {
     final isPending = fusion.claimPending;
     return GestureDetector(
       onTap: () async {
-        if (_showingDialog) return;
-        setState(() => _showingDialog = true);
+        if (FusionDialogLayerGuard.isDialogOpen.value) return;
+        FusionDialogLayerGuard.isDialogOpen.value = true;
         await showDialog(
           context: context,
           builder: (_) => FusionSummaryModal(fusion: fusion),
         );
-        if (mounted) {
-          setState(() => _showingDialog = false);
-        }
+        FusionDialogLayerGuard.isDialogOpen.value = false;
       },
       child: Container(
         decoration: BoxDecoration(
@@ -93,9 +90,13 @@ class _PediaFusionTileState extends State<PediaFusionTile> {
           children: [
             Padding(
               padding: const EdgeInsets.all(4),
-              child: _showingDialog
-                  ? const SizedBox.expand()
-                  : _fusionImage(),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: FusionDialogLayerGuard.isDialogOpen,
+                builder: (_, dialogOpen, __) {
+                  if (dialogOpen) return const SizedBox.expand();
+                  return _fusionImage();
+                },
+              ),
             ),
             if (isPending)
               const Positioned(
