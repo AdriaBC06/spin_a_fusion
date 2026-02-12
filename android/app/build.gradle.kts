@@ -52,7 +52,6 @@ android {
 
     buildTypes {
         release {
-            // 🔒 EXACTAMENTE IGUAL QUE EL VIEJO
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("release")
             } else {
